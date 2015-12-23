@@ -1,0 +1,19 @@
+<div>
+    <h4> Create Bookmark</h4>
+<form class="create-form" role="form" ng-submit="createBookmarkCtrl.createBookmark(createBookmarkCtrl.newBookmark)" novalidate>
+    <div class="form-group">
+        <!--<label for="newBookmarkTags">Tags</label>-->
+        <input type="text" class="form-control" id="newBookmarkTags" ng-model="createBookmarkCtrl.newBookmark.tags" placeholder="Enter tags separated by commas">
+    </div>
+    <div class="form-group">
+        <!-- <label for="newBookmarkNamespaces">Namespaces</label> -->
+        <input type="text" class="form-control" id="newBookmarkNamespaces" ng-model="createBookmarkCtrl.newBookmark.namespaces" placeholder="Enter namespaces separated by commas">
+    </div>
+    <div class="form-group">
+        <!-- <label for="newBookmarkTimestamp">Timestamp</label> -->
+        <input type="text" class="form-control" id="newBookmarkTimestamp" ng-model="createBookmarkCtrl.newBookmark.timestamp" placeholder="Enter timestamp">
+    </div>
+    <button type="submit" class="btn btn-info btn-lg">Create</button>
+    <button type="button" class="btn btn-default btn-lg pull-right" ng-click="createBookmarkCtrl.cancelCreating()">Cancel</button>
+</form>
+    </div>

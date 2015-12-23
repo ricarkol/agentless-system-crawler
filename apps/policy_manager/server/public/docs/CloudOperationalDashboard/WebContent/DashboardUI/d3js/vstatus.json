@@ -1,0 +1,4 @@
+[
+  {"usnid": "usn-2588-1", "check": "Safe", "description": "Several security issues were fixed in the kernel. "},
+  {"usnid": "usn-2571-1", "check": "Vulnerable", "description": "Firefox could be made to crash or run programs as your login if it opened a malicious website. "}
+]

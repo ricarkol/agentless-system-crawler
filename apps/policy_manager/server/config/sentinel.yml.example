@@ -1,0 +1,46 @@
+# =================================================================
+# Licensed Materials - Property of IBM
+#
+# (c) Copyright IBM Corp. 2014 All Rights Reserved
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+# =================================================================
+---
+# Limits
+limits:
+  max_systems: 1000 # Up to 1000 managed systems supported
+# Install chef client settings under this user in target systems
+user: "sentinel"
+# Public/Private SSH keypair to use when talking to target systems
+ssh_key: "~/.ssh/id_rsa"
+# SoftLayer Credentials. Used by the candidate systems API
+sl:
+  username: "my_sl_user"
+  api_key: "my_sl_api_key"
+# Log settings.
+log:
+  level: "info"
+  path: "/var/log/sentinel.log" # Leave blank for stdout
+  age: "monthly" # default. How often to rotate the log.
+# Elasticsearch settings
+db:
+  limit: 1000 # Default limit when getting a page.
+  log: false # Set to true to show elasticsearch log messages
+  index_name: "sentinel" # What to call the index
+  hosts: # Elasticsearch node addresses
+    - host: "localhost"
+      port: "9200"
+chef_server: # Optional. Public URL to the Chef server.
+# Optional - first admin user. This can also be set through the API and is not required
+# when accessing the application over localhost
+admin:
+  identity: "https://marketplace.ibmcloud.com/openid/id/70301e71-1cca-4fd7-a1b2-8e31af2c1cd9"
+  fullname: "Renier Morales"
+  email: "renierm@us.ibm.com"
+  api_key: "7e94cebfa5ed7196a2a2c7f303a1a0e523b7aaf00194f770c0e24573e707576f" # Optional (auto-generated)
+openid:
+  enabled: true # Set to false to disable openid authentication
+  realms:
+    - "https://marketplace.ibmcloud.com/openid/id" # First one is the default
+    - "https://stage.marketplace-stage.ibmcloud.com/openid/id"

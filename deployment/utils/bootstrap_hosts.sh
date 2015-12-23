@@ -1,0 +1,114 @@
+#!/bin/bash 
+
+
+#
+# Vulnerability Advisor host bootstrapping
+# (c) IBM Research 2015
+#
+
+. ../config/storage_devices.${ENV}
+
+
+PARTITION_NUMBER=1
+for host in ${!DOCKER_DEVICES[@]}
+   do
+   DEVICE=${DOCKER_DEVICES[$host]}
+  
+   echo "Initial block devices in host $host"
+   $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+
+   echo "Creating docker partition on host $host at device $DEVICE"
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+
+   $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
+
+   STAT=$?
+
+   if [ $STAT -eq 0 ] 
+   then
+       $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
+       $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
+   fi
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker start
+   
+   echo "Final block devices in host $host"
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+
+   if [ $STAT -ne 0 ] 
+   then 
+       echo "Docker partition creation failed for $host with $STAT, exiting"
+       exit 1
+   fi
+done
+
+PARTITION_NUMBER=1
+for host in ${!DOCKER_DEVICES_LARGE[@]}
+   do
+   DEVICE=${DOCKER_DEVICES_LARGE[$host]}
+  
+   echo "Initial block devices in host $host"
+   $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+
+   echo "Creating docker partition on host $host at device $DEVICE"
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+
+   $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_LARGE_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
+
+   STAT=$?
+
+   if [ $STAT -eq 0 ] 
+   then
+       $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
+       $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
+   fi
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker start
+   
+   echo "Final block devices in host $host"
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+
+   if [ $STAT -ne 0 ] 
+   then 
+       echo "Docker partition creation failed for $host with $STAT, exiting"
+       exit 1
+   fi
+done
+
+PARTITION_NUMBER=2
+for host in ${!DATA_DEVICES[@]}
+   do
+   DEVICE=${DATA_DEVICES[$host]}
+
+   echo "Initial block devices in host $host"
+   $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+
+   echo "Creating data partition on host $host at device $DEVICE"
+   $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DATA_PARTITION_START $DATA_PARTITION_END $PARTITION_NUMBER $DATA_PARTITION_FSTYPE $DATA_PARTITION_MOUNTPOINT
+
+   STAT=$?
+
+   echo "Final block devices in host $host"
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
+   $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
+   cat $host.partitions
+   if [ $STAT -ne 0 ] 
+   then 
+       echo "Data partition creation failed for $host with $STAT, exiting"
+       exit 1
+   fi
+done

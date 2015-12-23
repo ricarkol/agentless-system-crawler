@@ -1,0 +1,16 @@
+FROM cloudsight/kelk-base
+
+MAINTAINER sastry Duri <sastry@us.ibm.com>
+
+ENV TIMEMACHINE_PORT 8600
+ENV TIMEMACHINE_VERSION 0.1.0
+
+RUN pip install requests simplejson pytz pydoubles flask prettytable python-dateutil elasticsearch
+ADD . /opt/timemachine
+
+# Configure supervisord
+COPY startup-services.conf /etc/supervisor/conf.d/startup-services.conf
+
+EXPOSE 8600
+
+

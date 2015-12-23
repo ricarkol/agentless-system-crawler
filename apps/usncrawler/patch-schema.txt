@@ -1,0 +1,24 @@
+This is the format of the json stored in usnrepo
+    ############################################################
+    # patch schema: elements tagged with * are mandatory
+    # {
+    #   id* (rhsa-2015:0816)
+    #   site* (http://www.xyz.com)
+    #   category* (security, enhancement, bugfix)
+    #   cveid (xyz)
+    #   vendor (redhat, ubuntu)
+    #   severity (low, medium, high, critical)
+    #   releasedate (2015-01-01)
+    #   summary* (firefox vulnerability)
+    #   fixes[]*
+    #     os*
+    #       name* (rhel)
+    #       version* (7.0)
+    #       architecture (32-bit)
+    #       distribution (server)
+    #     packages[]*
+    #       name*
+    #       version*
+    #       release
+    #       architecture
+    ############################################################

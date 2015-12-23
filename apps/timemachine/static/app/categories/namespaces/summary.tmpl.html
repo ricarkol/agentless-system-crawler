@@ -1,0 +1,60 @@
+
+<div class="parent">
+    <div class="bookmark_summary">
+        <table st-table="namespacesSummaryCtrl.summary" class="table table-striped table-bordered table-condensed table-summary">
+            <thead>
+            <tr><h4>Summary</h4></tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="row in namespacesSummaryCtrl.summary">
+                <td>{{row.duration}}</td>
+                <td>{{row.count}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="bookmark_controls">
+       <h3> Find Namespaces</h3>
+        <div>
+            <form class="find-form" role="form" ng-submit="namespacesSummaryCtrl.findNamespaces(namespacesSummaryCtrl.namespaceQuery)" novalidate>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="findNamespaces" ng-model="namespacesSummaryCtrl.namespaceQuery.namespaces" placeholder="Enter namespaces separated by commas">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="findFromTimestamp" ng-model="namespacesSummaryCtrl.namespaceQuery.fromTimestamp" placeholder="Enter from timestamp">
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="findToTimestamp" ng-model="namespacesSummaryCtrl.namespaceQuery.toTimestamp" placeholder="Enter to timestamp">
+                </div>
+                <button type="submit" class="btn btn-info btn-sm"><span class="glyphicon glyphicon-search"></span></button>
+                <button type="button" class="btn btn-default btn-sm pull-right" ng-click="namespacesSummaryCtrl.cancelFinding()">Cancel</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div ng-if="namespacesSummaryCtrl.namespaces.length !== 0">
+    <table st-table="namespacesSummaryCtrl.displayedNamespaces" st-safe-src="namespacesSummaryCtrl.namespaces" class="table table-striped table-condensed">
+        <thead>
+        <tr>
+            <th st-ratio="70" >Namespaces</th>
+            <th st-ratio="30">Timestamp</th>
+        </tr>
+        <tr>
+            <th colspan="3"><input st-search="" class="form-control" placeholder="type to search with in the displayed ..." type="text"/></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in namespacesSummaryCtrl.displayedNamespaces">
+            <td>{{row.namespace}}</td>
+            <td>{{row.timestamp}}</td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="3" class="text-center">
+                <div st-pagination="" st-items-by-page="itemsByPage" st-displayed-pages="7"></div>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>

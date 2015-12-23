@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# =================================================================
+# Licensed Materials - Property of IBM
+#
+# (c) Copyright IBM Corp. 2014 All Rights Reserved
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+# =================================================================
+# vi: set ft=ruby :
+
+Vagrant.configure('2') do |config|
+  config.vm.define 'build', primary: true do |build|
+    build.vm.box = 'sentinel-build'
+
+    build.vm.network :private_network, ip: '192.168.50.10', auto_config: false
+    build.vm.provider :virtualbox do |vb|
+      vb.customize ['modifyvm', :id, '--memory', '4096']
+      vb.customize ['modifyvm', :id, '--cpus', '2']
+      vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+    end
+    script = <<-SCRIPT
+      cd sentinel
+      git pull
+      bundle install
+      bundle exec rake standalone_package
+      [ ! -d /vagrant/pkg ] && mkdir /vagrant/pkg
+      cp -v pkg/*.{bz2,zip} /vagrant/pkg/
+    SCRIPT
+    build.vm.provision 'shell', inline: script, privileged: false
+  end
+end

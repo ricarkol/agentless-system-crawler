@@ -1,0 +1,62 @@
+HOW TO DEPLOY A STAND-ALONE INSTANCE OF CLOUDSIGHT
+-------------------------------------------------
+
+The instructions below describe a stand-alone deployment of CloudSight
+on a single host. These can be adapted for multi-host deployment by 
+adjusting the host names in config/hosts.csdev accordingly.
+
+
+1. DEFAULT REQUIREMENTS
+
+1.1 A docker host running Ubuntu 14.04 Trusty with at least 32GB of memory 
+and an empty non-root partition with 100 GB. Ensure this partition has no
+data and can be formatted with a new file system.
+Set up an ssh key for the root user on the host so that the user can ssh to 
+localhost.
+
+1.2 A running docker registry (https://docs.docker.com/registry/) where 
+the container images we build will be hosted. The registry can be deployed 
+on the same host as the remaining components of CloudSight.
+
+
+2. CONFIGURATION
+
+2.1 Replace the hostname `csdev.sl.cloud9.ibm.com` in config/hosts.csdev 
+with your target docker host.
+
+2.2 Point DEPLOYMENT_REGISTRY and CUSTOMER_REGISTRY in config/hosts.csdev 
+to your docker registry from step 1.2.
+
+2.3. Replace secreg2.sl.cloud9.ibm.com:5000 with the address of your 
+registry in config/docker.config.csdev.
+
+2.4 Replace `/dev/xvdc` in config/storage_devices.csdev with the
+storage device name from step 1.1.
+
+
+3. PREPARE THE SYSTEM FOR INSTALLATION
+The following steps assume that $CLOUDSIGHT is the path to the source code
+$HOST is the docker host where we are deploying and $REGISTRY is the docker 
+registry (e.g. registry.ibm.com:5000)
+
+cd $CLOUDSIGHT/deployment
+
+./deploy-services.sh csdev true latest true
+
+4. BUILD CLOUDSIGHT COMPONENTS
+
+cd $CLOUDSIGHT/build
+./build-all.sh $REGISTRY latest
+
+cd $CLOUDSIGHT/deployment
+./push-images-to-registry.sh $REGISTRY latest
+
+5. DEPLOY CLOUDSIGHT
+ 
+cd $CLOUDSIGHT/deployment
+./deploy-services.sh csdev false latest false
+
+Once deployment completes you should be able to view scan reports 
+in the kibana dashboard at:
+
+http://$HOST:8888/kibana/

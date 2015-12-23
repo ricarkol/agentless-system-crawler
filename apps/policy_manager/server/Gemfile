@@ -1,0 +1,20 @@
+# =================================================================
+# Licensed Materials - Property of IBM
+#
+# (c) Copyright IBM Corp. 2014 All Rights Reserved
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+# =================================================================
+source 'https://rubygems.org'
+
+gem 'grape-swagger', git: 'https://github.com/renier/grape-swagger.git', require: false, ref: '4c6f6bfce0f3d36c1a7db2b3aadc1ade20d2f8b9'
+
+# Specify your gem's dependencies in sentinel.gemspec
+gemspec
+
+gem 'puma', '~> 2.8.2', git: 'https://github.rtp.raleigh.ibm.com/renierm-us/puma.git', branch: '2.8.2-nopoodle'
+gem 'pry-byebug', '~> 1.3.3', platforms: [:mri_20, :mri_21], groups: [:development, :test]
+gem 'port_vul', '~> 0.1.0', path: '/home/sentinel/port_vul'
+gem 'scdocker_utils', '~> 0.1.0', path: '/home/sentinel/scdocker_utils'
+

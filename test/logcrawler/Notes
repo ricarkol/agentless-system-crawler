@@ -1,0 +1,12 @@
+root@kollerr-2:~# docker run -e LOG_LOCATIONS=/var/log/messages2 -it ubuntu bash
+root@ac7dbfc6b14c:/# echo messages >> /var/log/messages
+root@ac7dbfc6b14c:/# echo messages >> /var/log/messages
+root@ac7dbfc6b14c:/# echo messages >> /var/log/messages
+root@ac7dbfc6b14c:/# 
+root@ac7dbfc6b14c:/# echo messages2 >> /var/log/messages2
+root@ac7dbfc6b14c:/# echo messages2 >> /var/log/messages2
+root@ac7dbfc6b14c:/# echo messages2 >> /var/log/messages2
+root@ac7dbfc6b14c:/# echo '{"log_files": ["/var/log/messages3"]}' > /etc/logcrawl-logs.json
+root@ac7dbfc6b14c:/# echo messages3 >> /var/log/messages3
+root@ac7dbfc6b14c:/# echo messages3 >> /var/log/messages3
+root@ac7dbfc6b14c:/# echo messages3 >> /var/log/messages3

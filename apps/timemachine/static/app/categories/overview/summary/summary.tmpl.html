@@ -1,0 +1,21 @@
+<div>
+    <h4>CloudSight Summary</h4>
+    <table st-table="overviewSummaryCtrl.summary" class="table table-striped">
+        <thead>
+        <tr>
+            <th>Entity</th>
+            <th>Total</th>
+            <th>Last Week</th>
+            <th>Last Day</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in overviewSummaryCtrl.summary">
+            <td>{{row.summary_type}}</td>
+            <td>{{row.total}}</td>
+            <td>{{row.last_week}}</td>
+            <td>{{row.last_day}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

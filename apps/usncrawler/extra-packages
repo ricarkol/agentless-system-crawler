@@ -1,0 +1,4 @@
+Extra packages needed for rhncrawler
+
+apt-get install yum
+pip install BeautifulSoup4 (>= 4.3.2)

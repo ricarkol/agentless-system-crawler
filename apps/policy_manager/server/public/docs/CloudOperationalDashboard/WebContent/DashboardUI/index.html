@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Alchemy Compliance Dashboard</title>
+        <!--[if lt IE 8]>
+    	    <script type="text/javascript">
+    	    	window.location = "https://mms.ibmcloud.com/static/web/old.html";
+    		</script>
+    <![endif]-->
+    
+
+    <!-- Bootstrap Core CSS -->
+   	<link href="https://mms.ibmcloud.com/static/web/css/magic-bootstrap.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="https://mms.ibmcloud.com/static/web/css/plugins/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="https://mms.ibmcloud.com/static/web/css/sb-admin-2.css" rel="stylesheet">
+    
+    <link href="https://mms.ibmcloud.com/static/web/css/updates.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+    
+        <!-- Navigation -->
+         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand ibm-sm-logo" href="index.html" tabindex="0">IBM  ®</a> <a class="navbar-brand hidden-xs" href="index.html"> Alchemy <span class="service-brand hidden-xs">Compliance Dashboard</span></a>
+            </div>
+            <!-- /.navbar-header -->
+
+            <ul class="nav navbar-top-links navbar-right">
+                <li class="active" ><a href="#">Manage</a></li>
+	           <!--  <li><a href="#">Help</a></li>    -->  
+	             <!--  <li><a href="https://support.mms.ibmcloud.com">Support</a></li>  -->
+	             <!-- /.dropdown -->
+                  <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        Support<i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="https://mms.ibmcloud.com/docs/patching_home.html" target="_blank" ><i class="fa fa-life-ring fa-fw"></i> Help</a></li>
+                        <li><a href="https://support.mms.ibmcloud.com" target="_blank"><i class="fa fa-envelope-o fa-fw"></i> Contact Us</a></li>
+                        <li class="divider"></li>
+                        <li><a href="AMMAbout.html"><i class="fa fa-info fa-fw"></i> About</a>
+                        </li>
+                     </ul>
+                    <!-- /.dropdown-user --> 
+                 <!-- /.dropdown -->
+                  <li class="dropdown">
+                    <a class="dropdown-toggle userid" data-toggle="dropdown" href="#">
+                        admin  <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="javascript:loadChangePassword();"><i class="fa fa-gear fa-fw"></i> Change Password</a>
+                        </li>
+                        
+                     <li class="divider"></li>
+                        <li><a href="AMMLogout.jsp"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        Subscription <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-user fa-fw"></i> Manage</a>
+                        </li>
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Update</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Cancel</a>
+                        </li>
+                    </ul>
+                    /.dropdown-user
+                </li> -->
+                <!-- /.dropdown -->
+                <!-- /.dropdown -->
+               
+                <!-- /.dropdown -->
+            </ul>
+             
+            <div class="navbar-default sidebar" role="navigation">
+                <div class="sidebar-nav navbar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="menu-context">
+                             <a href="#">Manage<span class="fa fa-angle-double-down fa-2x"></span></a>
+                        </li>
+                         <li>
+                            <a class="active" href="index.html"><i class="fa fa-tachometer fa-fw"></i> OVERVIEW</a>
+                        </li>
+
+                
+                        <li>
+                            <a href="#"><i class="fa fa-bar-chart-o fa-fw"></i> Image Compliance<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                               <!--   
+                                <li><a href="#">My Images<span class="fa arrow"></span></a></li>
+                                	<ul class="nav nav-third-level">
+                                	-->
+                                	<li><a href="StatusTime.html">Compliance Status (TIME)</a></li>
+                                    <li><a href="StatusName.html">Compliance Status (NAME)</a></li>
+                                    <li><a href="VStatusTime.html">Vulnerability Status (TIME)</a></li>
+                                	<li><a href="Rules.html">Compliance Rules</a></li>
+									<!--  </ul>  -->
+                            </ul>
+                        </li>
+                         <li>
+                            <a href="Kibana.html"><i class="fa fa-bar-chart-o fa-fw"></i>Kibana</a>
+                        </li>
+                    
+                    </ul>
+                </div>
+            </div>
+
+        </nav>
+
+
+        <div id="page-wrapper">
+            <div class="row top-buffer">
+                <div class="col-lg-6 col-md-6">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <!-- <i class="fa fa-check fa-5x"></i> -->
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge securitypatches">--</div>
+                                    <div class="panel-description">Noncompliant Images</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="ComplianceView.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <!-- <i class="fa fa-times-circle-o fa-5x"></i> -->
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge managedhosts">--</div>
+                                    <div class="panel-description">Vulnerable Images</div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="ComplianceView.html">
+                            <div class="panel-footer">
+                                <span class="pull-left">View Details</span>
+                                <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                                <div class="clearfix"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+          
+            <!-- /.row -->
+<!--             <div class="row">
+                
+                <div class="col-lg-8">
+                    /.panel
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Compliance History
+                        </div>
+                        /.panel-heading
+                        <div class="panel-body">
+                            <div id="bar-example"></div>
+                        </div>
+                        /.panel-body
+                    </div>
+                    /.panel
+
+                </div>
+                /.col-lg-4
+            </div> -->
+            <!-- /.row -->
+         <!--    <div class="row">
+            	<div class="col-lg-6">
+            		<div class="table-responsive">
+                                <table class="table table-hover ibm-data-table">
+                                	<caption>
+                                		<em>
+                                			this is a caption
+                                		</em>
+                                	</caption>
+                                    <thead>
+                                        <tr>
+                                            <th>Enabled</th>
+                                            <th>Hostname</th>
+                                            <th>IP Address</th>
+                                            <th>OS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                            	<div class="btn-group" data-toggle="buttons">
+												  <label class="btn btn-success btn-xs active">
+												    <input type="radio" name="options" id="option1" checked> On
+												  </label>
+												  <label class="btn btn-primary btn-xs">
+												    <input type="radio" name="options" id="option2"> Off
+												  </label>
+												</div>
+											</td>
+                                            <td>Mark</td>
+                                            <td>Otto</td>
+                                            <td>@mdo</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+												<div class="btn-group" data-toggle="buttons">
+												  <label class="btn btn-success btn-xs active">
+												    <input type="radio" name="options" id="option1"> On
+												  </label>
+												  <label class="btn btn-primary btn-xs">
+												    <input type="radio" name="options" id="option2" checked> Off
+												  </label>
+												</div>
+                                            </td>
+                                            <td>Jacob</td>
+                                            <td>Thornton</td>
+                                            <td>@fat</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+												<div class="btn-group" data-toggle="buttons">
+												  <label class="btn btn-success btn-xs active">
+												    <input type="radio" name="options" id="option1" > On
+												  </label>
+												  <label class="btn btn-primary btn-xs">
+												    <input type="radio" name="options" id="option2" checked> Off
+												  </label>
+												</div>
+                                            </td>
+                                            <td>Larry</td>
+                                            <td>the Bird</td>
+                                            <td>@twitter</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+            	</div>
+            </div> -->
+        </div>
+        <!-- /#page-wrapper -->
+       <!--  <div id="wait" style="display:none;width:69px;height:89px;border:1px solid black;position:absolute;top:50%;left:50%;padding:2px;"><img src='demo_wait.gif' width="64" height="64" />
+        <br>Loading..</div> -->
+        
+
+    </div>
+    <div id="loadChangePassword"></div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery Version 1.11.0 -->
+    <script src="https://mms.ibmcloud.com/static/web/js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="https://mms.ibmcloud.com/static/web/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="https://mms.ibmcloud.com/static/web/js/plugins/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="https://mms.ibmcloud.com/static/web/js/plugins/morris/raphael.min.js"></script>
+    <script src="https://mms.ibmcloud.com/static/web/js/plugins/morris/morris.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="https://mms.ibmcloud.com/static/web/js/sb-admin-2.js"></script>
+    
+    <script type="text/javascript">
+    Morris.Bar({
+        element: 'bar-example',
+        data: [{
+            y: 'Feb',
+            a: 100,
+            b: 10
+        }, {
+            y: 'Mar',
+            a: 120,
+            b: 5
+        }, {
+            y: 'May',
+            a: 100,
+            b: 20
+        }, {
+            y: 'June',
+            a: 110,
+            b: 2
+        }, {
+            y: 'Jul',
+            a: 70,
+            b: 30
+        }, {
+            y: 'Aug',
+            a: 175,
+            b: 13
+        }, {
+            y: 'Sept',
+            a: 200,
+            b: 13
+        }],
+        xkey: 'y',
+        ykeys: ['a', 'b'],
+        labels: ['Compliant', 'Non-Compliant'],
+        hideHover: 'auto',
+        resize: true,
+        barColors:["#5cb85c","#D9182D"]
+    });
+    </script>
+    
+    <script type="text/javascript"> 
+   /*  $(document).ready(function(){ 
+          $(document).ajaxStart(function(){ 
+            $("#wait").css("display","block"); 
+          }); 
+          $(document).ajaxComplete(function(){ 
+            $("#wait").css("display","none"); 
+          }); 
+         
+        });  */
+    </script>
+    
+   
+   <script type="text/javascript">
+   
+  /*  $(document).ready(function(){
+		  
+		  $('a[href="https://support.mms.ibmcloud.com"]').click(function(){
+			 
+			  newwindow=window.open("https://support.mms.ibmcloud.com",'support','height=600,width=900,top=20,left=20,scrollbars=yes,toolbar=yes,location=yes');
+				if (window.focus) {newwindow.focus()}
+				return false;
+		  });
+		  
+		  $('a[href="https://mms.ibmcloud.com/docs/patching_home.html"]').click(function(){
+				 
+			  newwindow=window.open("https://mms.ibmcloud.com/docs/patching_home.html",'AMM Patching Resources','height=600,width=900,top=20,left=20,scrollbars=yes,toolbar=yes,location=yes');
+				if (window.focus) {newwindow.focus()}
+				return false;
+		  });
+		  
+	}); */</script>
+    
+    <script type="text/javascript">
+     function loadChangePassword() {
+    	$("#loadChangePassword").load("AMMChangePassword.html",
+    			function(responseTxt, statusTxt, xhr) {
+    				if (statusTxt == "success")
+    					changePassword();
+    				if (statusTxt == "error")
+    					alert("Error: " + xhr.status + ": " + xhr.statusText);
+    			});
+    	}
+    </script>
+    
+    <!--  
+    <script src="patch-js/AMMOverview.js"></script>
+    -->
+    <script language="javascript" type="text/javascript">
+		function popitup(url, name) {
+			newwindow=window.open(url,name,'height=600,width=900,top=20,left=20,toolbar=yes,scrollbars=yes,location=yes');
+			if (window.focus) {newwindow.focus()}
+			return false;
+		}
+		
+</script>
+
+</body>
+
+</html>
