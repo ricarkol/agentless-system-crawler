@@ -306,7 +306,7 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
     registry = '%s://%s' % (registry_scheme, registry_host)
     if registry_v2_alchemy_api:
         logger.info('Getting list of images in %s' % alchemy_registry_api) 
-        ret = requests.request('GET', '%s/imageListAll' % alchemy_registry_api, 
+        ret = requests.request('GET', '%s/v1/imageListAll' % alchemy_registry_api, 
                                auth=auth, timeout=http_request_timeout)
                                    
         if ret.status_code != requests.codes.ok:
@@ -401,11 +401,13 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
     registry_version = -1
     ret = requests.request('GET', '%s/v2/' % registry, auth=auth, timeout=http_request_timeout)
     if ret.status_code == requests.codes.ok:
+        logger.info('Using v2 registry')
         registry_version = 2
         if alchemy_registry_api:
-            ret = requests.request('GET', '%s/imageListAll' % alchemy_registry_api, 
+            ret = requests.request('GET', '%s/v1/imageListAll' % alchemy_registry_api, 
                                    auth=auth, timeout=http_request_timeout)
             if ret.status_code == requests.codes.ok:
+                logger.info('Using alchemy v2 registry endpoint %s' % alchemy_registry_api)
                 registry_v2_alchemy_api = True
 
     elif ret.status_code != 404:
@@ -414,6 +416,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
     ret = requests.request('GET', '%s/v1/_ping' % registry, auth=auth, 
                            timeout=http_request_timeout)
     if ret.status_code == requests.codes.ok:
+        logger.info('Using v1 registry')
         registry_version = 1
     elif ret.status_code != 404:
         raise RegistryError('Registry version checking failed at %s' % registry)

@@ -54,7 +54,7 @@ REGCRAWL_HOST_DATA_DIR="/mnt/data/regcrawler"
 REGCRAWL_GUEST_DATA_DIR="/mnt/data/regcrawler"
 REGISTRY_ICE_API=False
 
-REGCRAWLER_DEB_FILE="regcrawler_0.4-alchemy_amd64.deb"
+REGCRAWLER_DEB_FILE="regcrawler_0.5-alchemy_amd64.deb"
 
 #config parser
 CONFIG_PARSER_KNOWN_CONFIG_FILES='[\"/etc/passwd\",\"/etc/group\",\"/etc/shadow\",\"/etc/gshadow\",\"/etc/ssh/sshd_config\"]'

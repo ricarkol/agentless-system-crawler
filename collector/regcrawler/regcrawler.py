@@ -35,6 +35,7 @@ except:
     import json
 
 log_file = "/var/log/regcrawler.log"
+http_request_timeout= 120
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
 except AttributeError:
@@ -207,14 +208,41 @@ def registry_login(daemon, registry, user, password, email, ice_api, bluemix_api
     
     if not registry_user:
         raise Exception('Failed to authenticate to registry')
-    
-    daemon.login(
-              username          = registry_user,
-              password          = registry_password,
-              email             = email,
-              registry          = '%s/v1/' % registry
-              )
-    
+
+    auth = requests.auth.HTTPBasicAuth(registry_user, registry_password)
+
+    registry_version = -1
+    ret = requests.request('GET', '%s/v2/' % registry, auth=auth, timeout=http_request_timeout)
+    if ret.status_code == requests.codes.ok:
+        registry_version = 2
+    elif ret.status_code != 404:
+        raise RegistryError('Registry version checking failed at %s' % registry)
+    else:
+        ret = requests.request('GET', '%s/v1/_ping' % registry, auth=auth, 
+                           timeout=http_request_timeout)
+        if ret.status_code == requests.codes.ok:
+            registry_version = 1
+        elif ret.status_code != 404:
+            raise RegistryError('Registry version checking failed at %s' % registry)
+
+    if registry_version == -1:
+        raise RegistryError('Could not find supported registry API at %s' % registry)
+
+    if registry_version == 1:
+        daemon.login(
+                  username          = registry_user,
+                  password          = registry_password,
+                  email             = email,
+                  registry          = '%s/v1/' % registry
+                  )
+    elif registry_version == 2:
+        daemon.login(
+                  username          = registry_user,
+                  password          = registry_password,
+                  email             = email,
+                  registry          = '%s/v2/' % registry
+                  )
+
     return (registry_user, registry_password)
 
 @timeout(1800)
@@ -247,12 +275,12 @@ def get_new_image_event(kafka_client):
 def crawl_images(registry, kafka_host, config_topic, notification_topic, registry_topic, 
                  user, password, email, ice_api, insecure_registry, bluemix_api, 
                  bluemix_org, bluemix_space, instance_id):
+
     daemon = client.Client(timeout=1800)
     
     if user:
         registry_user, registry_password = registry_login(daemon, registry, user, password, email, 
                                                           ice_api, bluemix_api, bluemix_org, bluemix_space)
-                        
     registry_scheme = urlparse.urlparse(registry).scheme
     registry_host = registry[len(registry_scheme)+3:]
     

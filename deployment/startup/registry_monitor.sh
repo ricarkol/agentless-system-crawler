@@ -52,6 +52,7 @@ case $1 in
              "--password xxxxx --email $REGISTRY_EMAIL --org $BLUEMIX_ORG" \
              "--space $BLUEMIX_SPACE --single-run $REGISTRY_MONITOR_SINGLE_RUN" \
              "--ice-api $REGISTRY_ICE_API --insecure-registry $INSECURE_REGISTRY" \
+             "--alchemy-registry-api $ALCHEMY_REGISTRY_URL" \
              "$REGISTRY_URL $KAFKA_SERVICE"
 
         # Start registry-monitor
@@ -62,7 +63,7 @@ case $1 in
                    "$REGISTRY_MONITOR_IMG" --user "$REGISTRY_USER" --password "$REGISTRY_PASSWORD" \
                    --email "$REGISTRY_EMAIL" --org "$BLUEMIX_ORG" --space "$BLUEMIX_SPACE" \
                    --single-run "$REGISTRY_MONITOR_SINGLE_RUN" --ice-api "$REGISTRY_ICE_API" \
-                   --insecure-registry "$INSECURE_REGISTRY" \
+                   --insecure-registry "$INSECURE_REGISTRY" --alchemy-registry-api "$ALCHEMY_REGISTRY_URL" \
                    "$REGISTRY_URL" "$KAFKA_SERVICE"
 
         ;;

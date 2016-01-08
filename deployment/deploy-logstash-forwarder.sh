@@ -40,7 +40,7 @@ if [ "$ENABLE_LOGSTASH_FORWARDER" = "true" ]
         echo "LSF_TENANT_ID=\"$LSF_TENANT_ID\"" >>$config_file
         echo "LSF_PASSWORD=\"$LSF_PASSWORD\"" >>$config_file
         echo "LSF_GROUP_ID=\"$LSF_GROUP_ID\"" >>$config_file
-        package_path="../../packaging/alchemy/mt-logstash-forwarder/$LOGSTASH_DEB_FILE"
+        package_path="../packaging/alchemy/mt-logstash-forwarder/$LOGSTASH_DEB_FILE"
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get update -y --fix-missing
         $SCP $package_path ${SSH_USER}@$host:$LOGSTASH_DEB_FILE
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -i $LOGSTASH_DEB_FILE

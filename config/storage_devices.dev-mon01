@@ -46,5 +46,4 @@ declare -A DATA_DEVICES=(
   [$ES5]="/dev/xvdc" 
   [$KAFKA1]="/dev/xvdc" 
   [$KAFKA2]="/dev/xvdc" 
-  [$KAFKA3]="/dev/xvdc" 
   )

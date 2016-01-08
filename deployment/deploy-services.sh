@@ -6,7 +6,13 @@
 # (c) IBM Research 2015
 #
 
-if [ $# -ne 4 ] ; then
+if [ $# -eq 4 ] ; then
+   echo "Processing all containers"
+CONTAINER_NAME=
+elif [ $# -eq 5 ] ; then
+   echo "Processing container:" $5
+CONTAINER_NAME=cloudsight-$5
+else
    echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<CONTAINER_NAME>]"
    exit 1
 fi
@@ -16,7 +22,6 @@ ENV=$1
 BOOTSTRAP=$2
 IMAGE_TAG=$3
 SHUTDOWN=$4
-CONTAINER_NAME=$5
 
 echo "Deploying to ENV ${ENV}"
 echo "BOOTSTRAP: ${BOOTSTRAP}"
@@ -33,12 +38,7 @@ if [ "$BOOTSTRAP" = "true" ]
     . utils/bootstrap_hosts.sh
 fi
 
-if [ -z "$CONTAINER_NAME" ]
-    then
-    . ../config/container_hosts.${ENV}
-else
-    . ../config/container_hosts.default
-fi
+. ../config/container_hosts.${ENV}
 
 ES_HOSTS=""
 for count in `seq ${CONTAINER_COUNTS[$ES_CONT]}`
@@ -54,7 +54,6 @@ done
 
 cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
-
 
 #assign write nodes top to bottom. Reads are assigned bottom up
 balanced_cluster_node(){
@@ -91,8 +90,9 @@ balanced_cluster_node(){
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
 do
     container=${CONTAINER_STARTUP_ORDER[i]}
-    if [ -z "$CONTAINER_NAME"] || [ "$CONTAINER_NAME" = $container ]
+    if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
         then
+        CONTAINER_KNOWN="true"
         for count in `seq ${CONTAINER_COUNTS[$container]}|sort -r`
         do
             host=${CONTAINER_HOSTS["$container.$count"]}
@@ -183,6 +183,12 @@ do
     fi
 done
 
+if [ -z "$CONTAINER_KNOWN" ]
+    then
+    echo "Containers of type $CONTAINER_NAME unknown"
+    exit 1
+fi
+
 if [ "$SHUTDOWN" = "true" ]
     then
     echo "All services have been shutdown. End of job."
@@ -192,11 +198,13 @@ fi
 #starting up services
 for container in ${CONTAINER_STARTUP_ORDER[@]}
 do
-    if [ -z "$CONTAINER_NAME"] || [ "$CONTAINER_NAME" = $container ]
+    if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
         then
         for count in `seq ${CONTAINER_COUNTS[$container]}`
         do
             host=${CONTAINER_HOSTS["$container.$count"]}
+            echo ""
+            echo "================================================"
             echo "STARTING UP $container $count IN $host"
             case "$container" in
             $ES_CONT)
@@ -821,6 +829,7 @@ do
                 echo "REGCRAWL_HOST_DATA_DIR=$REGCRAWL_HOST_DATA_DIR" >>$config_file
                 echo "REGCRAWL_GUEST_DATA_DIR=$REGCRAWL_GUEST_DATA_DIR" >>$config_file
                 echo "REGISTRY_URL=$CUSTOMER_REGISTRY_PROTOCOL://$CUSTOMER_REGISTRY" >>$config_file
+                echo "ALCHEMY_REGISTRY_URL=$ALCHEMY_REGISTRY_URL" >>$config_file
                 echo "REGISTRY_USER=$REGISTRY_USER" >>$config_file
                 echo "REGISTRY_PASSWORD=$REGISTRY_PW" >>$config_file
                 echo "REGISTRY_EMAIL=$REGISTRY_EMAIL" >>$config_file

@@ -53,7 +53,7 @@ then
 	#upstart config file
 	upstart_config_file=/etc/init/va-crawler.conf
 
-	package=vacrawler_0.3-va-crawler_amd64.deb
+	package=vacrawler_0.4-va-crawler_amd64.deb
 
 	$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
 	$SCP ../packaging/created_packages/crawler/$package ${SSH_USER}@$host:$package

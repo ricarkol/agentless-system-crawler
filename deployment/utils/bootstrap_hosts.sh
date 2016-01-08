@@ -14,27 +14,34 @@ for host in ${!DOCKER_DEVICES[@]}
    do
    DEVICE=${DOCKER_DEVICES[$host]}
   
+   echo ""
+   echo "================================================"
+   echo "BOOTSTRAPING $host"
+   echo ""
+   echo "-------------DOCKER_DEVICES---------------------"
    echo "Initial block devices in host $host"
    $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
    cat $host.partitions
 
+   echo "------------------------------------------------"
    echo "Creating docker partition on host $host at device $DEVICE"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /etc/default/docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get -y install lxc-docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+   $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
 
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
 
    STAT=$?
 
-   if [ $STAT -eq 0 ] 
-   then
-       $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
-       $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
-   fi
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker start
    
+   echo "------------------------------------------------"
    echo "Final block devices in host $host"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
@@ -52,27 +59,30 @@ for host in ${!DOCKER_DEVICES_LARGE[@]}
    do
    DEVICE=${DOCKER_DEVICES_LARGE[$host]}
   
+   echo "-------------DOCKER_DEVICES_LARGE---------------"
    echo "Initial block devices in host $host"
    $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
    cat $host.partitions
 
+   echo "------------------------------------------------"
    echo "Creating docker partition on host $host at device $DEVICE"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /etc/default/docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get -y install lxc-docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
+   $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
 
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_LARGE_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
 
    STAT=$?
 
-   if [ $STAT -eq 0 ] 
-   then
-       $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
-       $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
-   fi
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker start
    
+   echo "------------------------------------------------"
    echo "Final block devices in host $host"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
@@ -90,18 +100,21 @@ for host in ${!DATA_DEVICES[@]}
    do
    DEVICE=${DATA_DEVICES[$host]}
 
+   echo "-------------DATA_DEVICES-----------------------"
    echo "Initial block devices in host $host"
    $SCP utils/probe_disks.sh ${SSH_USER}@$host:probe_disks.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
    cat $host.partitions
 
+   echo "------------------------------------------------"
    echo "Creating data partition on host $host at device $DEVICE"
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DATA_PARTITION_START $DATA_PARTITION_END $PARTITION_NUMBER $DATA_PARTITION_FSTYPE $DATA_PARTITION_MOUNTPOINT
 
    STAT=$?
 
+   echo "------------------------------------------------"
    echo "Final block devices in host $host"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./probe_disks.sh
    $SCP ${SSH_USER}@$host:/tmp/partitions.txt $host.partitions
