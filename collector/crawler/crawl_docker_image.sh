@@ -50,9 +50,9 @@ function send_empty_frame {
          'compress':False, 'system_type':'container', \
          'container_name':'$CONTAINER_NAME', 'namespace':'$NAMESPACE', \
          'uuid':'$REQUEST_UUID'}"
-    python -c "import json; import datetime; print('%s\t%s\t%s') %\
+    python2.7 -c "import json; import datetime; print('%s\t%s\t%s') %\
          ('metadata', 'metadata', json.dumps($JSON))" > /tmp/msg
-    python ${KAFKA_PRODUCER_PY} /tmp/msg ${URL} config 2>&1 || \
+    python2.7 ${KAFKA_PRODUCER_PY} /tmp/msg ${URL} config 2>&1 || \
         { echo "$REQUEST_UUID Failed to send an empty frame." ; exit 1; }
 }
 
@@ -60,13 +60,19 @@ function send_notification {
     EVENT=$1
     TEXT=$2
     TIMEFORMAT="%Y-%m-%dT%H:%M:%S.%fZ"
+
+    if [ ${KAFKA_NOTIFICATION_URL} == "none" ]
+    then
+       return
+    fi
+
     JSON="{'status':'$EVENT', \
          'timestamp':datetime.datetime.utcnow().strftime('$TIMEFORMAT'),\
          'timestamp_ms':int(time.time() * 1e3), 'namespace':'${NAMESPACE}',\
          'uuid':'${REQUEST_UUID}','container_name':'${CONTAINER_NAME}',\
          'processor':'crawler','instance-id':'${INSTANCE_ID}', 'text':'${TEXT}'}"
-    python -c "import json; import datetime; import time; print(json.dumps($JSON))" > /tmp/msg
-    python ${KAFKA_PRODUCER_PY} /tmp/msg ${KAFKA_NOTIFICATION_URL} \
+    python2.7 -c "import json; import datetime; import time; print(json.dumps($JSON))" > /tmp/msg
+    python2.7 ${KAFKA_PRODUCER_PY} /tmp/msg ${KAFKA_NOTIFICATION_URL} \
         notification 2>&1 || { echo "$REQUEST_UUID Crawler failed to send $EVENT notification." ; exit 1; }
 }
 
@@ -117,7 +123,7 @@ fi
 LONG_IMAGE_NAME=`docker ps --no-trunc | grep ${CONTAINER_NAME} | head -n 1 | awk '{print $2}'` 2>&1
 SHORT_IMAGE_NAME=`basename $LONG_IMAGE_NAME` 2>&1
 DOCKER_REGISTRY_URL=`dirname $LONG_IMAGE_NAME | awk -F'/' '{print $1}'` 2>&1
-IMAGE_TAG=`echo $LONG_IMAGE_NAME | awk -F'\:' '{print $2}'` 2>&1
+IMAGE_TAG=`echo $LONG_IMAGE_NAME | awk -F':' '{print $2}'` 2>&1
 echo "$REQUEST_UUID Crawling " $CONTAINER_ID $SHORT_IMAGE_NAME, $LONG_IMAGE_NAME, $DOCKER_REGISTRY_URL, $IMAGE_TAG
 
 if [ -z "$LONG_IMAGE_NAME" ]
@@ -148,7 +154,7 @@ echo {\"owner_namespace\": \"${OWNER_NAMESPACE}\", \
 echo "$REQUEST_UUID Running ${CRAWLER_PY}"
 
 printf "$REQUEST_UUID "
-/usr/bin/python ${CRAWLER_PY} --crawlmode OUTCONTAINER --crawlContainers $CONTAINER_ID \
+python2.7 ${CRAWLER_PY} --crawlmode OUTCONTAINER --crawlContainers $CONTAINER_ID \
     --url $URL --since EPOCH \
     --features $FEATURES --numprocesses 1 \
     --extraMetadataFile /tmp/crawler_metadata.json \
@@ -184,7 +190,7 @@ printf "$REQUEST_UUID "
 	\"etc/services\", \"etc/init/ssh.conf\"], \
 	\"discover_config_files\": false, \"root_dir\": \"/\"}, \"metric\": {}, \
 	\"disk\": {}, \"os\": {}, \
-	\"metadata\": {\"namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}}" 2>&1 \
+	\"metadata\": {\"container_long_id_to_namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}}" 2>&1 \
         && echo "Successfully crawled and frame emitted."
 
 RETVAL=$?
