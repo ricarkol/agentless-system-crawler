@@ -18,6 +18,7 @@ REGISTRY_MONITOR_IMG="cloudsight/registry-monitor"
 PASSWORD_ANNOTATOR_IMG="cloudsight/password-annotator"
 VASTAT_REPORTER_IMG="cloudsight/vastat-reporter"
 TIMEMACHINE_IMG="cloudsight/timemachine"
+CONSUL_IMG="alchemy/containers-consul"
 
 ES_CONT="cloudsight-elasticsearch"
 KAFKA_CONT="cloudsight-kafka"
@@ -52,7 +53,7 @@ CONTAINERS=($ES_CONT $KAFKA_CONT \
         $VASTAT_REPORTER_CONT\
         $TIMEMACHINE_CONT)
 
-DEPLOYMENT_IMAGES=($ES_IMG $KAFKA_IMG \
+DEPLOYMENT_IMAGES=($ES_IMG $KAFKA_IMG $CONSUL_IMG \
         $INDEXER_IMG $GENERIC_INDEXER_IMG \
         $NOTIFICATION_INDEXER_IMG \
         $SEARCH_IMG $CONFIG_PARSER_IMG \

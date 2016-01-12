@@ -24,6 +24,7 @@ declare -A CONTAINER_COUNTS=(
         [$REGCRAWLER]=3
         [$REGISTRY_UPDATE_CONT]=1
         [$REGISTRY_MONITOR_CONT]=1
+        [$CONSUL_CONT]=3
         )
 
 declare -A CONTAINER_HOSTS=(
@@ -59,6 +60,9 @@ declare -A CONTAINER_HOSTS=(
         ["$REGCRAWLER.3"]=$REGCRAWL3
         ["$REGISTRY_UPDATE_CONT.1"]=$REGCRAWL1
         ["$REGISTRY_MONITOR_CONT.1"]=$REGCRAWL3
+        ["$CONSUL_CONT.1"]=$REGCRAWL1
+        ["$CONSUL_CONT.2"]=$REGCRAWL2
+        ["$CONSUL_CONT.3"]=$REGCRAWL3
         )
 
 declare -A WRITABLE_CLUSTER_NODES=(
