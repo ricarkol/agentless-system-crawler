@@ -180,7 +180,7 @@ printf "$REQUEST_UUID "
 	\"etc/services\", \"etc/init/ssh.conf\"], \
 	\"discover_config_files\": false, \"root_dir\": \"/\"}, \"metric\": {}, \
 	\"disk\": {}, \"os\": {}, \
-	\"metadata\": {\"namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}}" 2>&1 \
+	\"metadata\": {\"container_long_id_to_namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}}" 2>&1 \
         && echo "Successfully crawled and frame emitted."
 
 RETVAL=$?

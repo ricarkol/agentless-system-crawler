@@ -1,0 +1,111 @@
+#!/bin/bash
+
+# Returns 1 if success, 0 otherwise
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+cat > /tmp/dummy-metadata-file << EOF
+{"uuid": "<UUID>", "availability_zone": "nova", "hostname": "li-l6o5-3mvyy3m5ug3l-r2wazwiucexe-server-52l5wrw5277b.novalocal", "launch_index": 0, "meta": {"Cmd_0": "echo \"Hello world\"", "tagseparator": "_", "sgroup_name": "lindj_group1", "logging_password": "VSKHimqp69Nk", "Cmd_1": "/bin/bash", "tenant_id": "<SPACE_ID>", "sgroup_id": "dd28638d-7c10-4e26-9059-6e0baba7f64d", "test2": "supercoolvar2", "logstash_target": "logmet.stage1.opvis.bluemix.net:9091", "tagformat": "tenant_id group_id uuid", "metrics_target": "logmet.stage1.opvis.bluemix.net:9095", "group_id": "dd28638d-7c10-4e26-9059-6e0baba7f64d"}, "name": "li-l6o5-3mvyy3m5ug3l-r2wazwiucexe-server-52l5wrw5277b"}
+EOF
+
+NAME=test_create_destroy_containers_w_diff_name_alchemy
+CONTAINER_ID=`uuid`
+SPACE_ID=`uuid`
+NAMESPACE=${SPACE_ID}_dd28638d-7c10-4e26-9059-6e0baba7f64d_${CONTAINER_ID}
+LOG_PATH="/var/log/crawler_container_logs/${SPACE_ID}/dd28638d-7c10-4e26-9059-6e0baba7f64d/${CONTAINER_ID}"
+FRAME=test_create_destroy_containers_w_diff_name_alchemy
+
+# Cleanup
+rm -f /tmp/$NAME*
+docker rm -f $NAME 2> /dev/null > /dev/null
+
+MSG=`uuid`
+docker run -d --name $NAME ubuntu bash -c "echo $MSG; sleep 5" 2> /dev/null > /dev/null
+ID1=`docker ps | grep $NAME | awk '{print $1}'`
+
+# Create dummy metadata file
+DOCKER_ID=`docker inspect -f '{{ .Id }}' $NAME`
+mkdir -p /openstack/nova/metadata/
+sed s"/<UUID>/${CONTAINER_ID}/" /tmp/dummy-metadata-file > /openstack/nova/metadata/${DOCKER_ID}.json
+sed -i s"/<SPACE_ID>/${SPACE_ID}/" /openstack/nova/metadata/${DOCKER_ID}.json
+
+
+python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+	--features=cpu,interface --url file:///tmp/`uuid` \
+	--linkContainerLogFiles --frequency 1 --numprocesses 4 \
+	--url file:///tmp/$FRAME --format graphite --environment alchemy 2>/dev/null &
+PID=$!
+sleep 3
+
+# By now the log should be there
+COUNT=`grep -c $MSG ${LOG_PATH}/docker.log`
+
+# Also, there should be cpu, and interface metrics for the container
+COUNT_METRICS=`grep -l ${NAMESPACE}.interface-eth0 /tmp/${FRAME}.${ID1}.* | wc -l`
+
+# after this, the log will disappear
+sleep 5
+
+# By now the container should be dead, and the link should be deleted
+if [ $COUNT == "1" ] && [ ! -f $LOG_PATH/var/log/input_file_name.log ] && [ ${COUNT_METRICS} -gt "0" ]
+then
+	:
+	#echo 1
+else
+	echo 0
+	exec 2> /dev/null
+	kill $PID > /dev/null 2> /dev/null
+	exit
+fi
+
+# As the --ephemeral option to docker might not be available, lets make sure
+# the container is removed (even if it already exited)
+docker rm -f $NAME 2> /dev/null > /dev/null
+
+sleep 3
+
+# Now start a container with a different name and a different space ID
+MSG=`uuid`
+NAME=test_create_destroy_containers_w_diff_name_alchemy_2
+CONTAINER_ID=`uuid`
+SPACE_ID=`uuid`
+NAMESPACE=${SPACE_ID}_dd28638d-7c10-4e26-9059-6e0baba7f64d_${CONTAINER_ID}
+LOG_PATH="/var/log/crawler_container_logs/${SPACE_ID}/dd28638d-7c10-4e26-9059-6e0baba7f64d/${CONTAINER_ID}"
+docker run -d --name $NAME ubuntu bash -c "echo $MSG; sleep 5" 2> /dev/null > /dev/null
+# Although this is a container with teh same name, the ID is not the same
+ID2=`docker ps | grep $NAME | awk '{print $1}'`
+
+# Create dummy metadata file
+DOCKER_ID=`docker inspect -f '{{ .Id }}' $NAME`
+mkdir -p /openstack/nova/metadata/
+sed s"/<UUID>/${CONTAINER_ID}/" /tmp/dummy-metadata-file > /openstack/nova/metadata/${DOCKER_ID}.json
+sed -i s"/<SPACE_ID>/${SPACE_ID}/" /openstack/nova/metadata/${DOCKER_ID}.json
+
+sleep 3
+
+# By now the log should be there
+COUNT=`grep -c $MSG ${LOG_PATH}/docker.log`
+
+# Also, there should be cpu, and interface metrics for the container
+COUNT_METRICS=`grep -l ${NAMESPACE}.interface-eth0 /tmp/${FRAME}.${ID2}.* | wc -l`
+
+# after this, the log will disappear
+sleep 5
+
+# By now the container should be dead, and the link should be deleted
+if [ $COUNT == "1" ] && [ ! -f $LOG_PATH/var/log/input_file_name.log  ] && [ ${COUNT_METRICS} -gt "0" ]
+then
+	echo 1
+else
+	echo 0
+fi
+
+# Just avoid having the "Terminated ..." error showing up
+exec 2> /dev/null
+kill $PID > /dev/null 2> /dev/null
+
+docker rm -f $NAME > /dev/null
+rm -rf /var/log/crawler_container_logs/*
