@@ -15,6 +15,7 @@ The current state of this project is in the middle of "make it right".
  * Install Python 2.7.6
  * apt-get install python-dev (for installing psutil)
  * apt-get install python-pip
+ # @RICARDO Don't use simplejson! - pmeckif1
  * pip install simplejson
  * pip install psutil
  * pip install netifaces
@@ -42,6 +43,7 @@ On host machine, start a ubuntu Docker container that idles (Read docker
 documents on how to install docker engine on the host machine). We define
 a container as any process subtree with the `pid` namespace different to the `init` process `pid` namespace
 
+# @RICARDO let's try using a python maintained container instead of ubuntu... then we can delete half of this file! - pmeckif1
 ```bash
 % docker run -d ubuntu:latest bash -c "while true; do sleep 1; done"
 ```
