@@ -156,6 +156,10 @@ do
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/password_annotator.sh "stop" $count
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/password_annotator.sh "delete" $count
             ;;
+            $CONSUL_CONT)
+#                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "stop" $count
+#                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "delete" $count
+            ;;
             $REGISTRY_UPDATE_CONT)
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "stop" $count
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "delete" $count
@@ -292,6 +296,37 @@ do
 
                 echo "Pausing for kafka startup..."
                 sleep 30
+            ;;
+
+            $CONSUL_CONT)
+                #create config file
+                config_file=${CONSUL_CONT}.${count}.sh
+                echo "#!/bin/bash" >$config_file
+                echo "CONSUL_IMG=$CONSUL_IMG" >>$config_file
+                echo "CONSUL_CONT=$CONSUL_CONT" >>$config_file
+                echo "HOSTS_containers_consul=$CONSUL1 $CONSUL2 $CONSUL3" >>$config_file
+                echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
+                echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
+                echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
+                echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
+
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                $SCP startup/consul.sh ${SSH_USER}@$host:consul.sh
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv consul.sh $cloudsight_scripts_dir/consul.sh
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/consul.sh
+                $SCP $config_file ${SSH_USER}@$host:$config_file
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/consul.sh "start" $count
+
+                STAT=$?
+                if [ $STAT -ne 0 ]
+                    then
+                    echo "Failed to start $container.$count in $host"
+                    exit 1
+                fi
             ;;
 
             $INDEXER_CONT)
