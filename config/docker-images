@@ -38,6 +38,7 @@ REGISTRY_MONITOR_CONT="cloudsight-registry-monitor"
 PASSWORD_ANNOTATOR_CONT="cloudsight-password-annotator"
 VASTAT_REPORTER_CONT="cloudsight-vastat-reporter"
 TIMEMACHINE_CONT="cloudsight-timemachine"
+CONSUL_CONT="cloudsight-consul"
 
 CONTAINERS=($ES_CONT $KAFKA_CONT \
         $INDEXER_CONT $LOG_INDEXER_CONT \
