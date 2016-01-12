@@ -12,6 +12,7 @@ prereqs: FORCE
 		sudo yum install -y python-pip gcc python-devel; \
 		# sudo yum install dpkg;
 	fi
+	# @RICARDO - pip2 not necessary if you use python maintained container
 	sudo pip2 install --no-index --find-links="../../packaging/python_packages/" psutil bottle requests simplejson pydoubles netifaces kafka-python docker-py pykafka
 
 executable: prereqs pyinstaller crawler.spec python-setuptools
