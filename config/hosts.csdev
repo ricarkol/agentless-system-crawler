@@ -1,23 +1,23 @@
 #!/bin/bash
 
-ANNOTATOR1=csdev.sl.cloud9.ibm.com
-ANNOTATOR2=csdev.sl.cloud9.ibm.com
-ANNOTATOR3=csdev.sl.cloud9.ibm.com
-ES1=csdev.sl.cloud9.ibm.com
-ES2=csdev.sl.cloud9.ibm.com
-ES3=csdev.sl.cloud9.ibm.com
-ES4=csdev.sl.cloud9.ibm.com
-ES5=csdev.sl.cloud9.ibm.com
-INDEXER1=csdev.sl.cloud9.ibm.com
-INDEXER2=csdev.sl.cloud9.ibm.com
-INDEXER3=csdev.sl.cloud9.ibm.com
-KAFKA1=csdev.sl.cloud9.ibm.com
-KAFKA2=csdev.sl.cloud9.ibm.com
-SEARCH1=csdev.sl.cloud9.ibm.com
-REGCRAWL1=csdev.sl.cloud9.ibm.com
-REGCRAWL2=csdev.sl.cloud9.ibm.com
-REGCRAWL3=csdev.sl.cloud9.ibm.com
-POLICY1=csdev.sl.cloud9.ibm.com
+ANNOTATOR1=francis.hursley.ibm.com
+ANNOTATOR2=francis.hursley.ibm.com
+ANNOTATOR3=francis.hursley.ibm.com
+ES1=francis.hursley.ibm.com
+ES2=francis.hursley.ibm.com
+ES3=francis.hursley.ibm.com
+ES4=francis.hursley.ibm.com
+ES5=francis.hursley.ibm.com
+INDEXER1=francis.hursley.ibm.com
+INDEXER2=francis.hursley.ibm.com
+INDEXER3=francis.hursley.ibm.com
+KAFKA1=francis.hursley.ibm.com
+KAFKA2=francis.hursley.ibm.com
+SEARCH1=francis.hursley.ibm.com
+REGCRAWL1=francis.hursley.ibm.com
+REGCRAWL2=francis.hursley.ibm.com
+REGCRAWL3=francis.hursley.ibm.com
+POLICY1=francis.hursley.ibm.com
 
 HOSTS=( $ES1 )
 
@@ -31,9 +31,9 @@ REGISTRY_EMAIL=
 SSH_USER=root
 
 #VA metrics crawler env config
-ENABLE_VA_CRAWLER=false
-VA_CRAWLER_SPACE_ID="{insert userID}"
-VA_CRAWLER_EMIT_URL="mtgraphite://metrics.stage1.opvis.bluemix.net:9095/{insert tenantID}:{insert password}"
+ENABLE_VA_CRAWLER=true
+VA_CRAWLER_SPACE_ID="a63d60f6-d9ce-402a-9d06-b9263acc15d4"
+VA_CRAWLER_EMIT_URL="mtgraphite://metrics.stage1.opvis.bluemix.net:9095/Crawler:5KilGEQ9qExi"
 
 #Logstash env config
 ENABLE_LOGSTASH_FORWARDER=false
