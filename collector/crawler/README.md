@@ -15,8 +15,6 @@ The current state of this project is in the middle of "make it right".
  * Install Python 2.7.6
  * apt-get install python-dev (for installing psutil)
  * apt-get install python-pip
- # @RICARDO Don't use simplejson! - pmeckif1
- * pip install simplejson
  * pip install psutil
  * pip install netifaces
  * pip install bottle
