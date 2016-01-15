@@ -98,9 +98,10 @@ balanced_cluster_node(){
             target_node=$num_nodes
         fi
     fi
+
     echo "Target node is $target_node"
     return 0
-    }
+}
 
 #shutting down services
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
@@ -202,6 +203,18 @@ do
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -r /opt/cloudsight/collector 
                 #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
             ;;
+            $CONFIG_AND_METRICS_CRAWLER_CONT)
+            # The container count doesn't really apply here as we want it on every host, so I create my own.
+            # Count through hosts and stop the config and metrics crawler on every host.
+            CRAWLER_COUNT=1
+            for host in ${HOSTS[@]}
+                do
+                config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
+                CRAWLER_COUNT=$((CRAWLER_COUNT+1))
+                done
+            ;;
             *)
                 echo "Containers of type $container not yet supported"
             ;;
@@ -234,6 +247,51 @@ do
             echo "================================================"
             echo "STARTING UP $container $count IN $host"
             case "$container" in
+            $CONFIG_AND_METRICS_CRAWLER_CONT)
+                for host in ${HOSTS[@]}
+                    do
+
+                    config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+
+                    #create config file
+                    echo "#!/bin/bash" >$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_IMG=$CONFIG_AND_METRICS_CRAWLER_IMG" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_CONT=$CONFIG_AND_METRICS_CRAWLER_CONT" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_NODE_NAME=$host" >>$config_file
+                    echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                    echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
+                    echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
+                    echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                    echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
+                    echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_SPACE_ID=$CONFIG_AND_METRICS_CRAWLER_SPACE_ID" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_EMIT_URL=$CONFIG_AND_METRICS_CRAWLER_EMIT_URL" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT=$CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_FEATURES=$CONFIG_AND_METRICS_CRAWLER_FEATURES" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_FORMAT=$CONFIG_AND_METRICS_CRAWLER_FORMAT" >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_FREQ=$CONFIG_AND_METRICS_CRAWLER_FREQ"  >>$config_file
+                    echo "CONFIG_AND_METRICS_CRAWLER_MODE=$CONFIG_AND_METRICS_CRAWLER_MODE" >>$config_file
+                    echo "NUM_CORES=$NUM_CORES" >>$config_file
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                    $SCP startup/config_and_metrics_crawler.sh ${SSH_USER}@$host:config_and_metrics_crawler.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv config_and_metrics_crawler.sh $cloudsight_scripts_dir/config_and_metrics_crawler.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_and_metrics_crawler.sh
+                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "start"
+
+                    STAT=$?
+                    if [ $STAT -ne 0 ]
+                        then
+                        echo "Failed to start $container.$count in $host"
+                        exit 1
+                    fi
+                    echo "Config and Metrics Crawler Deployed"
+                done
+
+            ;;
             $ES_CONT)
                 if [ "$IGNORE_ES" = "true" ]
                     then

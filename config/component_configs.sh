@@ -55,7 +55,15 @@ REGCRAWL_GUEST_DATA_DIR="/mnt/data/regcrawler"
 REGISTRY_ICE_API=False
 
 REGCRAWLER_DEB_FILE="regcrawler_0.5-alchemy_amd64.deb"
-VACRAWLER_DEB_FILE=vacrawler_1.1-va-crawler_amd64.deb
+
+# CONFIG_AND_METRICS_CRAWLER CONFIG
+CONFIG_AND_METRICS_CRAWLER_DEB_FILE=vacrawler_1.2-va-crawler_amd64.deb
+CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT="cloudsight"
+CONFIG_AND_METRICS_CRAWLER_FEATURES="cpu,memory,interface,disk,os"
+CONFIG_AND_METRICS_CRAWLER_FORMAT="graphite"
+CONFIG_AND_METRICS_CRAWLER_FREQ="15"
+CONFIG_AND_METRICS_CRAWLER_MODE="OUTCONTAINER"
+NUM_CORES=8
 
 #config parser
 CONFIG_PARSER_KNOWN_CONFIG_FILES='[\"/etc/passwd\",\"/etc/group\",\"/etc/shadow\",\"/etc/gshadow\",\"/etc/ssh/sshd_config\"]'

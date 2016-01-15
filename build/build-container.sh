@@ -40,6 +40,7 @@ declare -A IMG_TO_DIR=(
   [$REGISTRY_UPDATE_IMG]="../apps/registry_update"
   [$REGISTRY_MONITOR_IMG]="../apps/registry_monitor"
   [$VASTAT_REPORTER_IMG]="../apps/vastat_reporter"
+  [$CONFIG_AND_METRICS_CRAWLER_IMG]="../collector/config_and_metrics_crawler"
 )
 
 
