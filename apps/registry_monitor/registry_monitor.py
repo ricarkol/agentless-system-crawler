@@ -50,6 +50,7 @@ processor_group = 'registry-monitor'
 logger              = logging
 max_kafka_retries   = 600
 http_request_timeout= 120
+iterator_sleep_time = 1 * 60 * 60 # 1 hour
 
 class TimeoutError(Exception):
     pass
@@ -507,6 +508,8 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         
         if single_run:
             iterate = False
+        else:
+            time.sleep(iterator_sleep_time)
             
     logger.info('Registry monitor is exiting normally') 
                 
