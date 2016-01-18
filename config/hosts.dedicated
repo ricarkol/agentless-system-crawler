@@ -7,7 +7,7 @@ KAFKA1="{host4}"
 REGCRAWL1="{host5}"
 POLICY1="{host6}"
 
-HOSTS=( $ES1 )
+HOSTS=($ANNOTATOR1, $ES1, $INDEXER1, $KAFKA1, $REGCRAWL1, $POLICY1)
 
 DEPLOYMENT_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
 CUSTOMER_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
