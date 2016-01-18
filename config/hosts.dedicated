@@ -1,23 +1,11 @@
 #!/bin/bash
 
-ANNOTATOR1=csdev.sl.cloud9.ibm.com
-ANNOTATOR2=csdev.sl.cloud9.ibm.com
-ANNOTATOR3=csdev.sl.cloud9.ibm.com
-ES1=csdev.sl.cloud9.ibm.com
-ES2=csdev.sl.cloud9.ibm.com
-ES3=csdev.sl.cloud9.ibm.com
-ES4=csdev.sl.cloud9.ibm.com
-ES5=csdev.sl.cloud9.ibm.com
-INDEXER1=csdev.sl.cloud9.ibm.com
-INDEXER2=csdev.sl.cloud9.ibm.com
-INDEXER3=csdev.sl.cloud9.ibm.com
-KAFKA1=csdev.sl.cloud9.ibm.com
-KAFKA2=csdev.sl.cloud9.ibm.com
-SEARCH1=csdev.sl.cloud9.ibm.com
-REGCRAWL1=csdev.sl.cloud9.ibm.com
-REGCRAWL2=csdev.sl.cloud9.ibm.com
-REGCRAWL3=csdev.sl.cloud9.ibm.com
-POLICY1=csdev.sl.cloud9.ibm.com
+ANNOTATOR1="{host1}"
+ES1="{host2}"
+INDEXER1="{host3}"
+KAFKA1="{host4}"
+REGCRAWL1="{host5}"
+POLICY1="{host6}"
 
 HOSTS=( $ES1 )
 
