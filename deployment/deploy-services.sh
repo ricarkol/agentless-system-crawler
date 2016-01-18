@@ -6,14 +6,30 @@
 # (c) IBM Research 2015
 #
 
-if [ $# -eq 4 ] ; then
-   echo "Processing all containers"
-CONTAINER_NAME=
-elif [ $# -eq 5 ] ; then
-   echo "Processing container:" $5
-CONTAINER_NAME=cloudsight-$5
+if [ $# -eq 4 ]
+    then
+    echo "Processing all containers"
+    IGNORE-ES=false
+    CONTAINER_NAME=
+elif [ $# -eq 5 ]
+    then
+    if [ "$5" = "true" ]
+       then
+        echo "Processing all containers except ES"
+        IGNORE-ES=true
+        CONTAINER_NAME=
+    elif [ "$5" = "false" ]
+        then
+        echo "Processing all containers"
+        IGNORE-ES=false
+        CONTAINER_NAME=
+    else
+        echo "Processing container:" $5
+        IGNORE-ES=false
+        CONTAINER_NAME=cloudsight-$5
+    fi
 else
-   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<CONTAINER_NAME>]"
+   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE-ES> | <CONTAINER_NAME>]"
    exit 1
 fi
 
@@ -100,8 +116,13 @@ do
             config_file=${container}.${count}.sh
             case "$container" in
             $ES_CONT)
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "stop" $count
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "delete" $count
+                if [ "IGNORE-ES" = "true" ]
+                    then
+                    echo "Ignoring ES"
+                else
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "stop" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "delete" $count
+                fi
             ;;
             $KAFKA_CONT)
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "stop" $count
@@ -212,49 +233,55 @@ do
             echo "STARTING UP $container $count IN $host"
             case "$container" in
             $ES_CONT)
-                config_file=${ES_CONT}.${count}.sh
-
-                #create config file
-                echo "#!/bin/bash" >$config_file
-                echo "ES_IMG=$ES_IMG" >>$config_file
-                echo "ES_CONT=$ES_CONT" >>$config_file
-                echo "ES_PORT=$ES_PORT" >>$config_file
-                echo "ES_DATA_VOLUME=$ES_DATA_VOLUME" >>$config_file
-                echo "ES_LOGS_VOLUME=$ES_LOGS_VOLUME" >>$config_file
-                echo "ES_HEAP_SIZE=$ES_HEAP_SIZE" >>$config_file
-                echo "ES_CLUSTER_NAME=cloudsight-es-$ENV" >>$config_file
-                echo "ES_NODE_NAME=$host" >>$config_file
-                echo "ES_PUBLISH_HOST=$host" >>$config_file
-                echo "ES_UNICAST_HOSTS=$ES_HOSTS" >>$config_file
-                echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
-                echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
-                echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
-                echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
-                echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
-                echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
-                echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
-
-
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_DATA_VOLUME"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_DATA_VOLUME"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_LOGS_VOLUME"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_LOGS_VOLUME"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
-                $SCP startup/elasticsearch.sh ${SSH_USER}@$host:elasticsearch.sh
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv elasticsearch.sh $cloudsight_scripts_dir/elasticsearch.sh
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/elasticsearch.sh
-                $SCP $config_file ${SSH_USER}@$host:$config_file
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
-
-                STAT=$?
-                if [ $STAT -ne 0 ]
+                if [ "IGNORE-ES" = "true" ]
                     then
-                    echo "Failed to start $container.$count in $host"
-                    exit 1
+                    echo "Ignoring ES"
+                else
+
+                    config_file=${ES_CONT}.${count}.sh
+
+                    #create config file
+                    echo "#!/bin/bash" >$config_file
+                    echo "ES_IMG=$ES_IMG" >>$config_file
+                    echo "ES_CONT=$ES_CONT" >>$config_file
+                    echo "ES_PORT=$ES_PORT" >>$config_file
+                    echo "ES_DATA_VOLUME=$ES_DATA_VOLUME" >>$config_file
+                    echo "ES_LOGS_VOLUME=$ES_LOGS_VOLUME" >>$config_file
+                    echo "ES_HEAP_SIZE=$ES_HEAP_SIZE" >>$config_file
+                    echo "ES_CLUSTER_NAME=cloudsight-es-$ENV" >>$config_file
+                    echo "ES_NODE_NAME=$host" >>$config_file
+                    echo "ES_PUBLISH_HOST=$host" >>$config_file
+                    echo "ES_UNICAST_HOSTS=$ES_HOSTS" >>$config_file
+                    echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                    echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
+                    echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
+                    echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                    echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
+                    echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
+
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_DATA_VOLUME"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_DATA_VOLUME"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_LOGS_VOLUME"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_LOGS_VOLUME"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                    $SCP startup/elasticsearch.sh ${SSH_USER}@$host:elasticsearch.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv elasticsearch.sh $cloudsight_scripts_dir/elasticsearch.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/elasticsearch.sh
+                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
+
+                    STAT=$?
+                    if [ $STAT -ne 0 ]
+                        then
+                        echo "Failed to start $container.$count in $host"
+                        exit 1
+                    fi
+                    echo "Pausing for elasticsearch startup..."
+                    sleep 60
                 fi
-                echo "Pausing for elasticsearch startup..."
-                sleep 60
             ;;
             $KAFKA_CONT)
                 config_file=${KAFKA_CONT}.${count}.sh
