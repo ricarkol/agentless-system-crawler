@@ -1,0 +1,18 @@
+# Copied from sdebuilder/cfg/ptippet/
+CRAWLER_ENVIRONMENT=alchemy
+CRAWLER_EMIT_URL=mtgraphite://metrics.eu-gb.opvis.bluemix.net:9095/Crawler:oS1z4EpVsQQQ
+CRAWLER_MODE=OUTCONTAINER
+CRAWLER_FEATURES=cpu,memory,interface
+CRAWLER_FORMAT=graphite
+CRAWLER_FREQ=15
+CRAWLER_LOGMET_HOST=logs.eu-gb.opvis.bluemix.net
+CRAWLER_LOGMET_PORT=9091
+CRAWLER_SUPERTENANT_ID=Crawler
+CRAWLER_SUPERTENANT_PASSWORD=oS1z4EpVsQQQ
+
+# These are not copied from sdebuilder configurations
+CRAWLER_MONITOR_HOST=metrics.eu-gb.opvis.bluemix.net
+CRAWLER_MONITOR_PORT=9095
+CRAWLER_MONITOR_ID=Crawler
+CRAWLER_MONITOR_PASSWORD=oS1z4EpVsQQQ
+CRAWLER_MONITOR_SPACE_ID=2c1c93ec-dbf9-43ef-a2da-cb6759258275.eu-gb

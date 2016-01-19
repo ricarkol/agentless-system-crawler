@@ -1,0 +1,18 @@
+# Copied from sdebuilder/cfg/ptippet/bmconfig-prod-dal09-vizio1.cfg
+CRAWLER_ENVIRONMENT=alchemy
+CRAWLER_EMIT_URL=mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:oLYMLA7ogscT
+CRAWLER_MODE=OUTCONTAINER
+CRAWLER_FEATURES=cpu,memory,interface
+CRAWLER_FORMAT=graphite
+CRAWLER_FREQ=15
+CRAWLER_LOGMET_HOST=logs.opvis.bluemix.net
+CRAWLER_LOGMET_PORT=9091
+CRAWLER_SUPERTENANT_ID=Crawler
+CRAWLER_SUPERTENANT_PASSWORD=oLYMLA7ogscT
+
+# These are not copied from sdebuilder configurations
+CRAWLER_MONITOR_HOST=metrics.opvis.bluemix.net
+CRAWLER_MONITOR_PORT=9095
+CRAWLER_MONITOR_ID=Crawler
+CRAWLER_MONITOR_PASSWORD=oLYMLA7ogscT
+CRAWLER_MONITOR_SPACE_ID=1fb90c5d-84e6-452f-a131-9128c565a64f
