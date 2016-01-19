@@ -9,27 +9,27 @@
 if [ $# -eq 4 ]
     then
     echo "Processing all containers"
-    IGNORE-ES=false
+    IGNORE_ES=false
     CONTAINER_NAME=
 elif [ $# -eq 5 ]
     then
     if [ "$5" = "true" ]
        then
         echo "Processing all containers except ES"
-        IGNORE-ES=true
+        IGNORE_ES=true
         CONTAINER_NAME=
     elif [ "$5" = "false" ]
         then
         echo "Processing all containers"
-        IGNORE-ES=false
+        IGNORE_ES=false
         CONTAINER_NAME=
     else
         echo "Processing container:" $5
-        IGNORE-ES=false
+        IGNORE_ES=false
         CONTAINER_NAME=cloudsight-$5
     fi
 else
-   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE-ES> | <CONTAINER_NAME>]"
+   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
    exit 1
 fi
 
@@ -112,11 +112,13 @@ do
         for count in `seq ${CONTAINER_COUNTS[$container]}|sort -r`
         do
             host=${CONTAINER_HOSTS["$container.$count"]}
+            echo ""
+            echo "================================================"
             echo "SHUTTING DOWN $container $count IN $host"
             config_file=${container}.${count}.sh
             case "$container" in
             $ES_CONT)
-                if [ "IGNORE-ES" = "true" ]
+                if [ "$IGNORE_ES" = "true" ]
                     then
                     echo "Ignoring ES"
                 else
@@ -233,7 +235,7 @@ do
             echo "STARTING UP $container $count IN $host"
             case "$container" in
             $ES_CONT)
-                if [ "IGNORE-ES" = "true" ]
+                if [ "$IGNORE_ES" = "true" ]
                     then
                     echo "Ignoring ES"
                 else
