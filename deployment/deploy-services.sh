@@ -210,6 +210,14 @@ do
             for host in ${HOSTS[@]}
                 do
                 config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                # To deal with legacy issues
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler "stop"
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-host "stop"
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-host
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-containers "stop"
+                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-containers
+                
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
                 CRAWLER_COUNT=$((CRAWLER_COUNT+1))
