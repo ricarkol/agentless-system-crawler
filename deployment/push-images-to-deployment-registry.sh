@@ -22,7 +22,7 @@ SOURCE_REGISTRY=$3
 
 if [ -z "$CONTAINER_NAME" ]
 	then
-	./push-images-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $SOURCE_REGISTRY 
+	./push-images-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $SOURCE_REGISTRY latest
 else
-	./push-an-image-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $CONTAINER_NAME $SOURCE_REGISTRY 
+	./push-an-image-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $CONTAINER_NAME $SOURCE_REGISTRY latest
 fi
