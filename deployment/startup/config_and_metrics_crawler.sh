@@ -31,6 +31,7 @@ HOST_SUPERVISOR_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${SUPERVISOR
 HOST_CLOUDSIGHT_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${CLOUDSIGHT_DIR}
 mkdir -p HOST_SUPERVISOR_LOG_DIR
 mkdir -p HOST_CLOUDSIGHT_LOG_DIR
+mkdir -p HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR
 
 case $1 in
     start)
@@ -49,21 +50,24 @@ case $1 in
 			-v /sys/fs/cgroup:/sys/fs/cgroup \
 			-v /var/run/docker.sock:/var/run/docker.sock \
 			-v ${HOST_SUPERVISOR_LOG_DIR}:${CONTAINER_SUPERVISOR_LOG_DIR} \
+			-v ${HOST_CONTAINER_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
+			-v ${HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR}:${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
 			--name ${CONTAINER_NAME} \
 			-it $CONFIG_AND_METRICS_CRAWLER_IMG \
-			--url "$CONFIG_AND_METRICS_CRAWLER_EMIT_URL" \
+			--url "$CONFIG_AND_METRICS_CRAWLER_EMIT_URL" "file://${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR}/stats" \
+			--overwrite \
 			--since EPOCH \
 			--frequency "$CONFIG_AND_METRICS_CRAWLER_FREQ" \
 			--features "$CONFIG_AND_METRICS_CRAWLER_FEATURES" \
 			--compress false \
-			--logfile /var/log/config-and-metrics-crawler-containers.log \
+			--logfile ${CONTAINER_CLOUDSIGHT_LOG_DIR}/config-and-metrics-crawler-containers.log \
 			--crawlContainers ALL \
 			--format "$CONFIG_AND_METRICS_CRAWLER_FORMAT" \
 			--crawlmode "$CONFIG_AND_METRICS_CRAWLER_MODE" \
 			--environment "$CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT" \
 			--numprocesses "$NUM_CORES" \
 			--namespace ${CONFIG_AND_METRICS_CRAWLER_SPACE_ID}.va.`hostname` \
-			2>> /var/log/config-and-metrics-crawler-containers.log
+			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}config-and-metrics-crawler-containers-error.log
         set +x
         ;;
 
