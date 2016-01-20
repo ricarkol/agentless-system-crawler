@@ -9,9 +9,9 @@
 . ../config/docker-images
 
 
-if [ $# -lt 2 ] || [ $# -gt 4 ]
+if [ $# -lt 2 ] || [ $# -gt 5 ]
     then
-    echo "Usage: $0 <target_registry> <tag> container_name [<build_registry>] "
+    echo "Usage: $0 <target_registry> <tag> container_name [<build_registry> [latest]] "
     exit 1
 fi
 
@@ -20,6 +20,7 @@ REGISTRY=$1
 TAG=$2
 CONTAINER_NAME=$3
 BUILD_REGISTRY=$4
+LATEST=$5
 
 matched=false
 for img in ${DEPLOYMENT_IMAGES[@]}
@@ -36,6 +37,11 @@ do
          fi
          echo "Pushing docker image: ${REGISTRY}/$img:$TAG"
          docker push "${REGISTRY}/${img}:${TAG}"
+         if [ -n "$LATEST" ]
+          then
+             docker tag -f "${REGISTRY}/$img:$TAG" "${REGISTRY}/$img:latest"
+             docker push "${REGISTRY}/${img}:latest"
+        fi
      fi
   fi
 done
