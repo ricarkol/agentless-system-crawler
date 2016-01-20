@@ -27,17 +27,18 @@ if [ -z "$CONTAINER_NAME" ]
 	./push-images-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $SOURCE_REGISTRY 
 	for img in ${DEPLOYMENT_IMAGES[@]}
 	do
-		if [[ "$img" =~ "$CONTAINER_NAME" ]]; then
-			echo "Tagging ${DEPLOYMENT_REGISTRY}/$img:$TAG as latest"
-			docker tag -f "${DEPLOYMENT_REGISTRY}/$img:$TAG" "${DEPLOYMENT_REGISTRY}/$img:latest"
-		fi
+		echo "Tagging ${DEPLOYMENT_REGISTRY}/$img:$TAG as latest"
+		docker tag -f "${DEPLOYMENT_REGISTRY}/$img:$TAG" "${DEPLOYMENT_REGISTRY}/$img:latest"
 	done
 
 else
 	./push-an-image-to-registry.sh $DEPLOYMENT_REGISTRY $TAG $CONTAINER_NAME $SOURCE_REGISTRY 
 	for img in ${DEPLOYMENT_IMAGES[@]}
 	do
-		echo "Tagging ${DEPLOYMENT_REGISTRY}/$img:$TAG as latest"
-		docker tag -f "${DEPLOYMENT_REGISTRY}/$img:$TAG" "${DEPLOYMENT_REGISTRY}/$img:latest"
+		if [[ "$img" =~ "$CONTAINER_NAME" ]]; then
+			echo "Tagging ${DEPLOYMENT_REGISTRY}/$img:$TAG as latest"
+			echo docker tag -f "${DEPLOYMENT_REGISTRY}/$img:$TAG" "${DEPLOYMENT_REGISTRY}/$img:latest"
+			docker tag -f "${DEPLOYMENT_REGISTRY}/$img:$TAG" "${DEPLOYMENT_REGISTRY}/$img:latest"
+		fi
 	done
 fi
