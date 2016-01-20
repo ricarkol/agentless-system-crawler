@@ -35,7 +35,7 @@ done
 
 IDS=`docker ps | grep test_crawl_cpu_many_containers | awk '{printf "%s,",  $1}' | sed s/,$//g`
 
-python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers $IDS --numprocesses 2 \
 	--linkContainerLogFiles --environment alchemy --url file:///tmp/test_crawl_cpu_many_containers_input_logfile_links_alchemy
 

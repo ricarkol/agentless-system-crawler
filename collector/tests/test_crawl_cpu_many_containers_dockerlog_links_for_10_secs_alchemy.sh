@@ -33,7 +33,7 @@ done
 NAME=test_crawl_cpu_many_containers_dockerlog_links_for_10_secs_alchemy
 IDS=`docker ps | grep test_crawl_cpu_many_containers | awk '{printf "%s,",  $1}' | sed s/,$//g`
 
-timeout 10 python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+timeout 10 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers $IDS --numprocesses 2 \
 	--frequency 1 --linkContainerLogFiles --environment alchemy --url file:///tmp/$NAME
 

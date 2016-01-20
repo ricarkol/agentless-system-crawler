@@ -33,7 +33,7 @@ sed s"/<UUID>/${CONTAINER_ID}/" /tmp/dummy-metadata-file > /openstack/nova/metad
 sed -i s"/<SPACE_ID>/${SPACE_ID}/" /openstack/nova/metadata/${DOCKER_ID}.json
 
 
-python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu,interface --url file:///tmp/`uuid` \
 	--linkContainerLogFiles --frequency 1 --numprocesses 4 \
 	--url file:///tmp/$FRAME --format graphite --environment alchemy 2>/dev/null &

@@ -8,7 +8,7 @@ import sys
 
 sys.path.append('..')
 from setup_logger import setup_logger_stdout
-from crawler import mtgraphite
+from config_and_metrics_crawler import mtgraphite
 
 def test_send_non_stop(url):
     client = mtgraphite.MTGraphiteClient(host_url=url)

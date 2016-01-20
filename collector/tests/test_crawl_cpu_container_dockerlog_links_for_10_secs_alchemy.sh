@@ -28,7 +28,7 @@ sed -i s"/<UUID>/${CONTAINER_ID}/" /tmp/dummy-metadata-file
 mkdir -p /openstack/nova/metadata/
 mv /tmp/dummy-metadata-file /openstack/nova/metadata/${DOCKER_ID}.json
 
-timeout 10 python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+timeout 10 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers ${DOCKER_ID} \
 	--linkContainerLogFiles --frequency 1 \
 	--environment alchemy --url file:///tmp/$NAME
