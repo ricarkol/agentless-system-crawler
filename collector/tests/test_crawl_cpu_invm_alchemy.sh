@@ -12,7 +12,7 @@ NUM_CORES=`grep ^processor /proc/cpuinfo | wc -l`
 
 
 # the alchemy environment won't have any effect on INVM
-CRAWLED_NUM_CORES=`python2.7 ../crawler/crawler.py --crawlmode INVM \
+CRAWLED_NUM_CORES=`python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode INVM \
 	--features=cpu --environment alchemy | grep -c cpu-`
 
 if [ $NUM_CORES == $CRAWLED_NUM_CORES ]

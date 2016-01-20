@@ -27,7 +27,7 @@ mv /tmp/dummy-metadata-file /openstack/nova/metadata/${DOCKER_ID}.json
 
 rm -f /tmp/test_crawl_cpu_container_for_10_secs_alchemy*
 
-timeout $COUNT python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+timeout $COUNT python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers ${DOCKER_ID} --frequency 1 \
 	--environment alchemy \
 	--url file:///tmp/test_crawl_cpu_container_for_10_secs_alchemy

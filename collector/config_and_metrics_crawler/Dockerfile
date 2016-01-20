@@ -1,8 +1,8 @@
 FROM python:2.7
-WORKDIR /crawler
-COPY requirements.txt /crawler/requirements.txt
-RUN pip install -v -r requirements.txt
-ADD . /crawler
+WORKDIR /config_and_metrics_crawler
+COPY requirements.txt /config_and_metrics_crawler/requirements.txt
+RUN pip install -r requirements.txt
+ADD . /config_and_metrics_crawler
 ENV DOCKER_VERSION 1.6.2
 ADD https://get.docker.com/builds/Linux/x86_64/docker-${DOCKER_VERSION}.tgz /docker.tgz
 RUN (cd /; tar xzvf /docker.tgz)

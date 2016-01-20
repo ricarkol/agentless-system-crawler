@@ -22,7 +22,7 @@ rm -f /tmp/$NAME*
 rm -rf /var/log/crawler_container_logs/f75ec4e7-eb9d-463a-a90f-f8226572fbcc
 docker rm -f $NAME 2> /dev/null > /dev/null
 
-python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu,interface --url file:///tmp/`uuid` \
 	--linkContainerLogFiles --frequency 1 --numprocesses 4 \
 	--url file:///tmp/$NAME --format graphite --environment alchemy &

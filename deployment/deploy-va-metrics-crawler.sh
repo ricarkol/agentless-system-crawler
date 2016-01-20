@@ -43,15 +43,11 @@ then
         #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo cp /etc/init/va-crawler.conf /etc/init/alchemy-crawler.conf
         #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service alchemy-crawler "start"
 
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service va-crawler "stop" || true
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service va-crawler-host "stop" || true
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service va-crawler-containers "stop" || true
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r va-crawler|| true
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r va-crawler-host || true
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r va-crawler-container || true
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg --purge va-crawler || true
+
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -rf /opt/cloudsight/va-crawler
-#        VACRAWLER=va-crawler
+
         echo "Starting va-crawler on host $host"
         config_file=crawler-config.sh
         echo "env SPACE_ID=$VA_CRAWLER_SPACE_ID" >$config_file
@@ -81,7 +77,11 @@ then
         $SSH ${SSH_USER}@$host HOST=$host "/usr/bin/sudo cat ${upstart_config_file_host} $cloudsight_scripts_dir/config/$config_file > /tmp/va-crawler.conf"
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv /tmp/va-crawler.conf ${upstart_config_file_host} || true
 
-        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo pip install --no-index --find-links="/opt/cloudsight/python_packages/" psutil bottle requests simplejson pydoubles netifaces kafka-python docker-py pykafka || true
+        cat ../collector/crawler/requirements.txt > /tmp/crawler_requirements.txt
+        # Keeping in in case we need to backtrack backtrack backtrack if we break dev
+        # $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo pip install --no-index --find-links="/opt/cloudsight/python_packages/" psutil bottle requests simplejson pydoubles netifaces kafka-python docker-py
+
+        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo pip install -r /tmp/crawler_requirements.txt  || true
 	    echo "Installed pip packages"
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service va-crawler-host "start" || true
         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service va-crawler-containers "start" || true

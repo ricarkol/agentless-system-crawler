@@ -31,7 +31,7 @@ DOCKER_ID=`docker inspect -f '{{ .Id }}' $NAME`
 mkdir -p /openstack/nova/metadata/
 sed s"/<UUID>/${CONTAINER_ID}/" /tmp/dummy-metadata-file > /openstack/nova/metadata/${DOCKER_ID}.json
 
-python2.7 ../crawler/crawler.py --crawlmode OUTCONTAINER \
+python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu,interface --url file:///tmp/`uuid` \
 	--linkContainerLogFiles --frequency 1 --numprocesses 4 \
 	--url file:///tmp/$FRAME --format graphite --environment alchemy 2>/dev/null &
