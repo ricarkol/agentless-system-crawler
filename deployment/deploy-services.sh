@@ -204,24 +204,25 @@ do
                 #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
             ;;
             $CONFIG_AND_METRICS_CRAWLER_CONT)
-            # The container count doesn't really apply here as we want it on every host, so I create my own.
-            # Count through hosts and stop the config and metrics crawler on every host.
-            CRAWLER_COUNT=1
-            for host in ${HOSTS[@]}
-                do
-                config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
-                # To deal with legacy issues
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler "stop"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-host "stop"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-host
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-containers "stop"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-containers
-                
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
-                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
-                CRAWLER_COUNT=$((CRAWLER_COUNT+1))
-                done
+                # The container count doesn't really apply here as we want it on every host, so I create my own.
+                # Count through hosts and stop the config and metrics crawler on every host.
+                for host in ${HOSTS[@]}
+                    do
+                        config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                        # To deal with legacy issues
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler "stop"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-host "stop"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-host
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-containers "stop"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-containers
+
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo docker stop "config_and_metrics_crawler_1"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo docker rm "config_and_metrics_crawler_1"
+
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
+                    done
             ;;
             *)
                 echo "Containers of type $container not yet supported"
