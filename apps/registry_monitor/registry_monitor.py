@@ -276,6 +276,7 @@ def get_next_image_v1(registry_scheme, registry_host, auth):
         ret = requests.request('GET', '%s/v1/search' % registry, auth=auth, timeout=http_request_timeout)
     except ConnectionError, e:
         logging.error('Connection error when connecting to search on v1 registry %s' % registry)
+        logging.error(e)
         raise ConnectionError
     
                                    
@@ -409,6 +410,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         ret = requests.request('GET', '%s/v2/' % registry, auth=auth, timeout=http_request_timeout)
     except ConnectionError, e:
         logging.error('Connection error when connecting to v2 registry %s' % registry)
+        logging.error(e)
         raise ConnectionError
     if ret.status_code == requests.codes.ok:
         logger.info('Using v2 registry')
@@ -419,6 +421,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                                    auth=auth, timeout=http_request_timeout)
             except ConnectionError, e:
                 logging.error('Connection error when connecting to imageListAll on v2 registry %s' % registry)
+                logging.error(e)
                 raise ConnectionError
 
             if ret.status_code == requests.codes.ok:
@@ -437,6 +440,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                            timeout=http_request_timeout)
     except ConnectionError, e:
         logging.error('Connection error when connecting to _ping on v1 registry %s' % registry)
+        logging.error(e)
         raise ConnectionError
 
     if ret.status_code == requests.codes.ok:
@@ -446,7 +450,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         raise RegistryError('Registry version checking failed at %s' % registry)
 
     if registry_version == -1:
-        raise RegistryError('Could not find supported registry API at %s' % registry)    
+        raise RegistryError('Could not find supported registry API at %s' % registry)
 
  
     iterate = True
