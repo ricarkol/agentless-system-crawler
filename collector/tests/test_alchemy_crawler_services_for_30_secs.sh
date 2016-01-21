@@ -39,5 +39,7 @@ sleep 30
 
 for i in `seq 1 $COUNT`
 do
+	# removing the links might help making the docker rm faster
+	rm -rf /var/log/crawler_container_logs/d5c00fbb-90b6-4ace-b69a-0e4e7bd28083/0000/kollerr-test-container-$i
 	docker rm -f test_crawl_cpu_many_containers_$i > /dev/null
 done
