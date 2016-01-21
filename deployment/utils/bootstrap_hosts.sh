@@ -28,16 +28,16 @@ for host in ${!DOCKER_DEVICES[@]}
    echo "------------------------------------------------"
    echo "Creating docker partition on host $host at device $DEVICE"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /etc/default/docker
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get -y install lxc-docker
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
-   $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
-
+   
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
 
    STAT=$?
+   if [ $STAT -eq 0 ] 
+   then
+       $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
+       $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
+   fi
 
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker start
    
