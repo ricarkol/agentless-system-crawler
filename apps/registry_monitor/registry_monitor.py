@@ -272,7 +272,12 @@ def get_next_image_v1(registry_scheme, registry_host, auth):
     registry = '%s://%s' % (registry_scheme, registry_host)
    
     logger.info('Getting list of images in %s' % registry_host) 
-    ret = requests.request('GET', '%s/v1/search' % registry, auth=auth, timeout=http_request_timeout)
+    try:
+        ret = requests.request('GET', '%s/v1/search' % registry, auth=auth, timeout=http_request_timeout)
+    except ConnectionError, e:
+        logging.error('Connection error when connecting to search on v1 registry %s' % registry)
+        raise ConnectionError
+    
                                    
     if ret.status_code != requests.codes.ok:
         raise RegistryError('Failed to list images in %s' % registry_host)
@@ -317,8 +322,8 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
         images_alchemy = ret.json()
         logger.info('Received %d image names from registry' % len(images_alchemy))
         for image_alchemy in images_alchemy:
-            image_name, tag = image_alchemy['name'].rsplit(':')
-            repository = '%s/%s' % (registry_host, image_name)
+            repository, tag = image_alchemy['name'].rsplit(':')
+            image_name = repository.split('/',1)[1]
             image_id = image_alchemy['id']
 
             image = {
@@ -351,7 +356,7 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
                 ret = requests.request('GET', '%s/v2/%s/manifests/%s' % (registry, image_name, tag), 
                                        auth=auth, timeout=http_request_timeout)
                 if ret.status_code != requests.codes.ok:
-                    raise RegistryError('Failed to get manifest of iamge %s/%s:%s' % \
+                    raise RegistryError('Failed to get manifest of image %s/%s:%s' % \
                                         (registry_host, image_name, tag))
 
                 digest = ret.headers.get('docker-content-digest')
@@ -380,7 +385,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
 
     kinterface = KafkaInterface(kafka_url=kafka_service)
 
-    logger.info('Created an kafka interface')
+    logger.info('Created a Kafka interface')
     
     if registry.find('://') == -1:
         registry = 'http://%s' % registry
@@ -400,22 +405,40 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             auth = requests.auth.HTTPBasicAuth(registry_user, registry_password)
        
     registry_version = -1
-    ret = requests.request('GET', '%s/v2/' % registry, auth=auth, timeout=http_request_timeout)
+    try:
+        ret = requests.request('GET', '%s/v2/' % registry, auth=auth, timeout=http_request_timeout)
+    except ConnectionError, e:
+        logging.error('Connection error when connecting to v2 registry %s' % registry)
+        raise ConnectionError
     if ret.status_code == requests.codes.ok:
         logger.info('Using v2 registry')
         registry_version = 2
         if alchemy_registry_api:
-            ret = requests.request('GET', '%s/v1/imageListAll' % alchemy_registry_api, 
+            try:
+                ret = requests.request('GET', '%s/v1/imageListAll' % alchemy_registry_api, 
                                    auth=auth, timeout=http_request_timeout)
+            except ConnectionError, e:
+                logging.error('Connection error when connecting to imageListAll on v2 registry %s' % registry)
+                raise ConnectionError
+
             if ret.status_code == requests.codes.ok:
-                logger.info('Using alchemy v2 registry endpoint %s' % alchemy_registry_api)
-                registry_v2_alchemy_api = True
+                    logger.info('Using alchemy v2 registry endpoint %s' % alchemy_registry_api)
+                    registry_v2_alchemy_api = True
+            else:
+                logger.error('Alchemy v2 registry endpoint %s fails with status code %d' % \
+                    (alchemy_registry_api, ret.status_code))
+            
 
     elif ret.status_code != 404:
         raise RegistryError('Registry version checking failed at %s' % registry)
 
-    ret = requests.request('GET', '%s/v1/_ping' % registry, auth=auth, 
+    try:
+        ret = requests.request('GET', '%s/v1/_ping' % registry, auth=auth, 
                            timeout=http_request_timeout)
+    except ConnectionError, e:
+        logging.error('Connection error when connecting to _ping on v1 registry %s' % registry)
+        raise ConnectionError
+
     if ret.status_code == requests.codes.ok:
         logger.info('Using v1 registry')
         registry_version = 1
@@ -423,7 +446,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         raise RegistryError('Registry version checking failed at %s' % registry)
 
     if registry_version == -1:
-        raise RegistryError('Could not find supported registry API at %s' % registry)
+        raise RegistryError('Could not find supported registry API at %s' % registry)    
 
  
     iterate = True
