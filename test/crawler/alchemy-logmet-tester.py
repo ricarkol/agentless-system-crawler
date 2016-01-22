@@ -84,12 +84,23 @@ if __name__ == "__main__":
     stage_url = "mtgraphite://metrics.stage1.opvis.bluemix.net:9095/Crawler:5KilGEQ9qExi"
     prod_url = "mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:oLYMLA7ogscT"
 
+    sangita_space = 'bf8a1339-993f-4c92-a67b-a36effe15818' # sangita stage space id
+    prod_space = '1fb90c5d-84e6-452f-a131-9128c565a64f' # prod alchemy-test
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', dest="url", type=str, default=prod_url, help='Logmet where to send the data to: defaults to mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:<XXX> where <XXX> is the Crawler supertenant password.')
+    parser.add_argument('--space', dest="space", type=str, default=prod_space, help='Logmet space ID to use')
     args  = parser.parse_args()
 
-    # these spaces are: alchemy-test, Sangita's stage, and Ricardo's stage
-    test_send_non_stop(args.url, ["1fb90c5d-84e6-452f-a131-9128c565a64f",
-                                  "bf8a1339-993f-4c92-a67b-a36effe15818",
-                                  "25aa4c07-4a76-43ba-af53-81af7d1733a9",
-                                  "2c1c93ec-dbf9-43ef-a2da-cb6759258275.eu-gb"])
+    if 'stage' in args.url:
+        spaces_list = [sangita_space, args.space]
+    else:
+        spaces_list = [args.space]
+
+    test_send_non_stop(args.url, spaces_list)
+
+#    # these spaces are: alchemy-test, Sangita's stage, and Ricardo's stage
+#    test_send_non_stop(args.url, ["1fb90c5d-84e6-452f-a131-9128c565a64f",
+#                                  "bf8a1339-993f-4c92-a67b-a36effe15818",
+#                                  "25aa4c07-4a76-43ba-af53-81af7d1733a9",
+#                                  "2c1c93ec-dbf9-43ef-a2da-cb6759258275.eu-gb"])
