@@ -151,8 +151,8 @@ def get_namespace(instance_identifier, type):
         metadata_json = json.loads(metadata)
         tagformat = metadata_json['meta']['tagformat']
         tagseparator = metadata_json['meta']['tagseparator']
-    except ValueError as e:
-        raise e
+    except Exception:
+        return None
 
     namespace = ''
     tag_list = tagformat.split()
