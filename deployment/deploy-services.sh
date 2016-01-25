@@ -29,18 +29,15 @@ elif [ $# -eq 5 ]
         CONTAINER_NAME=cloudsight-$5
     fi
 else
-   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
+   echo "Usage: $0 <ENV> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
    exit 1
 fi
 
-
 ENV=$1
-BOOTSTRAP=$2
-IMAGE_TAG=$3
-SHUTDOWN=$4
+IMAGE_TAG=$2
+SHUTDOWN=$3
 
 echo "Deploying to ENV ${ENV}"
-echo "BOOTSTRAP: ${BOOTSTRAP}"
 echo "IMAGE_TAG: $IMAGE_TAG"
 
 . ../config/hosts.${ENV}
@@ -48,13 +45,6 @@ echo "IMAGE_TAG: $IMAGE_TAG"
 
 SCP="scp -o StrictHostKeyChecking=no"
 SSH="ssh -o StrictHostKeyChecking=no"
-
-if [ "$BOOTSTRAP" = "true" ]
-    then
-    . utils/bootstrap_hosts.sh
-fi
-
-. ../config/container_hosts.${ENV}
 
 ES_HOSTS=""
 for count in `seq ${CONTAINER_COUNTS[$ES_CONT]}`
