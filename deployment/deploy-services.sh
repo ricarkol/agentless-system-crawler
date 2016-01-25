@@ -272,8 +272,7 @@ do
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
-                    echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
-                    echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
+                    echo "HOST_SUPERVISOR_LOG_DIR=$HOST_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONFIG_AND_METRICS_CRAWLER_SPACE_ID=$CONFIG_AND_METRICS_CRAWLER_SPACE_ID" >>$config_file
                     echo "CONFIG_AND_METRICS_CRAWLER_EMIT_URL=$CONFIG_AND_METRICS_CRAWLER_EMIT_URL" >>$config_file
                     echo "CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT=$CONFIG_AND_METRICS_CRAWLER_ENVIRONMENT" >>$config_file
@@ -281,6 +280,8 @@ do
                     echo "CONFIG_AND_METRICS_CRAWLER_FORMAT=$CONFIG_AND_METRICS_CRAWLER_FORMAT" >>$config_file
                     echo "CONFIG_AND_METRICS_CRAWLER_FREQ=$CONFIG_AND_METRICS_CRAWLER_FREQ"  >>$config_file
                     echo "CONFIG_AND_METRICS_CRAWLER_MODE=$CONFIG_AND_METRICS_CRAWLER_MODE" >>$config_file
+                    echo "HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=$HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR" >>$config_file
+                    echo "CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=$CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR" >>$config_file
                     echo "NUM_CORES=$NUM_CORES" >>$config_file
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
