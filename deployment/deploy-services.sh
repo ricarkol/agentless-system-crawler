@@ -6,27 +6,27 @@
 # (c) IBM Research 2015
 #
 
-if [ $# -eq 4 ]
+if [ $# -eq 3 ]
     then
     echo "Processing all containers"
     IGNORE_ES=false
     CONTAINER_NAME=
-elif [ $# -eq 5 ]
+elif [ $# -eq 4 ]
     then
-    if [ "$5" = "true" ]
+    if [ "$4" = "true" ]
        then
         echo "Processing all containers except ES"
         IGNORE_ES=true
         CONTAINER_NAME=
-    elif [ "$5" = "false" ]
+    elif [ "$4" = "false" ]
         then
         echo "Processing all containers"
         IGNORE_ES=false
         CONTAINER_NAME=
     else
-        echo "Processing container:" $5
+        echo "Processing container:" $4
         IGNORE_ES=false
-        CONTAINER_NAME=cloudsight-$5
+        CONTAINER_NAME=cloudsight-$4
     fi
 else
    echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
@@ -46,13 +46,9 @@ echo "IMAGE_TAG: $IMAGE_TAG"
 . ../config/hosts.${ENV}
 . ../config/docker-images
 
+
 SCP="scp -o StrictHostKeyChecking=no"
 SSH="ssh -o StrictHostKeyChecking=no"
-
-if [ "$BOOTSTRAP" = "true" ]
-    then
-    . utils/bootstrap_hosts.sh
-fi
 
 . ../config/container_hosts.${ENV}
 
