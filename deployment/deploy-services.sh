@@ -50,14 +50,6 @@ echo "IMAGE_TAG: $IMAGE_TAG"
 SCP="scp -o StrictHostKeyChecking=no"
 SSH="ssh -o StrictHostKeyChecking=no"
 
-<<<<<<< HEAD
-if [ "$BOOTSTRAP" = "true" ]
-    then
-    . utils/bootstrap_hosts.sh
-fi
-
-=======
->>>>>>> Adding . ../config/container_hosts. into deploy-service
 . ../config/container_hosts.${ENV}
 
 ES_HOSTS=""
