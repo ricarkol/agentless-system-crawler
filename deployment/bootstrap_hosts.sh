@@ -6,8 +6,19 @@
 # (c) IBM Research 2015
 #
 
+if [ $# -eq 1 ]
+   then
+   ENV=$1
+else
+   echo "Usage: $0 <ENV>"
+   exit 1
+fi
+
+. ../config/hosts.${ENV}
 . ../config/storage_devices.${ENV}
 
+SCP="scp -o StrictHostKeyChecking=no"
+SSH="ssh -o StrictHostKeyChecking=no"
 
 PARTITION_NUMBER=1
 for host in ${!DOCKER_DEVICES[@]}
