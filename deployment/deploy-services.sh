@@ -199,6 +199,16 @@ do
                 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -r /opt/cloudsight/collector 
                 #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
             ;;
+            $METRICS_SERVER_CONT)
+                # The container count doesn't really apply here as we want it on every host, so I create my own.
+                # Count through hosts and stop the config and metrics crawler on every host.
+                for host in ${HOSTS[@]}
+                    do
+                        config_file=${METRICS_SERVER_CONT}.sh
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "stop"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "delete"
+                    done
+            ;;
             $CONFIG_AND_METRICS_CRAWLER_CONT)
                 # The container count doesn't really apply here as we want it on every host, so I create my own.
                 # Count through hosts and stop the config and metrics crawler on every host.
@@ -295,6 +305,42 @@ do
                         exit 1
                     fi
                     echo "Config and Metrics Crawler Deployed"
+                done
+
+            ;;
+            $METRICS_SERVER_CONT)
+                for host in ${HOSTS[@]}
+                    do
+
+                    config_file=${METRICS_SERVER_CONT}.sh
+
+                    #create config file
+                    echo "#!/bin/bash" >$config_file
+                    echo "METRICS_SERVER_IMG=$METRICS_SERVER_IMG" >>$config_file
+                    echo "METRICS_SERVER_CONT=$METRICS_SERVER_CONT" >>$config_file
+                    echo "METRICS_SERVER_NODE_NAME=$host" >>$config_file
+                    echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                    echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
+                    echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
+                    echo "HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=$HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR" >>$config_file
+                    echo "CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=$CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR" >>$config_file
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                    $SCP startup/metrics_server.sh ${SSH_USER}@$host:metrics_server.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv metrics_server.sh $cloudsight_scripts_dir/metrics_server.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/metrics_server.sh
+                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "start"
+
+                    STAT=$?
+                    if [ $STAT -ne 0 ]
+                        then
+                        echo "Failed to start $container.$count in $host"
+                        exit 1
+                    fi
+                    echo "Metrics Server Deployed"
                 done
 
             ;;
