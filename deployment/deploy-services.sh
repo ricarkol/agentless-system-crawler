@@ -29,26 +29,30 @@ elif [ $# -eq 4 ]
         CONTAINER_NAME=cloudsight-$4
     fi
 else
-   echo "Usage: $0 <ENV> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
+   echo "Usage: $0 <ENV> <IMAGE_TAG> <DEPLOY_POLICY> [<IGNORE_ES> | <CONTAINER_NAME>]"
    exit 1
 fi
 
-
 ENV=$1
 IMAGE_TAG=$2
-SHUTDOWN=$3
+DEPLOY_POLICY=$3
+
+if  [ "$DEPLOY_POLICY" != "redeploy" ] && \
+    [ "$DEPLOY_POLICY" != "shutdown" ] && \
+    [ "$DEPLOY_POLICY" != "deploy" ] ; then
+    echo "DEPLOY_POLICY must equal 'redeploy', 'shutdown' or 'deploy'"
+    exit 1
+fi
 
 echo "Deploying to ENV ${ENV}"
 echo "IMAGE_TAG: $IMAGE_TAG"
 
 . ../config/hosts.${ENV}
 . ../config/docker-images
-
+. ../config/container_hosts.${ENV}
 
 SCP="scp -o StrictHostKeyChecking=no"
 SSH="ssh -o StrictHostKeyChecking=no"
-
-. ../config/container_hosts.${ENV}
 
 ES_HOSTS=""
 for count in `seq ${CONTAINER_COUNTS[$ES_CONT]}`
@@ -96,6 +100,25 @@ balanced_cluster_node(){
     echo "Target node is $target_node"
     return 0
 }
+
+for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
+    do
+        container=${CONTAINER_STARTUP_ORDER[i]}
+        if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
+            then
+            CONTAINER_KNOWN="true"
+        fi
+    done
+
+if [ -z "$CONTAINER_KNOWN" ]
+    then
+    echo "Containers of type $CONTAINER_NAME unknown"
+    exit 1
+fi
+
+if [ "$DEPLOY_POLICY" != "deploy" ]
+    then
+    echo "Shutting down all specified services."
 
 #shutting down services
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
@@ -236,17 +259,16 @@ do
     fi
 done
 
-if [ -z "$CONTAINER_KNOWN" ]
-    then
-    echo "Containers of type $CONTAINER_NAME unknown"
-    exit 1
-fi
-
-if [ "$SHUTDOWN" = "true" ]
+if [ "$DEPLOY_POLICY" = "shutdown" ]
     then
     echo "All services have been shutdown. End of job."
     exit 0
 fi
+fi
+
+if [ "$DEPLOY_POLICY" != "shutdown" ]
+    then
+    echo "Starting up all specified services."
 
 #starting up services
 for container in ${CONTAINER_STARTUP_ORDER[@]}
@@ -1077,6 +1099,7 @@ do
         done
     fi
 done
+fi
 
 if [ "$?" -eq "0" ]
     then
