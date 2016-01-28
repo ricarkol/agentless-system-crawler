@@ -20,6 +20,7 @@ VASTAT_REPORTER_IMG="cloudsight/vastat-reporter"
 TIMEMACHINE_IMG="cloudsight/timemachine"
 CONSUL_IMG="alchemy/containers-consul"
 CONFIG_AND_METRICS_CRAWLER_IMG="cloudsight/config-and-metrics-crawler"
+METRICS_SERVER_IMG="cloudsight/metrics-server"
 
 
 ES_CONT="cloudsight-elasticsearch"
@@ -42,6 +43,7 @@ VASTAT_REPORTER_CONT="cloudsight-vastat-reporter"
 TIMEMACHINE_CONT="cloudsight-timemachine"
 CONSUL_CONT="cloudsight-consul"
 CONFIG_AND_METRICS_CRAWLER_CONT="cloudsight-config-and-metrics-crawler"
+METRICS_SERVER_CONT="cloudsight-metrics-server"
 
 CONTAINERS=($ES_CONT $KAFKA_CONT \
         $INDEXER_CONT $LOG_INDEXER_CONT \
@@ -56,7 +58,8 @@ CONTAINERS=($ES_CONT $KAFKA_CONT \
         $PASSWORD_ANNOTATOR_CONT\
         $VASTAT_REPORTER_CONT\
         $TIMEMACHINE_CONT\
-        $CONFIG_AND_METRICS_CRAWLER_CONT)
+        $CONFIG_AND_METRICS_CRAWLER_CONT\
+        $METRICS_SERVER_CONT)
 
 DEPLOYMENT_IMAGES=($ES_IMG $KAFKA_IMG $CONSUL_IMG \
         $INDEXER_IMG $GENERIC_INDEXER_IMG \
@@ -70,4 +73,5 @@ DEPLOYMENT_IMAGES=($ES_IMG $KAFKA_IMG $CONSUL_IMG \
         $PASSWORD_ANNOTATOR_IMG\
         $VASTAT_REPORTER_IMG\
         $TIMEMACHINE_IMG\
-        $CONFIG_AND_METRICS_CRAWLER_IMG)
+        $CONFIG_AND_METRICS_CRAWLER_IMG\
+        $METRICS_SERVER_IMG)
