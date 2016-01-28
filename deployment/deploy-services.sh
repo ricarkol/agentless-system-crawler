@@ -29,15 +29,14 @@ elif [ $# -eq 4 ]
         CONTAINER_NAME=cloudsight-$4
     fi
 else
-   echo "Usage: $0 <ENV> <BOOTSTRAP> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
+   echo "Usage: $0 <ENV> <IMAGE_TAG> <SHUTDOWN> [<IGNORE_ES> | <CONTAINER_NAME>]"
    exit 1
 fi
 
 
 ENV=$1
-BOOTSTRAP=$2
-IMAGE_TAG=$3
-SHUTDOWN=$4
+IMAGE_TAG=$2
+SHUTDOWN=$3
 
 echo "Deploying to ENV ${ENV}"
 echo "BOOTSTRAP: ${BOOTSTRAP}"
