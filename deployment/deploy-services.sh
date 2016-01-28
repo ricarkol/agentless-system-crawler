@@ -39,7 +39,6 @@ IMAGE_TAG=$2
 SHUTDOWN=$3
 
 echo "Deploying to ENV ${ENV}"
-echo "BOOTSTRAP: ${BOOTSTRAP}"
 echo "IMAGE_TAG: $IMAGE_TAG"
 
 . ../config/hosts.${ENV}
