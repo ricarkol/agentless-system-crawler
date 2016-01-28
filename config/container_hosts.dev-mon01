@@ -27,6 +27,7 @@ declare -A CONTAINER_COUNTS=(
         [$REGISTRY_MONITOR_CONT]=1
         [$CONSUL_CONT]=3
         [$CONFIG_AND_METRICS_CRAWLER_CONT]=1
+        [$METRICS_SERVER_CONT]=1
         )
 
 declare -A CONTAINER_HOSTS=(
