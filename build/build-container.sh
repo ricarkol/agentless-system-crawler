@@ -45,7 +45,7 @@ declare -A IMG_TO_DIR=(
 )
 
 # Get the kelk-base image if required - only useful for Jenkins builds
-for img in ${KELK_BASE_DEPENDANT_IMAGES[@]}
+for img in ${KELK_BASE_DEPENDENT_IMAGES[@]}
 do
   if [[ "$img" =~ "$CONTAINER_NAME" ]]; then
     echo docker pull "${REGISTRY}${BASE_IMG}:latest"
