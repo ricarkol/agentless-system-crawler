@@ -66,7 +66,7 @@ do
 
      if [ "$i" = "$BASE_IMG" ] ; then
          # This is only useful when building locally
-         echo "============>" docker tag "${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
+         echo "docker tag ${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
          docker tag "${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
      fi
   fi
