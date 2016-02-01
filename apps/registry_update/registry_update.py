@@ -92,12 +92,17 @@ def post_to_kafka(kafka_service, kafka_topic, message):
     msg = json.dumps(message)
     message_posted = False
 
+    try:
+        kafka_python_client = kafka_python.KafkaClient(kafka_service)
+        kafka_python_client.ensure_topic_exists(kafka_topic)
+        kafka_python_client.close()
+    except TimeoutError, e:
+        app.logger.warn('Kafka ensure_topic_exists timed out: %s (error=%s)' % (kafka_service, str(e)))
+    except Exception, e:
+        app.logger.warn('Kafka ensure_topic_exists failed: %s (error=%s)' % (kafka_service, str(e)))
+
     for i in range(max_kafka_retries):
         try:
-            kafka_python_client = kafka_python.KafkaClient(kafka_service)
-            kafka_python_client.ensure_topic_exists(kafka_topic)
-            kafka_python_client.close()
-
             kafka = pykafka.KafkaClient(hosts=kafka_service)
             publish_topic_object = kafka.topics[kafka_topic]
             producer = publish_topic_object.get_producer()
