@@ -50,4 +50,5 @@ if [[ $matched =~ false ]]; then
    else
        echo -n "Failed to push $CONTAINER_NAME as it is not one of: "
        echo "${DEPLOYMENT_IMAGES[@]}"  | sed 's/cloudsight\///g'
+   fi
 fi
