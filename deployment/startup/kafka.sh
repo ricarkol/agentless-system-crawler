@@ -48,8 +48,12 @@ case $1 in
 
         docker run -d --restart=always -p $KAFKA_PORT:$KAFKA_PORT  \
                    -p $KAFKA_ZOO_KEEPER_PORT:$KAFKA_ZOO_KEEPER_PORT \
+                   -p $KAFKA_JMX_PORT:$KAFKA_JMX_PORT \
+                   -p $KAFKA_ZOO_KEEPER_JMX_PORT:$KAFKA_ZOO_KEEPER_JMX_PORT \
                    -e HOST_IP=$KAFKA_HOST \
                    -e KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE \
+                   -e KAFKA_JMX_PORT=$KAFKA_JMX_PORT \
+                   -e KAFKA_ZOO_KEEPER_JMX_PORT=$KAFKA_ZOO_KEEPER_JMX_PORT \
                    -v $KAFKA_DATA_VOLUME:/tmp/kafka-logs \
                    -v $HOST_SUPERVISOR_LOG_DIR:$CONTAINER_SUPERVISOR_LOG_DIR  \
 	           -v $HOST_CLOUDSIGHT_LOG_DIR:$CONTAINER_CLOUDSIGHT_LOG_DIR \
