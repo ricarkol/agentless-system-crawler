@@ -44,9 +44,18 @@ declare -A IMG_TO_DIR=(
   [$METRICS_SERVER_IMG]="../metrics_server"
 )
 
+# Get the kelk-base image if required - only useful for Jenkins builds
+for img in ${KELK_BASE_DEPENDENT_IMAGES[@]}
+do
+  if [[ "$img" =~ "$CONTAINER_NAME" ]]; then
+    echo docker pull "${REGISTRY}${BASE_IMG}:latest"
+    docker pull "${REGISTRY}${BASE_IMG}:latest"
+    echo docker tag "${REGISTRY}${BASE_IMG}:latest" ${BASE_IMG}
+    docker tag "${REGISTRY}${BASE_IMG}:latest" ${BASE_IMG}
+  fi
+done
 
 matched=false
-# Builds all docker images
 for i in ${!IMG_TO_DIR[@]}
 do
   if [[ "$i" =~ "$CONTAINER_NAME" ]]; then
@@ -56,6 +65,8 @@ do
      (cd ${IMG_TO_DIR[$i]} && docker build -t "${REGISTRY}$i:$TAG" .)
 
      if [ "$i" = "$BASE_IMG" ] ; then
+         # This is only useful when building locally
+         echo "docker tag ${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
          docker tag "${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
      fi
   fi

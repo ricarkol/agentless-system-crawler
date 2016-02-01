@@ -27,26 +27,27 @@ for img in ${DEPLOYMENT_IMAGES[@]}
 do
   if [[ "$img" =~ "$CONTAINER_NAME" ]]; then
      matched=true
-     if [ "$img" != "$BASE_IMG" ]
+     if [ -n "$BUILD_REGISTRY" ]
          then
-         if [ -n "$BUILD_REGISTRY" ]
-             then
-             echo "Pulling image ${BUILD_REGISTRY}/$img/$TAG"
-             docker pull "${BUILD_REGISTRY}/$img:$TAG"
-             docker tag -f "${BUILD_REGISTRY}/$img:$TAG" "${REGISTRY}/$img:$TAG"
-         fi
-         echo "Pushing docker image: ${REGISTRY}/$img:$TAG"
-         docker push "${REGISTRY}/${img}:${TAG}"
-         if [ -n "$LATEST" ]
-          then
-             docker tag -f "${REGISTRY}/$img:$TAG" "${REGISTRY}/$img:latest"
-             docker push "${REGISTRY}/${img}:latest"
-        fi
+         echo "Pulling image ${BUILD_REGISTRY}/$img/$TAG"
+         docker pull "${BUILD_REGISTRY}/$img:$TAG"
+         docker tag -f "${BUILD_REGISTRY}/$img:$TAG" "${REGISTRY}/$img:$TAG"
      fi
+     echo "Pushing docker image: ${REGISTRY}/$img:$TAG"
+     docker push "${REGISTRY}/${img}:${TAG}"
+     if [ -n "$LATEST" ]
+      then
+         docker tag -f "${REGISTRY}/$img:$TAG" "${REGISTRY}/$img:latest"
+         docker push "${REGISTRY}/${img}:latest"
+    fi
   fi
 done
 
 if [[ $matched =~ false ]]; then
-   echo -n "Failed to push $CONTAINER_NAME as it is not one of: "
-   echo "${DEPLOYMENT_IMAGES[@]}"  | sed 's/cloudsight\///g'
+    if [[ "$BASE_IMG" =~ "$CONTAINER_NAME" ]]; then
+       echo "Pushing base image: ${REGISTRY}/${BASE_IMG}:latest"
+       docker push "${REGISTRY}/${BASE_IMG}:latest"
+   else
+       echo -n "Failed to push $CONTAINER_NAME as it is not one of: "
+       echo "${DEPLOYMENT_IMAGES[@]}"  | sed 's/cloudsight\///g'
 fi
