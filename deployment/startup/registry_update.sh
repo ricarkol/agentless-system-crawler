@@ -49,7 +49,7 @@ case $1 in
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG" \
                    --listen-port "$REGISTRY_UPDATE_PORT" --kafka-service "$KAFKA_SERVICE" \
-                   --instance-id $INSTANCE_ID
+                   --instance-id "$INSTANCE_ID"
         set +x
         ;;
 
