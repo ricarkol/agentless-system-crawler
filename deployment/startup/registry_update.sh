@@ -48,7 +48,8 @@ case $1 in
                    -d --restart=always -p "$REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG" \
-                   --listen-port "$REGISTRY_UPDATE_PORT" --kafka-service "$KAFKA_SERVICE"
+                   --listen-port "$REGISTRY_UPDATE_PORT" --kafka-service "$KAFKA_SERVICE" \
+                   --instance-id $INSTANCE_ID
         set +x
         ;;
 
