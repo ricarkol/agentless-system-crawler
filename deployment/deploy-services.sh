@@ -69,6 +69,11 @@ done
 cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
 
+component_rc=$?
+    if [ $component_rc != "0" ] ; then
+        exit $component_rc
+    fi
+
 #assign write nodes top to bottom. Reads are assigned bottom up
 balanced_cluster_node(){
     if [ $# -ne 2 ]
@@ -141,12 +146,29 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                         echo "Ignoring ES"
                     else
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "stop" $count
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "delete" $count
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi 
                     fi
                 ;;
                 $KAFKA_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "stop" $count
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "delete" $count
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi 
                 ;;
                 $INDEXER_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_indexer.sh "stop" $count
@@ -326,7 +348,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         if [ $STAT -ne 0 ]
                             then
                             echo "Failed to start $container.$count in $host"
-                            exit 1
                         fi
                         echo "Config and Metrics Crawler Deployed"
                     done
@@ -362,7 +383,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         if [ $STAT -ne 0 ]
                             then
                             echo "Failed to start $container.$count in $host"
-                            exit 1
                         fi
                         echo "Metrics Server Deployed"
                     done
@@ -398,16 +418,70 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_DATA_VOLUME"
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_DATA_VOLUME"
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$ES_LOGS_VOLUME"
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_LOGS_VOLUME"
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SCP startup/elasticsearch.sh ${SSH_USER}@$host:elasticsearch.sh
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv elasticsearch.sh $cloudsight_scripts_dir/elasticsearch.sh
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/elasticsearch.sh
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SCP $config_file ${SSH_USER}@$host:$config_file
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
+
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
+                            ssh_rc=$?
+                                if [ $ssh_rc != "0" ] ; then
+                                    exit $ssh_rc
+                                fi
 
                         STAT=$?
                         if [ $STAT -ne 0 ]
@@ -443,14 +517,59 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$KAFKA_DATA_VOLUME"
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$KAFKA_DATA_VOLUME"
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SCP startup/kafka.sh ${SSH_USER}@$host:kafka.sh
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv kafka.sh $cloudsight_scripts_dir/kafka.sh
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/kafka.sh
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SCP $config_file ${SSH_USER}@$host:$config_file
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "start" $count
+                        ssh_rc=$?
+                            if [ $ssh_rc != "0" ] ; then
+                                exit $ssh_rc
+                            fi
+                            
 
                     STAT=$?
                     if [ $STAT -ne 0 ]
@@ -490,7 +609,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
 
@@ -531,7 +649,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $VULNERABILITY_INDEXER_CONT)
@@ -572,7 +689,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $COMPLIANCE_INDEXER_CONT)
@@ -613,7 +729,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $NOTIFICATION_INDEXER_CONT)
@@ -653,7 +768,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $VULNERABILITY_ANNOTATOR_CONT)
@@ -694,7 +808,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $SEARCH_CONT)
@@ -732,7 +845,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $TIMEMACHINE_CONT)
@@ -777,7 +889,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $COMPLIANCE_ANNOTATOR_CONT)
@@ -819,7 +930,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $CONFIG_PARSER_CONT)
@@ -855,7 +965,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $USNCRAWLER_CONT)
@@ -899,7 +1008,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
 
                     echo "Pausing for USN index initialization"
@@ -942,7 +1050,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $PASSWORD_ANNOTATOR_CONT)
@@ -974,7 +1081,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $REGISTRY_UPDATE_CONT)
@@ -1013,7 +1119,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $REGISTRY_MONITOR_CONT)
@@ -1057,7 +1162,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 $REGCRAWLER)
@@ -1135,7 +1239,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     if [ $STAT -ne 0 ]
                         then
                         echo "Failed to start $container.$count in $host"
-                        exit 1
                     fi
                 ;;
                 *)
