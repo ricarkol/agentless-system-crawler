@@ -65,10 +65,24 @@ do
      echo "  - directory: ${IMG_TO_DIR[$i]}"
      (cd ${IMG_TO_DIR[$i]} && docker build -t "${REGISTRY}$i:$TAG" .)
 
+        build_STAT=$?
+          if [ $build_STAT -ne "0" ]
+              then
+              echo "Build Failed"
+              exit $build_STAT
+          fi
+
      if [ "$i" = "$BASE_IMG" ] ; then
          # This is only useful when building locally
          echo "docker tag ${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
          docker tag "${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
+
+            tag_STAT=$?
+              if [ $tag_STAT -ne "0" ]
+                  then
+                  echo "Build Failed"
+                  exit $tag_STAT
+              fi
      fi
   fi
 done
@@ -76,4 +90,5 @@ done
 if [[ $matched =~ false ]]; then
    echo -n "Failed to build $CONTAINER_NAME as it is not one of: "
    echo "${!IMG_TO_DIR[@]}"  | sed 's/cloudsight\///g'
+   exit 1
 fi
