@@ -507,8 +507,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$KAFKA_DATA_VOLUME"
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$KAFKA_DATA_VOLUME"   
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                            
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$KAFKA_DATA_VOLUME"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                      
                     $SCP startup/kafka.sh ${SSH_USER}@$host:kafka.sh
                         ssh_rc=$?
                             if [ $ssh_rc != "0" ] ; then
@@ -570,7 +570,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config           
                     $SCP startup/consul.sh ${SSH_USER}@$host:consul.sh
                         STAT=$?
                             exit_code=exit_code+STAT
@@ -635,7 +635,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=exit_code+STAT
 
-                    $BANANA ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_indexer.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_indexer.sh
                         STAT=$?
                             exit_code=exit_code+STAT
 
@@ -848,7 +848,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
-                    
+
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/vulnerability_annotator.sh ${SSH_USER}@$host:vulnerability_annotator.sh
                         STAT=$?
@@ -1483,7 +1483,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=exit_code+STAT
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file#]
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
                             exit_code=exit_code+STAT
 
