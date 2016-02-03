@@ -88,7 +88,7 @@ done
 
 # There should be ~10 logs saying that container 4 does not have alchemy metadata
 # Container b746298e63e0 does not have alchemy metadata.
-NO_METADATA_LOGS=`grep "Container ${DOCKER_SHORT_ID[4]} does not have a valid alchemy metadata json file." *.log | wc -l`
+NO_METADATA_LOGS=`grep "Container ${DOCKER_SHORT_ID[4]} does not have alchemy metadata" *.log | wc -l`
 
 # In those 10 seconds, the containers had 2 logs
 COUNT=3
