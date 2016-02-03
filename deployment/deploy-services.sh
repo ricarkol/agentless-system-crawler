@@ -72,7 +72,7 @@ cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
 
 Component_STAT=$?
-    if [ $Component_STAT -ne "0" ]
+    if [ $Component_STAT -ne 0 ]
         then
         echo "Failed to start $container.$count in $host"
         exit $Component_STAT
@@ -89,7 +89,7 @@ balanced_cluster_node(){
     client_num=$2
 
     echo "Finding balanced node for client # $client_num on cluster of $num_nodes nodes"
-    if [ "$num_nodes" -eq "0" ] 
+    if [ $num_nodes -eq 0 ] 
         then
         target_node=1
     else
@@ -100,7 +100,7 @@ balanced_cluster_node(){
 
         target_node=$(((($num_nodes - $client_num) % $num_nodes) + 1))
 
-        if [ "$target_node" -eq "0" ] 
+        if [ $target_node -eq 0 ] 
             then
             target_node=$num_nodes
         fi
@@ -442,7 +442,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                         $SCP startup/elasticsearch.sh ${SSH_USER}@$host:elasticsearch.sh
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -450,7 +450,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv elasticsearch.sh $cloudsight_scripts_dir/elasticsearch.sh
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -458,7 +458,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/elasticsearch.sh
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -466,7 +466,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                         $SCP $config_file ${SSH_USER}@$host:$config_file
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -474,7 +474,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -482,7 +482,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
                             STAT=$?
-                                if [ $STAT -ne "0" ]
+                                if [ $STAT -ne 0 ]
                                     then
                                     echo "Failed to start $container.$count in $host"
                                     exit $STAT
@@ -519,7 +519,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                      
                     $SCP startup/kafka.sh ${SSH_USER}@$host:kafka.sh
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -527,7 +527,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv kafka.sh $cloudsight_scripts_dir/kafka.sh
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -535,7 +535,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/kafka.sh
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -543,7 +543,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -551,7 +551,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -559,7 +559,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "start" $count
                         STAT=$?
-                            if [ $STAT -ne "0" ]
+                            if [ $STAT -ne 0 ]
                                 then
                                 echo "Failed to start $container.$count in $host"
                                 exit $STAT
@@ -1522,7 +1522,7 @@ fi
 echo ""
 echo "================================================"
 
-if [ $exit_code -eq "0" ]
+if [ $exit_code -eq 0 ]
     then
     echo "Vulnerability Advisor service deployed - PASS!"
     echo "================================================"
