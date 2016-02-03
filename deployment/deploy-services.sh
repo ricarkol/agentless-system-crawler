@@ -251,6 +251,10 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
                         done
                 ;;
+                $IMAGE_RESCANNER_CONT)
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "stop" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "delete" $count
+                ;;
                 *)
                     echo "Containers of type $container not yet supported"
                 ;;
@@ -1086,6 +1090,46 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service regcrawler start
+
+                    STAT=$?
+                    if [ $STAT -ne 0 ]
+                        then
+                        echo "Failed to start $container.$count in $host"
+                        exit 1
+                    fi
+                ;;
+                 $IMAGE_RESCANNER_CONT)
+                    #balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
+                    target_node=3
+                    ES_ENDPOINT=$(eval "echo \$ES$target_node")
+                    echo "Connecting to ES $ES_ENDPOINT"
+
+                    #create config file
+                    config_file=${IMAGE_RESCANNER_CONT}.${count}.sh
+
+                    echo "#!/bin/bash" >$config_file
+                    echo "IMAGE_RESCANNER_IMG=$IMAGE_RESCANNER_IMG" >>$config_file
+                    echo "IMAGE_RESCANNER_CONT=$IMAGE_RESCANNER_CONT" >>$config_file
+                    echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
+                    echo "ES_PORT=$ES_PORT" >>$config_file
+                    echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                    echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
+                    echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
+                    echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                    echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
+                    echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
+                    echo "REGCRAWL1=$REGCRAWL1" >>$config_file
+                    echo "REGCRAWL2=$REGCRAWL2" >>$config_file
+                    echo "REGCRAWL3=$REGCRAWL3" >>$config_file
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                    $SCP ../kelk-deployment/latest/components/image_rescanner.sh ${SSH_USER}@$host:image_rescanner.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv image_rescanner.sh $cloudsight_scripts_dir/image_rescanner.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/image_rescanner.sh
+                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "start" $count
 
                     STAT=$?
                     if [ $STAT -ne 0 ]

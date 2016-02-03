@@ -37,6 +37,7 @@ declare -A IMG_TO_DIR=(
   [$USN_CRAWLER_IMG]="../apps/usncrawler"
   [$REGISTRY_UPDATE_IMG]="../apps/registry_update"
   [$REGISTRY_MONITOR_IMG]="../apps/registry_monitor"
+  [$IMAGE_RESCANNER_IMG]="../apps/image_rescanner"
 )
 
 docker pull ubuntu:trusty 
