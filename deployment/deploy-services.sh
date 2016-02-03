@@ -71,9 +71,11 @@ done
 cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
 
-component_rc=$?
-    if [ $component_rc != "0" ] ; then
-        exit $component_rc
+Component_STAT=$?
+    if [ $Component_STAT -ne "0" ]
+        then
+        echo "Failed to start $container.$count in $host"
+        exit $Component_STAT
     fi
 
 #assign write nodes top to bottom. Reads are assigned bottom up
@@ -439,45 +441,51 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$ES_LOGS_VOLUME"
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                         $SCP startup/elasticsearch.sh ${SSH_USER}@$host:elasticsearch.sh
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv elasticsearch.sh $cloudsight_scripts_dir/elasticsearch.sh
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/elasticsearch.sh
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         $SCP $config_file ${SSH_USER}@$host:$config_file
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
-                            ssh_rc=$?
-                                if [ $ssh_rc != "0" ] ; then
+                            STAT=$?
+                                if [ $STAT -ne "0" ]
+                                    then
                                     echo "Failed to start $container.$count in $host"
-                                    exit $ssh_rc
+                                    exit $STAT
                                 fi
 
                         echo "Pausing for elasticsearch startup..."
@@ -510,46 +518,52 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$KAFKA_DATA_VOLUME"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                      
                     $SCP startup/kafka.sh ${SSH_USER}@$host:kafka.sh
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
+                                exit $STAT
                             fi
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv kafka.sh $cloudsight_scripts_dir/kafka.sh
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
+                                exit $STAT
                             fi
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/kafka.sh
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
+                                exit $STAT
                             fi
                             
                     $SCP $config_file ${SSH_USER}@$host:$config_file
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
+                                exit $STAT
                             fi
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
+                                exit $STAT
                             fi
                             
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "start" $count
-                        ssh_rc=$?
-                            if [ $ssh_rc != "0" ] ; then
+                        STAT=$?
+                            if [ $STAT -ne "0" ]
+                                then
                                 echo "Failed to start $container.$count in $host"
-                                exit $ssh_rc
-                            fi                            
+                                exit $STAT
+                            fi                           
 
                     echo "Pausing for kafka startup..."
                     sleep 30
@@ -1508,7 +1522,7 @@ fi
 echo ""
 echo "================================================"
 
-if [ "$exit_code" -eq "0" ]
+if [ $exit_code -eq "0" ]
     then
     echo "Vulnerability Advisor service deployed - PASS!"
     echo "================================================"
