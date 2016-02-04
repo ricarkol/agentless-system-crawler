@@ -66,7 +66,7 @@ do
      (cd ${IMG_TO_DIR[$i]} && docker build -t "${REGISTRY}$i:$TAG" .)
 
         build_STAT=$?
-          if [ $build_STAT -ne "0" ]
+          if [ $build_STAT -ne 0 ]
               then
               echo "Build Failed"
               exit $build_STAT
@@ -78,7 +78,7 @@ do
          docker tag "${REGISTRY}${BASE_IMG}:$TAG" ${BASE_IMG}
 
             tag_STAT=$?
-              if [ $tag_STAT -ne "0" ]
+              if [ $tag_STAT -ne 0 ]
                   then
                   echo "Build Failed"
                   exit $tag_STAT
