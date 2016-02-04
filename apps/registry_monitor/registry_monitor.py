@@ -223,7 +223,7 @@ def registry_login(registry, user, password, email, ice_api, bluemix_api, bluemi
     
     return (registry_user, registry_password)
 
-def query_image_scanned(image_id):
+def query_image_scanned(elasticsearch_ip_port, image_id):
     '''Query ElasticSearch to see if the image has previously been scanned'''
 
     # Query config-* indices with the container_image = image id 
@@ -255,6 +255,8 @@ def query_image_scanned(image_id):
             # Check for the request uuid in the vulnerabilityscan index
             if "uuid" in results["hits"]["hits"][0]["_source"]:
                 request_uuid = results["hits"]["hits"][0]["_source"]["uuid"]
+            else:
+                return False
     else:
         response.raise_for_status()
 
@@ -446,7 +448,7 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
 
 def monitor_registry_images(registry, kafka_service, single_run, notification_topic, registry_topic, 
                             user, password, email, ice_api, insecure_registry, bluemix_api, 
-                            bluemix_org, bluemix_space, instance_id, alchemy_registry_api):
+                            bluemix_org, bluemix_space, instance_id, alchemy_registry_api, elasticsearch_ip_port):
     global kinterface, registry_v2_alchemy_api
     
     logger.info('Monitoring registry at: %s' % registry)
@@ -522,7 +524,8 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
  
     iterate = True
     while iterate:
-        new_images = []
+        new_images = 0
+        csv_additions = []
 
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
@@ -539,7 +542,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                 namespace = '%s:%s' % (repository, tag)
                 if tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
                     try:
-                        image_scanned = query_image_scanned(image_id)
+                        image_scanned = query_image_scanned(elasticsearch_ip_port, image_id)
 
                         if image_scanned:
                             # Image name and tag found in ElasticSearch
@@ -549,6 +552,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
 
                             known_images[image_name]['tags'].append(tag)
                             known_images[image_name]['ids'].append(image_id)
+                            csv_additions.append((image_name, tag, image_id))
                             continue
                     except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                         logger.error('Error connecting to ElasticSearch to query image %s' % namespace)
@@ -589,7 +593,8 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                     if tag not in known_images[image_name]['tags']:
                         known_images[image_name]['tags'].append(tag)
                             
-                    new_images.append((image_name, tag, image_id))
+                    csv_additions.append((image_name, tag, image_id))
+                    new_images += 1
                 
                 else:
                     logger.info('Image is not new: %s/%s:%s (%s)' % \
@@ -611,9 +616,9 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         except Exception, e:
             logger.exception(e)
             
-        logger.info('Discovered %d new images' % len(new_images))
+        logger.info('Discovered %d new images' % new_images)
         try:
-            save_known_images(new_images)
+            save_known_images(csv_additions)
         except (IOError, OSError), e:
             logger.error('Failed to update cache with new images: %s' % str(e))
         
@@ -709,5 +714,5 @@ if __name__ == '__main__':
     monitor_registry_images(registry, kafka_service, single_run, notification_topic, 
                             registry_topic, user, password, email, ice_api, 
                             insecure_registry, bluemix_api, bluemix_org, bluemix_space,
-                            instance_id, alchemy_registry_api)
+                            instance_id, alchemy_registry_api, elasticsearch_ip_port)
     
