@@ -21,11 +21,8 @@ TIMEMACHINE_IMG="cloudsight/timemachine"
 CONSUL_IMG="alchemy/containers-consul"
 CONFIG_AND_METRICS_CRAWLER_IMG="cloudsight/config-and-metrics-crawler"
 METRICS_SERVER_IMG="cloudsight/metrics-server"
-<<<<<<< 017bf528e76e37adbd8c7dfa4b86f9af641fe926
 IMAGE_RESCANNER_IMG="cloudsight/image-rescanner"
-=======
 MT_LOGSTASH_FORWARDER_IMG="cloudsight/mt-logstash-forwarder"
->>>>>>> Fix #11 deploy logstash from logstash forwarder
 
 
 ES_CONT="cloudsight-elasticsearch"
