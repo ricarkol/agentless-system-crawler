@@ -326,27 +326,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                         $SCP startup/config_and_metrics_crawler.sh ${SSH_USER}@$host:config_and_metrics_crawler.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv config_and_metrics_crawler.sh $cloudsight_scripts_dir/config_and_metrics_crawler.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_and_metrics_crawler.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SCP $config_file ${SSH_USER}@$host:$config_file
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "start"
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         if [ $STAT -ne 0 ]
                             then
@@ -377,27 +377,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                         $SCP startup/metrics_server.sh ${SSH_USER}@$host:metrics_server.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv metrics_server.sh $cloudsight_scripts_dir/metrics_server.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/metrics_server.sh
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SCP $config_file ${SSH_USER}@$host:$config_file
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "start"
                             STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                         if [ $STAT -ne 0 ]
                             then
@@ -587,27 +587,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config           
                     $SCP startup/consul.sh ${SSH_USER}@$host:consul.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv consul.sh $cloudsight_scripts_dir/consul.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/consul.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/consul.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -643,27 +643,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/config_indexer.sh ${SSH_USER}@$host:config_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv config_indexer.sh $cloudsight_scripts_dir/config_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_indexer.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -699,27 +699,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/vulnerability_indexer.sh ${SSH_USER}@$host:vulnerability_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv vulnerability_indexer.sh $cloudsight_scripts_dir/vulnerability_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/vulnerability_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/vulnerability_indexer.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -755,27 +755,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/compliance_indexer.sh ${SSH_USER}@$host:compliance_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv compliance_indexer.sh $cloudsight_scripts_dir/compliance_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/compliance_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -810,27 +810,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/notification_indexer.sh ${SSH_USER}@$host:notification_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv notification_indexer.sh $cloudsight_scripts_dir/notification_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/notification_indexer.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/notification_indexer.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -866,27 +866,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/vulnerability_annotator.sh ${SSH_USER}@$host:vulnerability_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv vulnerability_annotator.sh $cloudsight_scripts_dir/vulnerability_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/vulnerability_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/vulnerability_annotator.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -919,27 +919,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/searchservice.sh ${SSH_USER}@$host:searchservice.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv searchservice.sh $cloudsight_scripts_dir/searchservice.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/searchservice.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/searchservice.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -979,27 +979,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/timemachine.sh ${SSH_USER}@$host:timemachine.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv timemachine.sh $cloudsight_scripts_dir/timemachine.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/timemachine.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/timemachine.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1036,27 +1036,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/compliance_annotator.sh ${SSH_USER}@$host:compliance_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv compliance_annotator.sh $cloudsight_scripts_dir/compliance_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/compliance_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_annotator.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1087,27 +1087,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/config_parser.sh ${SSH_USER}@$host:config_parser.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv config_parser.sh $cloudsight_scripts_dir/config_parser.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/config_parser.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_parser.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1142,39 +1142,39 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SCP ../apps/usncrawler/sec_data/data.tar ${SSH_USER}@$host:
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv "usnrepo.tar" ${USN_CRAWLER_DATA_DIR}
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv "data.tar" ${USN_CRAWLER_DATA_DIR}
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host "cd ${USN_CRAWLER_DATA_DIR}; /usr/bin/sudo tar xf usnrepo.tar; /usr/bin/sudo tar xf data.tar"
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP startup/usncrawler.sh ${SSH_USER}@$host:usncrawler.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv usncrawler.sh $cloudsight_scripts_dir/usncrawler.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/usncrawler.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/usncrawler.sh "start"
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1212,27 +1212,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/notification_processor.sh ${SSH_USER}@$host:notification_processor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv notification_processor.sh $cloudsight_scripts_dir/notification_processor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/notification_processor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/notification_processor.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1259,27 +1259,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/password_annotator.sh ${SSH_USER}@$host:password_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv password_annotator.sh $cloudsight_scripts_dir/password_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/password_annotator.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/password_annotator.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1313,27 +1313,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/registry_update.sh ${SSH_USER}@$host:registry_update.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv registry_update.sh $cloudsight_scripts_dir/registry_update.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/registry_update.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1372,27 +1372,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/registry_monitor.sh ${SSH_USER}@$host:registry_monitor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv registry_monitor.sh $cloudsight_scripts_dir/registry_monitor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/registry_monitor.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1423,32 +1423,32 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP ../packaging/created_packages/regcrawler/$package ${SSH_USER}@$host:$package
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get update --fix-missing
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get install -y --fix-missing  make python2.7 python-pip gcc python-dev rpm uuid
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     echo "installed regcrawler dependencies"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -i $package
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service regcrawler start
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
@@ -1483,27 +1483,27 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP ../kelk-deployment/latest/components/image_rescanner.sh ${SSH_USER}@$host:image_rescanner.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv image_rescanner.sh $cloudsight_scripts_dir/image_rescanner.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/image_rescanner.sh
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SCP $config_file ${SSH_USER}@$host:$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "start" $count
                         STAT=$?
-                            exit_code=exit_code+STAT
+                            exit_code=$((exit_code + STAT))
 
                     if [ $STAT -ne 0 ]
                         then
