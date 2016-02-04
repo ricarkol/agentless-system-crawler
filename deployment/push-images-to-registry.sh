@@ -31,7 +31,7 @@ do
           docker pull "${BUILD_REGISTRY}/$img:$TAG"
 
             pull_STAT=$?
-              if [ $pull_STAT -ne "0" ]
+              if [ $pull_STAT -ne 0 ]
                   then
                   echo "Build Failed"
                   exit $pull_STAT
@@ -40,7 +40,7 @@ do
           docker tag -f "${BUILD_REGISTRY}/$img:$TAG" "${REGISTRY}/$img:$TAG"
 
             tag_STAT=$?
-              if [ $tag_STAT -ne "0" ]
+              if [ $tag_STAT -ne 0 ]
                   then
                   echo "Build Failed"
                   exit $tag_STAT
@@ -50,7 +50,7 @@ do
       docker push "${REGISTRY}/${img}:${TAG}"
 
         push_STAT=$?
-          if [ $push_STAT -ne "0" ]
+          if [ $push_STAT -ne 0 ]
               then
               echo "Build Failed"
               exit $push_STAT
