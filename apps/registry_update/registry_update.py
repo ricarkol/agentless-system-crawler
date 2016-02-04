@@ -141,6 +141,10 @@ def welcome():
              /registry/update
              '''
 
+@app.route('/health', methods=['GET'])
+def welcome():
+   return 'OK'
+
 @app.route('/registry/update', methods=['POST'])
 def update():
     request_uuid = str(uuid.uuid1())

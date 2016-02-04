@@ -61,42 +61,56 @@ echo "Joins: ${JOINS}"
 HOST_SUPERVISOR_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${SUPERVISOR_DIR}
 mkdir -p HOST_SUPERVISOR_LOG_DIR
 
+start() {
+    stop
+    delete
+    echo "Starting ${CONTAINER_NAME}."
+    if [ ! -z "$REGISTRY" ]; then
+        set -x
+        docker pull $REGISTRY/$CONSUL_IMG:$IMAGE_TAG 2>&1 > /dev/null
+        docker tag -f $REGISTRY/$CONSUL_IMG:$IMAGE_TAG $CONSUL_IMG 
+        set +x
+    fi
+    # Start the consul agent
+    set -x
+    docker run -d \
+        --restart=always \
+        --net=host \
+        -e GOMAXPROCS=4 \
+        -v ${HOST_SUPERVISOR_LOG_DIR}:${CONTAINER_SUPERVISOR_LOG_DIR} \
+        -v /var/consul:/data \
+        -v /var/log/containers/consul:/var/log/containers/consul \
+        -p $BRIDGE_IP:53:53 \
+        -p $BRIDGE_IP:53:53/udp \
+        --name $CONTAINER_NAME \
+        $CONSUL_IMG \
+        $JOINS \
+        -rejoin \
+        $RECURSORS \
+        -node $NODE
+    set +x
+}
+
+stop() {
+    echo -n "Stopping container: "
+    docker stop ${CONTAINER_NAME}
+}
+
+delete() {
+    echo -n "Removing container: "
+    docker rm ${CONTAINER_NAME}
+}
+
 case $1 in
     start)
-        echo "Starting ${CONTAINER_NAME}."
-        if [ ! -z "$REGISTRY" ]; then
-            set -x
-            docker pull $REGISTRY/$CONSUL_IMG:$IMAGE_TAG 2>&1 > /dev/null
-            docker tag -f $REGISTRY/$CONSUL_IMG:$IMAGE_TAG $CONSUL_IMG 
-            set +x
-        fi
-        # Start the consul agent
-        set -x
-        docker run -d \
-            --restart=always \
-            --net=host \
-            -e GOMAXPROCS=4 \
-            -v ${HOST_SUPERVISOR_LOG_DIR}:${CONTAINER_SUPERVISOR_LOG_DIR} \
-            -v /var/consul:/data \
-            -v /var/log/containers/consul:/var/log/containers/consul \
-            -p $BRIDGE_IP:53:53 \
-            -p $BRIDGE_IP:53:53/udp \
-            --name $CONTAINER_NAME \
-            $CONSUL_IMG \
-            $JOINS \
-            -rejoin \
-            $RECURSORS \
-            -node $NODE
-        set +x
+        start
         ;;
 
    stop)
-        echo -n "Stopping container: "
-        docker stop ${CONTAINER_NAME}
+        stop
         ;;
    delete)
-        echo -n "Removing container: "
-        docker rm ${CONTAINER_NAME}
+        delete
         ;;
    *)
         echo $USAGE

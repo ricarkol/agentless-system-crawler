@@ -25,6 +25,10 @@ fi
 PROC_ID=$2
 CONTAINER_NAME=${REGISTRY_UPDATE_CONT}_${PROC_ID}
 INSTANCE_ID=`hostname`_${CONTAINER_NAME}
+SERVICE_NAME="va-registry-update"
+hostname=`hostname`
+CONSUL_NODE=${hostname##${hostname:0:1}*vuln-}
+CONSUL_AGENT_HOST_IP=${REGISTRY_UPDATE_IP}
 
 if [ -z "$IMAGE_TAG" ] ; then
     IMAGE_TAG="latest"
@@ -50,11 +54,19 @@ case $1 in
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG" \
                    --listen-port "$REGISTRY_UPDATE_PORT" --kafka-service "$KAFKA_SERVICE" \
                    --instance-id "$INSTANCE_ID"
+
+        # Register with consul
+        curl -X PUT \
+                -d "{\"name\":\"$SERVICE_NAME\", \"tags\": [ \"$CONSUL_NODE\" ], \"address\":\"$REGISTRY_UPDATE_IP\",\"port\":$REGISTRY_UPDATE_PORT, \"check\": { \"name\": \"$SERVICE_NAME-health\", \"http\": \"http://${REGISTRY_UPDATE_IP}:${REGISTRY_UPDATE_PORT}/health\", \"interval\": \"10s\" } }" \
+  http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/register
+
         set +x
         ;;
 
    stop)
         echo -n "Stopping container: "
+        echo curl -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
+             curl -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
         docker stop ${CONTAINER_NAME}
         ;;
    delete)
