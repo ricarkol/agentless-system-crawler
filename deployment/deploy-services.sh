@@ -207,8 +207,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/password_annotator.sh "delete" $count
                 ;;
                 $CONSUL_CONT)
-    #                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "stop" $count
-    #                $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "delete" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/consul.sh "stop" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/consul.sh "delete" $count
                 ;;
                 $REGISTRY_UPDATE_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "stop" $count
@@ -1300,6 +1300,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGISTRY_TOPIC=$REGISTRY_TOPIC" >>$config_file
                     echo "NOTIFICATION_TOPIC=$NOTIFICATION_TOPIC" >>$config_file
                     echo "INSECURE_REGISTRY=$INSECURE_REGISTRY" >>$config_file
+                    echo "REGISTRY_UPDATE_IP=$host" >>$config_file
                     echo "REGISTRY_UPDATE_PORT=$REGISTRY_UPDATE_PORT" >>$config_file
                     echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
