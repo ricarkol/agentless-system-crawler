@@ -110,6 +110,7 @@ balanced_cluster_node(){
     return 0
 }
 
+echo $CONTAINER_STARTUP_ORDER
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}

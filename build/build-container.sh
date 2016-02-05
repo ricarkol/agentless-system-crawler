@@ -43,6 +43,7 @@ declare -A IMG_TO_DIR=(
   [$CONFIG_AND_METRICS_CRAWLER_IMG]="../collector/config_and_metrics_crawler"
   [$METRICS_SERVER_IMG]="../metrics_server"
   [$IMAGE_RESCANNER_IMG]="../apps/image_rescanner"
+  [$MT_LOGSTASH_FORWARDER_IMG]="../mt-logstash-forwarder"
 )
 
 # Get the kelk-base image if required - only useful for Jenkins builds
