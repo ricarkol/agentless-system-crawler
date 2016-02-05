@@ -142,7 +142,7 @@ def welcome():
              '''
 
 @app.route('/health', methods=['GET'])
-def welcome():
+def health():
    return 'OK'
 
 @app.route('/registry/update', methods=['POST'])

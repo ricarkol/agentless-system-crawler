@@ -56,7 +56,7 @@ case $1 in
                    --instance-id "$INSTANCE_ID"
 
         # Register with consul
-        curl -X PUT \
+        curl -s -X PUT \
                 -d "{\"name\":\"$SERVICE_NAME\", \"tags\": [ \"$CONSUL_NODE\" ], \"address\":\"$REGISTRY_UPDATE_IP\",\"port\":$REGISTRY_UPDATE_PORT, \"check\": { \"name\": \"$SERVICE_NAME-health\", \"http\": \"http://${REGISTRY_UPDATE_IP}:${REGISTRY_UPDATE_PORT}/health\", \"interval\": \"10s\" } }" \
   http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/register
 
@@ -65,8 +65,8 @@ case $1 in
 
    stop)
         echo -n "Stopping container: "
-        echo curl -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
-             curl -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
+        echo curl -s -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
+             curl -s -X DELETE http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/deregister/$SERVICE_NAME
         docker stop ${CONTAINER_NAME}
         ;;
    delete)
