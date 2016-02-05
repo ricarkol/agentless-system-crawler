@@ -53,6 +53,7 @@ case $1 in
              "--space $BLUEMIX_SPACE --single-run $REGISTRY_MONITOR_SINGLE_RUN" \
              "--ice-api $REGISTRY_ICE_API --insecure-registry $INSECURE_REGISTRY" \
              "--alchemy-registry-api $ALCHEMY_REGISTRY_URL" \
+             "--elasticsearch-url $ELASTIC_HOST:$ES_PORT" \
              "$REGISTRY_URL $KAFKA_SERVICE --instance-id $INSTANCE_ID"
 
         # Start registry-monitor
@@ -64,8 +65,8 @@ case $1 in
                    --email "$REGISTRY_EMAIL" --org "$BLUEMIX_ORG" --space "$BLUEMIX_SPACE" \
                    --single-run "$REGISTRY_MONITOR_SINGLE_RUN" --ice-api "$REGISTRY_ICE_API" \
                    --insecure-registry "$INSECURE_REGISTRY" --alchemy-registry-api "$ALCHEMY_REGISTRY_URL" \
+                   --elasticsearch-url "$ELASTIC_HOST:$ES_PORT" \
                    "$REGISTRY_URL" "$KAFKA_SERVICE" --instance-id "$INSTANCE_ID"
-
         ;;
 
    stop)

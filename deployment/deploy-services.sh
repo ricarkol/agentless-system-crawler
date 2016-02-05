@@ -1345,6 +1345,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
                     KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
+                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
+                    ES_ENDPOINT=$(eval "echo \$ES$target_node")
+                    echo "Connecting to ES $ES_ENDPOINT"
 
                     #create config file
                     config_file=${REGISTRY_MONITOR_CONT}.${count}.sh
@@ -1360,6 +1363,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGISTRY_EMAIL=$REGISTRY_EMAIL" >>$config_file
                     echo "INSECURE_REGISTRY=$INSECURE_REGISTRY" >>$config_file
                     echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    echo "ELASTIC_HOST=$ES_ENDPOINT" >>$config_file
+                    echo "ES_PORT=$ES_PORT" >>$config_file
                     echo "REGISTRY_MONITOR_SINGLE_RUN=$REGISTRY_MONITOR_SINGLE_RUN" >>$config_file
                     echo "REGISTRY_ICE_API=$REGISTRY_ICE_API" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
