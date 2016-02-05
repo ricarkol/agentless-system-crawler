@@ -51,6 +51,9 @@ logger              = logging
 max_kafka_retries   = 600
 http_request_timeout= 120
 iterator_sleep_time = 1 * 60 * 60 # 1 hour
+FULL_RESCAN_DAY     = 5 # Mon=0, Sun=6
+FULL_RESCAN_WINDOW_START = 2  # Full rescan time window must be > iterator_sleep_time
+FULL_RESCAN_WINDOW_END   = 5  # to make sure it doesn't hit a timing window.
 
 class TimeoutError(Exception):
     pass
@@ -96,6 +99,12 @@ class KafkaInterface():
         kafka_python_client.ensure_topic_exists(topic)
         kafka_python_client.close()
 
+
+def is_full_rescan_time(now):
+    if now.weekday() == FULL_RESCAN_DAY:
+        if FULL_RESCAN_WINDOW_START >= now.hour >= FULL_RESCAN_WINDOW_END:
+            return True
+    return False
 
 def timeout(seconds=5, msg=os.strerror(errno.ETIMEDOUT)):
     def decorator(func):
@@ -520,12 +529,28 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
 
     if registry_version == -1:
         raise RegistryError('Could not find supported registry API at %s' % registry)
-
  
     iterate = True
+    last_full_scan = None
+    scan_all = False
+
     while iterate:
         new_images = 0
         csv_additions = []
+
+        if last_full_scan is None:
+            now = datetime.datetime.now()
+            if is_full_rescan_time(now):
+                scan_all = True
+                last_full_scan = now
+            else:
+                scan_all = False
+        else:
+            if now() - last_full_scan > scan_frequency:
+                scan_all = True
+                last_full_scan = now
+            else:
+                scan_all = False
 
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
@@ -540,23 +565,24 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                     known_images[image_name]['tags'] = []
             
                 namespace = '%s:%s' % (repository, tag)
-                if tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
-                    try:
-                        image_scanned = query_image_scanned(elasticsearch_ip_port, image_id)
+                if scan_all or tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
+                    if not scan_all:
+                        try:
+                            image_scanned = query_image_scanned(elasticsearch_ip_port, image_id)
 
-                        if image_scanned:
-                            # Image name and tag found in ElasticSearch
-                            # Add to local known_images and ignore
-                            logger.info('Image found in ElasticSearch: %s/%s:%s (%s)' % \
-                                (registry_host, image_name, tag, image_id))
+                            if image_scanned:
+                                # Image name and tag found in ElasticSearch
+                                # Add to local known_images and ignore
+                                logger.info('Image found in ElasticSearch: %s/%s:%s (%s)' % \
+                                    (registry_host, image_name, tag, image_id))
 
-                            known_images[image_name]['tags'].append(tag)
-                            known_images[image_name]['ids'].append(image_id)
-                            csv_additions.append((image_name, tag, image_id))
-                            continue
-                    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
-                        logger.error('Error connecting to ElasticSearch to query image %s' % namespace)
-                        logger.exception(e)
+                                known_images[image_name]['tags'].append(tag)
+                                known_images[image_name]['ids'].append(image_id)
+                                csv_additions.append((image_name, tag, image_id))
+                                continue
+                        except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
+                            logger.error('Error connecting to ElasticSearch to query image %s' % namespace)
+                            logger.exception(e)
 
 
                     logger.info('Discovered new image %s/%s:%s id=%s' % \
