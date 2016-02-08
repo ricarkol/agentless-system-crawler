@@ -54,6 +54,7 @@ iterator_sleep_time = 1 * 60 * 60 # 1 hour
 FULL_RESCAN_DAY     = 5 # Mon=0, Sun=6
 FULL_RESCAN_WINDOW_START = 2  # Full rescan time window must be > iterator_sleep_time
 FULL_RESCAN_WINDOW_END   = 5  # to make sure it doesn't hit a timing window.
+FULL_RESCAN_FREQUENCY = datetime.timedelta(days=7) # 7 days
 
 class TimeoutError(Exception):
     pass
@@ -98,13 +99,6 @@ class KafkaInterface():
         kafka_python_client = kafka_python.KafkaClient(self.kafka_url)
         kafka_python_client.ensure_topic_exists(topic)
         kafka_python_client.close()
-
-
-def is_full_rescan_time(now):
-    if now.weekday() == FULL_RESCAN_DAY:
-        if FULL_RESCAN_WINDOW_START >= now.hour >= FULL_RESCAN_WINDOW_END:
-            return True
-    return False
 
 def timeout(seconds=5, msg=os.strerror(errno.ETIMEDOUT)):
     def decorator(func):
@@ -299,6 +293,11 @@ def query_image_scanned(elasticsearch_ip_port, image_id):
     else:
         return False
 
+def is_full_rescan_time(now):
+    if now.weekday() == FULL_RESCAN_DAY:
+        if FULL_RESCAN_WINDOW_START >= now.hour >= FULL_RESCAN_WINDOW_END:
+            return True
+    return False
 
 
 def load_known_images():
@@ -531,8 +530,8 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         raise RegistryError('Could not find supported registry API at %s' % registry)
  
     iterate = True
-    last_full_scan = None
-    scan_all = False
+    last_full_scan_time = None
+    rescan_all = False
 
     while iterate:
         new_images = 0
@@ -541,16 +540,16 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
         if last_full_scan is None:
             now = datetime.datetime.now()
             if is_full_rescan_time(now):
-                scan_all = True
-                last_full_scan = now
+                rescan_all = True
+                last_full_scan_time = now
             else:
-                scan_all = False
+                rescan_all = False
         else:
-            if now() - last_full_scan > scan_frequency:
-                scan_all = True
-                last_full_scan = now
+            if datetime.datetime.now() - last_full_scan_time > FULL_RESCAN_FREQUENCY:
+                rescan_all = True
+                last_full_scan_time = now
             else:
-                scan_all = False
+                rescan_all = False
 
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
@@ -565,8 +564,8 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                     known_images[image_name]['tags'] = []
             
                 namespace = '%s:%s' % (repository, tag)
-                if scan_all or tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
-                    if not scan_all:
+                if rescan_all or tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
+                    if not rescan_all:
                         try:
                             image_scanned = query_image_scanned(elasticsearch_ip_port, image_id)
 
