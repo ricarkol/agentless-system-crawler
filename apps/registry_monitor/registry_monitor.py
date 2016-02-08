@@ -295,7 +295,7 @@ def query_image_scanned(elasticsearch_ip_port, image_id):
 
 def is_full_rescan_time(now):
     if now.weekday() == FULL_RESCAN_DAY:
-        if FULL_RESCAN_WINDOW_START >= now.hour >= FULL_RESCAN_WINDOW_END:
+        if FULL_RESCAN_WINDOW_START <= now.hour <= FULL_RESCAN_WINDOW_END:
             return True
     return False
 
@@ -564,8 +564,10 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                     known_images[image_name]['tags'] = []
             
                 namespace = '%s:%s' % (repository, tag)
-                if rescan_all or tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']:
-                    if not rescan_all:
+                unknown_image = tag not in known_images[image_name]['tags'] or image_id not in known_images[image_name]['ids']
+                if rescan_all or unknown_image:
+                    if unknown_image:
+
                         try:
                             image_scanned = query_image_scanned(elasticsearch_ip_port, image_id)
 
@@ -577,16 +579,16 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
 
                                 known_images[image_name]['tags'].append(tag)
                                 known_images[image_name]['ids'].append(image_id)
-                                csv_additions.append((image_name, tag, image_id))
                                 continue
                         except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError), e:
                             logger.error('Error connecting to ElasticSearch to query image %s' % namespace)
                             logger.exception(e)
 
 
-                    logger.info('Discovered new image %s/%s:%s id=%s' % \
+                        logger.info('Discovered new image %s/%s:%s id=%s' % \
                                 (registry_host, image_name, tag, image_id))
                         
+
                     request_uuid = str(uuid.uuid1())
 
                     notify(kafka_service, notification_topic, namespace, request_uuid, event="start",
@@ -618,8 +620,9 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                     if tag not in known_images[image_name]['tags']:
                         known_images[image_name]['tags'].append(tag)
                             
-                    csv_additions.append((image_name, tag, image_id))
-                    new_images += 1
+                    if unknown_image:
+                        csv_additions.append((image_name, tag, image_id))
+                        new_images += 1
                 
                 else:
                     logger.info('Image is not new: %s/%s:%s (%s)' % \
