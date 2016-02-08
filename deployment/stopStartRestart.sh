@@ -6,6 +6,8 @@
 # (c) IBM Research 2015
 #
 
+echo "================================================"
+
 if [ $# -eq 2 ]
     then
     echo "Processing all containers"
@@ -108,9 +110,8 @@ fi
 
 doit() {
     OPERATION=$1
-    echo ""
+    echo
     echo "------------------------------------------------"
-    echo "Processing $container ..."
     CONTAINER_KNOWN="true"
     for count in `seq ${CONTAINER_COUNTS[$container]}|sort -r`
     do
@@ -120,7 +121,7 @@ doit() {
         $ES_CONT)
             if [ "$PROCESS_ES" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
@@ -129,7 +130,7 @@ doit() {
         $KAFKA_CONT | $INDEXER_CONT | $VULNERABILITY_INDEXER_CONT | $COMPLIANCE_INDEXER_CONT | $NOTIFICATION_INDEXER_CONT | $VULNERABILITY_ANNOTATOR_CONT | $SEARCH_CONT | $TIMEMACHINE_CONT | $COMPLIANCE_ANNOTATOR_CONT | $CONFIG_PARSER_CONT | $USNCRAWLER_CONT | $NOTIFICATION_PROCESSOR_CONT | $PASSWORD_ANNOTATOR_CONT | $REGISTRY_MONITOR_CONT)
             if [ "$PROCESS_VA" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
@@ -138,21 +139,21 @@ doit() {
         $REGISTRY_UPDATE_CONT)
             if [ "$PROCESS_VA" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
-                if [ $STAT -eq 0 ]
+                if [ $STAT -eq 0 ] && [ "$OPERATION" = "stop" ]
                     then
-                    echo "Sleeping for 30 seconds to starve upstreams before performing additional shutdowns"
-                    sleep 30
+                    echo "Sleeping for 15 seconds to starve upstreams before performing additional shutdowns"
+                    sleep 15
                 fi
             fi
         ;;
         $CONSUL_CONT | $IMAGE_RESCANNER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
@@ -161,7 +162,7 @@ doit() {
         $REGCRAWLER)
             if [ "$PROCESS_VA" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo /usr/bin/service regcrawler $OPERATION
                 STAT=$?
                 exit_code=$((exit_code + STAT))
@@ -170,7 +171,7 @@ doit() {
         $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
-                echo "$OPERATION $container $count IN $host"
+                echo "Processing $OPERATION $container $count IN $host"
                 # The container count doesn't really apply here as we want it on every host, so I create my own.
                 # Count through hosts and stop the config and metrics crawler on every host.
                 for host in ${HOSTS[@]}
