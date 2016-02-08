@@ -110,6 +110,7 @@ balanced_cluster_node(){
     return 0
 }
 
+echo $CONTAINER_STARTUP_ORDER
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}
@@ -260,6 +261,16 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
                         done
                 ;;
+                $MT_LOGSTASH_FORWARDER_CONT)
+                    # The container count doesn't really apply here as we want it on every host, so I create my own.
+                    # Count through hosts and stop the config and metrics crawler on every host.
+                    for host in ${HOSTS[@]}
+                        do
+                            config_file=${MT_LOGSTASH_FORWARDER_CONT}.sh
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
+                        done
+                ;;
                 $IMAGE_RESCANNER_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "stop" $count
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "delete" $count
@@ -405,7 +416,54 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         fi
                         echo "Metrics Server Deployed"
                     done
+                ;;
+                $MT_LOGSTASH_FORWARDER_CONT)
+                    for host in ${HOSTS[@]}
+                        do
 
+                        config_file=${MT_LOGSTASH_FORWARDER_CONT}.sh
+
+                        #create config file
+                        echo "#!/bin/bash" >$config_file
+                        echo "MT_LOGSTASH_FORWARDER_IMG=$MT_LOGSTASH_FORWARDER_IMG" >>$config_file
+                        echo "MT_LOGSTASH_FORWARDER_CONT=$MT_LOGSTASH_FORWARDER_CONT" >>$config_file
+                        echo "MT_LOGSTASH_FORWARDER_NODE_NAME=$host" >>$config_file
+                        echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                        echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                        echo "LSF_SPACE_ID=$LSF_TENANT_ID" >> $config_file
+                        echo "LSF_SPACE_NAME=$LSF_SPACE_NAME" >> $config_file
+                        echo "LSF_PASSWORD=$LSF_PASSWORD" >> $config_file
+                        echo "LSF_ORGANISATION=$LSF_ORGANISATION" >> $config_file
+                        echo "LSF_TARGET=$LSF_TARGET" >> $config_file
+
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                        $SCP startup/mt_logstash_forwarder.sh ${SSH_USER}@$host:mt_logstash_forwarder.sh
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv mt_logstash_forwarder.sh $cloudsight_scripts_dir/mt_logstash_forwarder.sh
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/mt_logstash_forwarder.sh
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+                        $SCP $config_file ${SSH_USER}@$host:$config_file
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "start"
+                            STAT=$?
+                            exit_code=$((exit_code + STAT))
+
+                        STAT=$?
+                        if [ $STAT -ne 0 ]
+                            then
+                            echo "Failed to start $container.$count in $host"
+                            exit 1
+                        fi
+                        echo "Multi Tenant Logstash Forwarder Deployed"
+                    done
                 ;;
                 $ES_CONT)
                     if [ "$IGNORE_ES" = "true" ]
