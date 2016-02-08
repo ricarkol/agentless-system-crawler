@@ -110,7 +110,6 @@ fi
 
 doit() {
     OPERATION=$1
-    echo
     echo "------------------------------------------------"
     CONTAINER_KNOWN="true"
     for count in `seq ${CONTAINER_COUNTS[$container]}|sort -r`
@@ -121,6 +120,7 @@ doit() {
         $ES_CONT)
             if [ "$PROCESS_ES" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
@@ -130,6 +130,7 @@ doit() {
         $KAFKA_CONT | $INDEXER_CONT | $VULNERABILITY_INDEXER_CONT | $COMPLIANCE_INDEXER_CONT | $NOTIFICATION_INDEXER_CONT | $VULNERABILITY_ANNOTATOR_CONT | $SEARCH_CONT | $TIMEMACHINE_CONT | $COMPLIANCE_ANNOTATOR_CONT | $CONFIG_PARSER_CONT | $USNCRAWLER_CONT | $NOTIFICATION_PROCESSOR_CONT | $PASSWORD_ANNOTATOR_CONT | $REGISTRY_MONITOR_CONT)
             if [ "$PROCESS_VA" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
@@ -139,6 +140,7 @@ doit() {
         $REGISTRY_UPDATE_CONT)
             if [ "$PROCESS_VA" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
@@ -153,6 +155,7 @@ doit() {
         $CONSUL_CONT | $IMAGE_RESCANNER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
                 STAT=$?
@@ -162,6 +165,7 @@ doit() {
         $REGCRAWLER)
             if [ "$PROCESS_VA" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo /usr/bin/service regcrawler $OPERATION
                 STAT=$?
@@ -171,6 +175,7 @@ doit() {
         $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
+                echo
                 echo "Processing $OPERATION $container $count IN $host"
                 # The container count doesn't really apply here as we want it on every host, so I create my own.
                 # Count through hosts and stop the config and metrics crawler on every host.
