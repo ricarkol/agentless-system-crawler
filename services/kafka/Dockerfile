@@ -15,6 +15,7 @@ RUN \
 
 COPY start-kafka.sh /opt/start-kafka.sh
 RUN chmod a+x /opt/start-kafka.sh
+COPY vaKafkaServer.jks /opt/vaKafkaServer.jks
 
 # Configure supervisord
 COPY startup-services.conf /etc/supervisor/conf.d/startup-services.conf

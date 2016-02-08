@@ -37,15 +37,26 @@ log.file.size=1073741824
 " >> /opt/kafka/config/server.properties
 fi
 
+jmx_parms=" \
+-Dcom.sun.management.jmxremote \
+-Dcom.sun.management.jmxremote.authenticate=false \
+-Dcom.sun.management.jmxremote.local.only=false \
+-Dcom.sun.management.jmxremote.ssl=true \
+-Dcom.sun.management.jmxremote.registry.ssl=true \
+-Djavax.net.ssl.keyStore=/opt/vaKafkaServer.jks \
+-Djavax.net.ssl.keyStoreType=jks \
+-Djavax.net.ssl.keyStorePassword=vaServerPass \
+"
+
 echo "#!/bin/bash" > /opt/boot_kafka.sh
 echo export JMX_PORT=$KAFKA_JMX_PORT >> /opt/boot_kafka.sh
-echo 'export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_JMX_PORT -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=$HOST_IP"' >> boot_kafka.sh
+echo 'export KAFKA_JMX_OPTS="'${jmx_parms}' -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_JMX_PORT -Djava.rmi.server.hostname=$HOST_IP"' >> boot_kafka.sh
 echo '/opt/kafka/bin/kafka-server-start.sh $*' >> /opt/boot_kafka.sh
 chmod +x /opt/boot_kafka.sh
 
 echo "#!/bin/bash" > /opt/boot_zookeeper.sh
 echo export JMX_PORT=$KAFKA_ZOO_KEEPER_JMX_PORT >> /opt/boot_zookeeper.sh
-echo 'export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_ZOO_KEEPER_JMX_PORT -Dcom.sun.management.jmxremote.local.only=false -Djava.rmi.server.hostname=$HOST_IP"' >> boot_zookeeper.sh
+echo 'export KAFKA_JMX_OPTS="'${jmx_parms}' -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_ZOO_KEEPER_JMX_PORT -Djava.rmi.server.hostname=$HOST_IP"' >> boot_zookeeper.sh
 echo '/opt/kafka/bin/zookeeper-server-start.sh $*' >> /opt/boot_zookeeper.sh
 chmod +x /opt/boot_zookeeper.sh
 
