@@ -195,7 +195,7 @@ doit() {
 
 }
 
-if [ "$FUNCTION" != "start" ]
+if [ "$FUNCTION" != "stop" ] || [ "$FUNCTION" = "restart" ]
     then
     echo ""
     echo "================================================"
@@ -214,7 +214,7 @@ if [ "$FUNCTION" != "start" ]
 
 fi
 
-if [ "$FUNCTION" != "stop" ]
+if [ "$FUNCTION" = "start" ] || [ "$FUNCTION" = "restart" ]
     then
     echo ""
     echo "================================================"
