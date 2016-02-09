@@ -1,7 +1,7 @@
 FROM cloudsight/kelk-base
 
 # These versions determine what kafka package will be installed
-ENV KAFKA_VERSION 0.8.2.0
+ENV KAFKA_VERSION 0.8.2.2
 ENV SCALA_VERSION 2.11
 
 WORKDIR /opt
