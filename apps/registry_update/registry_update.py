@@ -32,6 +32,8 @@ processor_group     = 'registry-update'
 kafka_service       = None
 updates_topic       = None
 notifications_topic = None
+notifications_producer = None
+updates_producer    = None
 instance_id         = 'unknown'
 max_kafka_retries   = 600
 
@@ -80,7 +82,7 @@ def notify(kafka_service, notifications_topic, uuid, event="start", processor="u
     message["text"]               = text
     
     try: 
-        post_to_kafka(kafka_service, notifications_topic, message)
+        post_to_kafka(kafka_service, notifications_producer, message)
     except KafkaError, e:
         app.logger.error(str(e))
         
@@ -88,25 +90,12 @@ def notify(kafka_service, notifications_topic, uuid, event="start", processor="u
 def send_message(producer, msg):
     producer.produce([msg])
 
-def post_to_kafka(kafka_service, kafka_topic, message):
+def post_to_kafka(kafka_service, producer, message):
     msg = json.dumps(message)
     message_posted = False
 
-    try:
-        kafka_python_client = kafka_python.KafkaClient(kafka_service)
-        kafka_python_client.ensure_topic_exists(kafka_topic)
-        kafka_python_client.close()
-    except TimeoutError, e:
-        app.logger.warn('Kafka ensure_topic_exists timed out: %s (error=%s)' % (kafka_service, str(e)))
-    except Exception, e:
-        app.logger.warn('Kafka ensure_topic_exists failed: %s (error=%s)' % (kafka_service, str(e)))
-
     for i in range(max_kafka_retries):
         try:
-            kafka = pykafka.KafkaClient(hosts=kafka_service)
-            publish_topic_object = kafka.topics[kafka_topic]
-            producer = publish_topic_object.get_producer()
-
             send_message(producer, msg)
 
             app.logger.debug('Published to kafka: %s' % msg)
@@ -121,9 +110,31 @@ def post_to_kafka(kafka_service, kafka_topic, message):
     if not message_posted:
         raise KafkaError('Failed to publish message to Kafka after %d retries: %s' % (max_kafka_retries, msg))
         
+def initialize_kafka_producer(kafka, kafka_service, kafka_topic):
+    try:
+        kafka_python_client = kafka_python.KafkaClient(kafka_service)
+        kafka_python_client.ensure_topic_exists(kafka_topic)
+        kafka_python_client.close()
+    except TimeoutError, e:
+        app.logger.warn('Kafka ensure_topic_exists timed out: %s (error=%s)' % (kafka_service, str(e)))
+    except Exception, e:
+        app.logger.warn('Kafka ensure_topic_exists failed: %s (error=%s)' % (kafka_service, str(e)))
+
+    try:
+        # Not sure if this needs to be in try block
+        publish_topic_object = kafka.topics[kafka_topic]
+        producer = publish_topic_object.get_producer()
+        return producer
+    except TimeoutError, e:
+        app.logger.warn('Kafka init timed out: %s' % kafka_service)
+    except Exception, e:
+        app.logger.warn('Kafka init failed: %s (error=%s)' % (kafka_service, str(e)))
 
 @app.before_first_request
 def initialize():
+    global notifications_producer
+    global updates_producer
+
     format = '%(asctime)s %(name)-12s: %(levelname)-8s LINE=%(lineno)s %(message)s'
     app.logger.setLevel(logging.DEBUG)
 
@@ -134,7 +145,11 @@ def initialize():
     fh.setFormatter(logging.Formatter(format))
     fh.setLevel(logging.INFO)
     app.logger.addHandler(fh)
-    
+
+    kafka = pykafka.KafkaClient(hosts=kafka_service)
+    notifications_producer = initialize_kafka_producer(kafka, kafka_service, notifications_topic)
+    updates_producer = initialize_kafka_producer(kafka, kafka_service, updates_topic)
+
 @app.route('/', methods=['GET'])
 def welcome():
    return '''CloudSight Registry Update Service:
@@ -166,7 +181,7 @@ def update():
             app.logger.error('Bad data: field %s missing from image info: %s' % (str(e), str(image_info)))
             abort(400)
     try:
-        post_to_kafka(kafka_service, updates_topic, image_info)
+        post_to_kafka(kafka_service, updates_producer, image_info)
 
         app.logger.info('Published request %s to topic %s: %s' % (request_uuid, updates_topic, json.dumps(image_info, sort_keys=True)))
         
