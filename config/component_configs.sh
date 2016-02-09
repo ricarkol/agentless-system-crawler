@@ -23,17 +23,17 @@ LS_HEAP_SIZE=5000m
 # Kafka network config
 KAFKA_PORT=9092
 
-KAFKA_ZOO_KEEPER_PORT=2181
+KAFKA_ZOOKEEPER_PORT=2181
 
 KAFKA_JMX_PORT=9999
 
-KAFKA_ZOO_KEEPER_JMX_PORT=9998
+KAFKA_ZOOKEEPER_JMX_PORT=9998
 
 # Maximum message size Kafka will accept
 KAFKA_MAX_MSG_SIZE=500000000 #(bytes)
 
 # Host directory that will be used by Kafka to store the data ingested
-KAFKA_DATA_VOLUME=/mnt/data/kafka/data
+KAFKA_DATA_VOLUME=/mnt/data/kafka
 
 KAFKA_COMPLIANCE_TOPIC=compliance
 
