@@ -216,7 +216,6 @@ if __name__ == "__main__":
     
         listen_port  = args.listen_port
         kafka_service = args.kafka_service
-        print >>sys.stdout, "kafka_service %s" % kafka_service
         updates_topic = args.kafka_updates_topic
         notifications_topic = args.kafka_notifications_topic
         instance_id = args.instance_id
