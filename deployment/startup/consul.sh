@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#CONFIG_FILE=setup_env.sh
-
 USAGE="Usage $0 start|stop|delete container_number"
 
 if [ $# -ne 2 ] ; then
@@ -13,6 +11,8 @@ re='^[0-9]+$'
 if ! [[ $2 =~ $re ]] ; then
    echo "error: container_number must be an integer" >&2; exit 1
 fi
+
+# CONFIG_FILE=/opt/cloudsight/kafka-elk-cloudsight/config/cloudsight-consul.$2.sh
 
 if ! [ -f "$CONFIG_FILE" ] ; then
     echo "Cannot open configuration file $CONFIG_FILE"
@@ -49,7 +49,7 @@ echo "Consul Node: $NODE"
 
 # compute joins 
 JOINS=""
-for h in ${CLUSTER[@]}
+for h in ${CONSUL_CLUSTER[@]}
 do
 if [ $h != ${CONSUL_IP} ]
 then
@@ -62,8 +62,6 @@ HOST_SUPERVISOR_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${SUPERVISOR
 mkdir -p HOST_SUPERVISOR_LOG_DIR
 
 start() {
-    stop
-    delete
     echo "Starting ${CONTAINER_NAME}."
     if [ ! -z "$REGISTRY" ]; then
         set -x
