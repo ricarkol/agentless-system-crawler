@@ -146,9 +146,13 @@ def initialize():
     fh.setLevel(logging.INFO)
     app.logger.addHandler(fh)
 
-    kafka = pykafka.KafkaClient(hosts=kafka_service)
-    notifications_producer = initialize_kafka_producer(kafka, kafka_service, notifications_topic)
-    updates_producer = initialize_kafka_producer(kafka, kafka_service, updates_topic)
+    try:
+        kafka = pykafka.KafkaClient(hosts=kafka_service)
+        notifications_producer = initialize_kafka_producer(kafka, kafka_service, notifications_topic)
+        updates_producer = initialize_kafka_producer(kafka, kafka_service, updates_topic)
+    except Exception, e:
+        app.logger.warn('Kafka init failed: %s (error=%s)' % (kafka_service, str(e)))
+        exit(1)
 
 @app.route('/', methods=['GET'])
 def welcome():
