@@ -9,9 +9,9 @@ if [ $# -ne 2 ] ; then
     exit 1
 fi
 
-re='^[1-2]$'
+re='^[0-9]+$'
 if ! [[ $2 =~ $re ]] ; then
-   echo "error: kafka instance number must be in [1-2] " >&2; exit 1
+   echo "error: container_number must be an integer" >&2; exit 1
 fi
 
 if ! [ -f "$CONFIG_FILE" ] ; then
@@ -34,6 +34,18 @@ HOST_CLOUDSIGHT_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${CLOUDSIGHT
 mkdir -p HOST_SUPERVISOR_LOG_DIR
 mkdir -p HOST_CLOUDSIGHT_LOG_DIR
 
+# To enable multiple kafkas and zookeepers to run on same host
+HOST_KAFKA_PORT=$((KAFKA_PORT+PROC_ID-1))
+CONTAINER_KAFKA_PORT=$KAFKA_PORT
+HOST_KAFKA_ZOOKEEPER_PORT=$((KAFKA_ZOOKEEPER_PORT+PROC_ID-1))
+CONTAINER_KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT
+
+# To enable multiple kafkas and zookeepers to run on same host
+HOST_KAFKA_JMX_PORT=$((KAFKA_JMX_PORT+(PROC_ID*2)-2))
+CONTAINER_KAFKA_JMX_PORT=$KAFKA_JMX_PORT
+HOST_KAFKA_ZOOKEEPER_JMX_PORT=$((KAFKA_ZOOKEEPER_JMX_PORT+(PROC_ID*2)-2))
+CONTAINER_KAFKA_ZOOKEEPER_JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT
+
 case $1 in
     start)
         echo "Starting ${CONTAINER_NAME}."
@@ -46,17 +58,21 @@ case $1 in
         # Start Kafka
         set -x
 
-        docker run -d --restart=always -p $KAFKA_PORT:$KAFKA_PORT  \
-                   -p $KAFKA_ZOO_KEEPER_PORT:$KAFKA_ZOO_KEEPER_PORT \
-                   -p $KAFKA_JMX_PORT:$KAFKA_JMX_PORT \
-                   -p $KAFKA_ZOO_KEEPER_JMX_PORT:$KAFKA_ZOO_KEEPER_JMX_PORT \
+        docker run -d --restart=always -p $HOST_KAFKA_PORT:$CONTAINER_KAFKA_PORT  \
+                   -p $HOST_KAFKA_ZOOKEEPER_PORT:$CONTAINER_KAFKA_ZOOKEEPER_PORT \
+                   -p $HOST_KAFKA_JMX_PORT:$CONTAINER_KAFKA_JMX_PORT \
+                   -p $HOST_KAFKA_ZOOKEEPER_JMX_PORT:$CONTAINER_KAFKA_ZOOKEEPER_JMX_PORT \
                    -e HOST_IP=$KAFKA_HOST \
+                   -e ZOOKEEPER_CLUSTER=$ZOOKEEPER_CLUSTER \
+                   -e PROC_ID=$PROC_ID \
                    -e KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE \
                    -e KAFKA_JMX_PORT=$KAFKA_JMX_PORT \
-                   -e KAFKA_ZOO_KEEPER_JMX_PORT=$KAFKA_ZOO_KEEPER_JMX_PORT \
-                   -v $KAFKA_DATA_VOLUME:/tmp/kafka-logs \
+                   -e KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT \
+                   -e KAFKA_ZOOKEEPER_JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT \
+                   -v $KAFKA_DATA_VOLUME/kafka-logs:/tmp/kafka-logs \
+                   -v $KAFKA_DATA_VOLUME/zookeeper:/tmp/zookeeper \
                    -v $HOST_SUPERVISOR_LOG_DIR:$CONTAINER_SUPERVISOR_LOG_DIR  \
-	           -v $HOST_CLOUDSIGHT_LOG_DIR:$CONTAINER_CLOUDSIGHT_LOG_DIR \
+	                 -v $HOST_CLOUDSIGHT_LOG_DIR:$CONTAINER_CLOUDSIGHT_LOG_DIR \
                    --name ${CONTAINER_NAME} $KAFKA_IMG
         set +x
         ;;

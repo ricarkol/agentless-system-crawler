@@ -214,15 +214,12 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 $REGISTRY_UPDATE_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "stop" $count
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "delete" $count
-                    #starve upstreams before additional shutdowns
-                    sleep 60
+                    echo "Sleeping for 15 seconds to starve upstreams before performing additional shutdowns"
+                    sleep 15
                 ;;
                 $REGISTRY_MONITOR_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "delete" $count
-                    #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -r $REGCRAWL_HOST_DATA_DIR
-                    #starve upstreams before additional shutdowns
-                    sleep 60
                 ;;
                 $REGCRAWLER)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service regcrawler "stop"
@@ -546,8 +543,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                     exit $STAT
                                 fi
 
-                        echo "Pausing for elasticsearch startup..."
-                        sleep 60
+                        echo "Pausing for 15 seconds for elasticsearch startup..."
+                        sleep 15
                     fi
                 ;;
                 $KAFKA_CONT)
@@ -559,11 +556,19 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_CONT=$KAFKA_CONT" >>$config_file
                     echo "KAFKA_HOST=$host" >>$config_file
                     echo "KAFKA_PORT=$KAFKA_PORT" >>$config_file
-                    echo "KAFKA_ZOO_KEEPER_PORT=$KAFKA_ZOO_KEEPER_PORT" >>$config_file
+                    echo "KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "KAFKA_JMX_PORT=$KAFKA_JMX_PORT" >>$config_file
-                    echo "KAFKA_ZOO_KEEPER_JMX_PORT=$KAFKA_ZOO_KEEPER_JMX_PORT" >>$config_file
-                    echo "KAFKA_DATA_VOLUME=$KAFKA_DATA_VOLUME" >>$config_file
+                    echo "KAFKA_ZOOKEEPER_JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT" >>$config_file
+                    echo "KAFKA_DATA_VOLUME=${KAFKA_DATA_VOLUME}_${count}" >>$config_file
                     echo "KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE" >>$config_file
+
+                    ZOOKEEPER_CLUSTER=
+                    for host in ${KAFKA_CLUSTER[@]} ; do
+                       ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER},${host}:${KAFKA_ZOOKEEPER_PORT}
+                    done
+                    ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER:1}
+
+                    echo "ZOOKEEPER_CLUSTER=$ZOOKEEPER_CLUSTER" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
@@ -623,8 +628,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                 exit $STAT
                             fi                           
 
-                    echo "Pausing for kafka startup..."
-                    sleep 30
+                    echo "Pausing for 15 seconds for kafka startup..."
+                    sleep 15
                 ;;
 
                 $CONSUL_CONT)
@@ -1240,7 +1245,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
 
                     echo "Pausing for USN index initialization"
-                    sleep 30
+                    sleep 15
                 ;;
                 $NOTIFICATION_PROCESSOR_CONT)
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count

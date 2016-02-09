@@ -9,6 +9,9 @@ sed -i s"/#advertised\.host\.name=.*/advertised\.host\.name=$HOST_IP/" /opt/kafk
 sed -i s"/socket.request.max.bytes=.*/socket.request.max.bytes=$KAFKA_MAX_MSG_SIZE/" /opt/kafka/config/server.properties
 sed -i s"/num.partitions=.*/num.partitions=10/" /opt/kafka/config/server.properties
 sed -i s"/num.network.threads=.*/num.network.threads=10/" /opt/kafka/config/server.properties
+sed -i s"/broker.id=*/broker.id=$PROC_ID/" /opt/kafka/config/server.properties
+sed -i s"/zookeeper.connect=*/zookeeper.connect=$ZOOKEEPER_CLUSTER/" /opt/kafka/config/server.properties
+sed -i s"/clientPort=*/clientPort=$KAFKA_ZOOKEEPER_PORT/" /opt/kafka/config/server.properties
 
 # Increase the java heap size to 4GBs Don't want to exagerate with this,
 # because kafka is supposed to use memory mapped pages from the page cache and
@@ -55,8 +58,8 @@ echo '/opt/kafka/bin/kafka-server-start.sh $*' >> /opt/boot_kafka.sh
 chmod +x /opt/boot_kafka.sh
 
 echo "#!/bin/bash" > /opt/boot_zookeeper.sh
-echo export JMX_PORT=$KAFKA_ZOO_KEEPER_JMX_PORT >> /opt/boot_zookeeper.sh
-echo 'export KAFKA_JMX_OPTS="'${jmx_parms}' -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_ZOO_KEEPER_JMX_PORT -Djava.rmi.server.hostname=$HOST_IP"' >> boot_zookeeper.sh
+echo export JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT >> /opt/boot_zookeeper.sh
+echo 'export KAFKA_JMX_OPTS="'${jmx_parms}' -Dcom.sun.management.jmxremote.rmi.port=$KAFKA_ZOOKEEPER_JMX_PORT -Djava.rmi.server.hostname=$HOST_IP"' >> boot_zookeeper.sh
 echo '/opt/kafka/bin/zookeeper-server-start.sh $*' >> /opt/boot_zookeeper.sh
 chmod +x /opt/boot_zookeeper.sh
 
