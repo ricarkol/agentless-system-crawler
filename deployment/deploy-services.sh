@@ -561,10 +561,13 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_ZOOKEEPER_JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT" >>$config_file
                     echo "KAFKA_DATA_VOLUME=${KAFKA_DATA_VOLUME}_${count}" >>$config_file
                     echo "KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE" >>$config_file
+                    echo "HOST_KAFKA_ZOOKEEPER_PORT=$((KAFKA_ZOOKEEPER_PORT+count-1))" >>$config_file
 
                     ZOOKEEPER_CLUSTER=
+                    zookeeper_port_offset=0
                     for host in ${KAFKA_CLUSTER[@]} ; do
-                       ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER},${host}:${KAFKA_ZOOKEEPER_PORT}
+                       ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER},${host}:$((KAFKA_ZOOKEEPER_PORT+zookeeper_port_offset))
+                        zookeeper_port_offset=$((zookeeper_port_offset+1))
                     done
                     ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER:1}
 

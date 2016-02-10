@@ -37,7 +37,7 @@ mkdir -p HOST_CLOUDSIGHT_LOG_DIR
 # To enable multiple kafkas and zookeepers to run on same host
 HOST_KAFKA_PORT=$((KAFKA_PORT+PROC_ID-1))
 CONTAINER_KAFKA_PORT=$KAFKA_PORT
-HOST_KAFKA_ZOOKEEPER_PORT=$((KAFKA_ZOOKEEPER_PORT+PROC_ID-1))
+# HOST_KAFKA_ZOOKEEPER_PORT passed to us
 CONTAINER_KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT
 
 # To enable multiple kafkas and zookeepers to run on same host
