@@ -1407,7 +1407,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "INSECURE_REGISTRY=$INSECURE_REGISTRY" >>$config_file
                     echo "REGISTRY_UPDATE_IP=$host" >>$config_file
                     echo "REGISTRY_UPDATE_PORT=$REGISTRY_UPDATE_PORT" >>$config_file
-                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file

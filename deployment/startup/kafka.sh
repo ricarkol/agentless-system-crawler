@@ -36,7 +36,7 @@ mkdir -p HOST_CLOUDSIGHT_LOG_DIR
 
 # To enable multiple kafkas and zookeepers to run on same host
 HOST_KAFKA_PORT=${PROC_ID}${KAFKA_PORT}
-CONTAINER_KAFKA_PORT=$KAFKA_PORT
+CONTAINER_KAFKA_PORT=$HOST_KAFKA_PORT
 HOST_KAFKA_ZOOKEEPER_PORT=${PROC_ID}${KAFKA_ZOOKEEPER_PORT}
 CONTAINER_KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT
 
@@ -75,6 +75,7 @@ case $1 in
                    -e HOST_IP=$KAFKA_HOST \
                    -e ZOOKEEPER_CLUSTER=$ZOOKEEPER_CLUSTER \
                    -e PROC_ID=$PROC_ID \
+                   -e KAFKA_PORT=$KAFKA_PORT \
                    -e KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE \
                    -e KAFKA_JMX_PORT=$KAFKA_JMX_PORT \
                    -e KAFKA_ZOOKEEPER_PORT=$KAFKA_ZOOKEEPER_PORT \

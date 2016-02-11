@@ -13,6 +13,7 @@ sed -i s"/num.partitions=.*/num.partitions=10/" /opt/kafka/config/server.propert
 sed -i s"/num.network.threads=.*/num.network.threads=10/" /opt/kafka/config/server.properties
 sed -i s"/broker.id=.*/broker.id=$PROC_ID/" /opt/kafka/config/server.properties
 sed -i s"/zookeeper.connect=.*/zookeeper.connect=$ZOOKEEPER_CLUSTER/" /opt/kafka/config/server.properties
+sed -i s"/^port=.*/port=${PROC_ID}$KAFKA_PORT/" /opt/kafka/config/server.properties
 
 # Zookeeper properties
 sed -i s"/clientPort=.*/clientPort=$KAFKA_ZOOKEEPER_PORT/" /opt/kafka/config/zookeeper.properties
