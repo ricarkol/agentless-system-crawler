@@ -20,7 +20,7 @@ fi
 
 . $CONFIG_FILE
 
-CONTAINER_NAME=${METRICS_SERVER_CONT}
+CONTAINER_NAME=${MASTER_METRICS_SERVER_CONT}
 INSTANCE_ID=`hostname`:$CONTAINER_NAME
 
 if [ -z "$IMAGE_TAG" ] ; then
@@ -32,19 +32,18 @@ case $1 in
         echo "Starting ${CONTAINER_NAME}."
         if [ ! -z "$REGISTRY" ]; then
             set -x
-            docker pull $REGISTRY/$METRICS_SERVER_IMG:$IMAGE_TAG 2>&1 > /dev/null
-            docker tag -f $REGISTRY/$METRICS_SERVER_IMG:$IMAGE_TAG $METRICS_SERVER_IMG
+            docker pull $REGISTRY/$MASTER_METRICS_SERVER_IMG:$IMAGE_TAG 2>&1 > /dev/null
+            docker tag -f $REGISTRY/$MASTER_METRICS_SERVER_IMG:$IMAGE_TAG $MASTER_METRICS_SERVER_IMG
             set +x
         fi
         # Pass all of the args to docker as supplied to the config file in deploy-services
         set -x
         docker run -d \
             --restart=always \
-            -p 8587:8587 \
-			-v ${HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR}:${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
+            -p 8586:8586 \
 			--name ${CONTAINER_NAME} \
-			-it $METRICS_SERVER_IMG \
-			--snapshot_dir ${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
+			-it $MASTER_METRICS_SERVER_IMG \
+			--hosts $CLOUDSIGHT_HOSTS \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}metrics_server_error.log
         set +x
         ;;
