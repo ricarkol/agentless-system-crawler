@@ -561,14 +561,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_ZOOKEEPER_JMX_PORT=$KAFKA_ZOOKEEPER_JMX_PORT" >>$config_file
                     echo "KAFKA_DATA_VOLUME=${KAFKA_DATA_VOLUME}_${count}" >>$config_file
                     echo "KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE" >>$config_file
-
-                    ZOOKEEPER_CLUSTER=
-                    for host in ${KAFKA_CLUSTER[@]} ; do
-                       ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER},${host}:${KAFKA_ZOOKEEPER_PORT}
-                    done
-                    ZOOKEEPER_CLUSTER=${ZOOKEEPER_CLUSTER:1}
-
-                    echo "ZOOKEEPER_CLUSTER=$ZOOKEEPER_CLUSTER" >>$config_file
+                    echo "KAFKA_CLUSTER=(${KAFKA_CLUSTER[@]})" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
@@ -628,8 +621,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                 exit $STAT
                             fi                           
 
-                    echo "Pausing for 15 seconds for kafka startup..."
-                    sleep 15
                 ;;
 
                 $CONSUL_CONT)
