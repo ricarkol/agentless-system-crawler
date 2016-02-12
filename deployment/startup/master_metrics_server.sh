@@ -43,8 +43,8 @@ case $1 in
             -p 8586:8586 \
 			--name ${CONTAINER_NAME} \
 			-it $MASTER_METRICS_SERVER_IMG \
-			--hosts $CLOUDSIGHT_HOSTS \
-			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}metrics_server_error.log
+			--hosts ${CLOUDSIGHT_HOSTS[@]} \
+			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}/metrics_server_error.log
         set +x
         ;;
 

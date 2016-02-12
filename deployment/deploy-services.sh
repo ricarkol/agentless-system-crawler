@@ -381,8 +381,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
-                    echo "CLOUDSIGHT_HOSTS=${HOSTS[@]}" >>$config_file
-
+                    echo "CLOUDSIGHT_HOSTS=( ${HOSTS[@]} )" >>$config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/master_metrics_server.sh ${SSH_USER}@$host:master_metrics_server.sh
                         STAT=$?
