@@ -71,6 +71,8 @@ done
 cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
 
+config_dir="/tmp/"
+
 Component_STAT=$?
     if [ $Component_STAT -ne 0 ]
         then
@@ -227,7 +229,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
                 ;;
                 $MASTER_METRICS_SERVER_CONT)
-                    config_file=${MASTER_METRICS_SERVER_CONT}.sh
+                    config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "stop"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "delete"
                 ;;
@@ -236,7 +238,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
-                            config_file=${METRICS_SERVER_CONT}.sh
+                            config_file_name=${METRICS_SERVER_CONT}.sh
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "delete"
                         done
@@ -246,7 +248,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
-                            config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                            config_file_name=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
                             # To deal with legacy issues
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler
@@ -267,7 +269,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
-                            config_file=${MT_LOGSTASH_FORWARDER_CONT}.sh
+                            config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
                         done
@@ -312,7 +314,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     for host in ${HOSTS[@]}
                         do
 
-                        config_file=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                        config_file_name=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
+                        config_file=${config_dir}${config_file_name}
 
                         #create config file
                         echo "#!/bin/bash" >$config_file
@@ -349,15 +352,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SCP $config_file ${SSH_USER}@$host:$config_file
+                        $SCP $config_file ${SSH_USER}@$host:$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "start"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/config_and_metrics_crawler.sh "start"
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -370,7 +373,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                 ;;
                 $MASTER_METRICS_SERVER_CONT)
-                    config_file=${MASTER_METRICS_SERVER_CONT}.sh
+                    config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
+                    config_file=${config_dir}${config_file_name}
 
                     #create config file
                     echo "#!/bin/bash" >$config_file
@@ -395,15 +399,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "start"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "start"
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
@@ -418,7 +422,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     for host in ${HOSTS[@]}
                         do
 
-                        config_file=${METRICS_SERVER_CONT}.sh
+                        config_file_name=${METRICS_SERVER_CONT}.sh
+                        config_file=${config_dir}${config_file_name}
 
                         #create config file
                         echo "#!/bin/bash" >$config_file
@@ -445,15 +450,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SCP $config_file ${SSH_USER}@$host:$config_file
+                        $SCP $config_file ${SSH_USER}@$host:$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "start"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/metrics_server.sh "start"
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -468,7 +473,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     for host in ${HOSTS[@]}
                         do
 
-                        config_file=${MT_LOGSTASH_FORWARDER_CONT}.sh
+                        config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
+                        config_file=${config_dir}${config_file_name}
 
                         #create config file
                         echo "#!/bin/bash" >$config_file
@@ -493,13 +499,13 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/mt_logstash_forwarder.sh
                             STAT=$?
                             exit_code=$((exit_code + STAT))
-                        $SCP $config_file ${SSH_USER}@$host:$config_file
+                        $SCP $config_file ${SSH_USER}@$host:$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                             STAT=$?
                             exit_code=$((exit_code + STAT))
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "start"
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "start"
                             STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -518,7 +524,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         echo "Ignoring ES"
                     else
 
-                        config_file=${ES_CONT}.${count}.sh
+                        config_file_name=${ES_CONT}.${count}.sh
+                        config_file=${config_dir}${config_file_name}
 
                         #create config file
                         echo "#!/bin/bash" >$config_file
@@ -569,7 +576,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                     exit $STAT
                                 fi
 
-                        $SCP $config_file ${SSH_USER}@$host:$config_file
+                        $SCP $config_file ${SSH_USER}@$host:$config_file_name
                             STAT=$?
                                 if [ $STAT -ne 0 ]
                                     then
@@ -577,7 +584,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                     exit $STAT
                                 fi
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                             STAT=$?
                                 if [ $STAT -ne 0 ]
                                     then
@@ -585,7 +592,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                     exit $STAT
                                 fi
 
-                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
+                        $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/elasticsearch.sh "start" $count $host
                             STAT=$?
                                 if [ $STAT -ne 0 ]
                                     then
@@ -598,7 +605,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $KAFKA_CONT)
-                    config_file=${KAFKA_CONT}.${count}.sh
+                    config_file_name=${KAFKA_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
 
                     #create config file
                     echo "#!/bin/bash" >$config_file
@@ -647,7 +655,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                 exit $STAT
                             fi
                             
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             if [ $STAT -ne 0 ]
                                 then
@@ -655,7 +663,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                 exit $STAT
                             fi
                             
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             if [ $STAT -ne 0 ]
                                 then
@@ -663,7 +671,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                                 exit $STAT
                             fi
                             
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/kafka.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/kafka.sh "start" $count
                         STAT=$?
                             if [ $STAT -ne 0 ]
                                 then
@@ -675,7 +683,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                 $CONSUL_CONT)
                     #create config file
-                    config_file=${CONSUL_CONT}.${count}.sh
+                    config_file_name=${CONSUL_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "CONSUL_IMG=$CONSUL_IMG" >>$config_file
                     echo "CONSUL_CONT=$CONSUL_CONT" >>$config_file
@@ -701,15 +711,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/consul.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/consul.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -728,7 +738,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${INDEXER_CONT}.${count}.sh
+                    config_file_name=${INDEXER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "INDEXER_IMG=$INDEXER_IMG" >>$config_file
                     echo "INDEXER_CONT=$INDEXER_CONT" >>$config_file
@@ -757,15 +769,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_indexer.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/config_indexer.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -783,7 +795,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${VULNERABILITY_INDEXER_CONT}.${count}.sh
+                    config_file_name=${VULNERABILITY_INDEXER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "GENERIC_INDEXER_IMG=$GENERIC_INDEXER_IMG" >>$config_file
                     echo "VULNERABILITY_INDEXER_CONT=$VULNERABILITY_INDEXER_CONT" >>$config_file
@@ -813,15 +827,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/vulnerability_indexer.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/vulnerability_indexer.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -839,7 +853,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${COMPLIANCE_INDEXER_CONT}.${count}.sh
+                    config_file_name=${COMPLIANCE_INDEXER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "GENERIC_INDEXER_IMG=$GENERIC_INDEXER_IMG" >>$config_file
                     echo "COMPLIANCE_INDEXER_CONT=$COMPLIANCE_INDEXER_CONT" >>$config_file
@@ -869,15 +885,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_indexer.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/compliance_indexer.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -895,7 +911,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${NOTIFICATION_INDEXER_CONT}.${count}.sh
+                    config_file_name=${NOTIFICATION_INDEXER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "NOTIFICATION_INDEXER_IMG=$NOTIFICATION_INDEXER_IMG" >>$config_file
                     echo "NOTIFICATION_INDEXER_CONT=$NOTIFICATION_INDEXER_CONT" >>$config_file
@@ -924,15 +942,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/notification_indexer.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/notification_indexer.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -950,7 +968,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${VULNERABILITY_ANNOTATOR_CONT}.${count}.sh
+                    config_file_name=${VULNERABILITY_ANNOTATOR_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "VULNERABILITY_ANNOTATOR_IMG=$VULNERABILITY_ANNOTATOR_IMG" >>$config_file
                     echo "VULNERABILITY_ANNOTATOR_CONT=$VULNERABILITY_ANNOTATOR_CONT" >>$config_file
@@ -980,15 +1000,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/vulnerability_annotator.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/vulnerability_annotator.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1006,7 +1026,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${SEARCH_CONT}.${count}.sh
+                    config_file_name=${SEARCH_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "SEARCH_IMG=$SEARCH_IMG" >>$config_file
                     echo "SEARCH_CONT=$SEARCH_CONT" >>$config_file
@@ -1033,15 +1055,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/searchservice.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/searchservice.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1059,7 +1081,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${TIMEMACHINE_CONT}.${count}.sh
+                    config_file_name=${TIMEMACHINE_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "TIMEMACHINE_IMG=$TIMEMACHINE_IMG" >>$config_file
                     echo "TIMEMACHINE_CONT=$TIMEMACHINE_CONT" >>$config_file
@@ -1093,15 +1117,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/timemachine.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/timemachine.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1119,7 +1143,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${COMPLIANCE_ANNOTATOR_CONT}.${count}.sh
+                    config_file_name=${COMPLIANCE_ANNOTATOR_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "COMPLIANCE_ANNOTATOR_IMG=$COMPLIANCE_ANNOTATOR_IMG" >>$config_file
                     echo "COMPLIANCE_ANNOTATOR_CONT=$COMPLIANCE_ANNOTATOR_CONT" >>$config_file
@@ -1150,15 +1176,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/compliance_annotator.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/compliance_annotator.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1173,7 +1199,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${CONFIG_PARSER_CONT}.${count}.sh
+                    config_file_name=${CONFIG_PARSER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "CONFIG_PARSER_IMG=$CONFIG_PARSER_IMG" >>$config_file
                     echo "CONFIG_PARSER_CONT=$CONFIG_PARSER_CONT" >>$config_file
@@ -1201,15 +1229,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_parser.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/config_parser.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1224,7 +1252,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to ES $ES_ENDPOINT"
 
                     #create config file
-                    config_file=${USNCRAWLER_CONT}.${count}.sh
+                    config_file_name=${USNCRAWLER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "USN_CRAWLER_IMG=$USN_CRAWLER_IMG" >>$config_file
                     echo "USNCRAWLER_CONT=$USNCRAWLER_CONT" >>$config_file
@@ -1268,15 +1298,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/usncrawler.sh "start"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/usncrawler.sh "start"
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1298,7 +1328,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${NOTIFICATION_PROCESSOR_CONT}.${count}.sh
+                    config_file_name=${NOTIFICATION_PROCESSOR_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "NOTIFICATION_PROCESSOR_IMG=$NOTIFICATION_PROCESSOR_IMG" >>$config_file
                     echo "NOTIFICATION_PROCESSOR_CONT=$NOTIFICATION_PROCESSOR_CONT" >>$config_file
@@ -1326,15 +1358,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/notification_processor.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/notification_processor.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1349,7 +1381,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${PASSWORD_ANNOTATOR_CONT}.${count}.sh
+                    config_file_name=${PASSWORD_ANNOTATOR_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "PASSWORD_ANNOTATOR_IMG=$PASSWORD_ANNOTATOR_IMG" >>$config_file
                     echo "PASSWORD_ANNOTATOR_CONT=$PASSWORD_ANNOTATOR_CONT" >>$config_file
@@ -1373,15 +1407,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/password_annotator.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/password_annotator.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1396,7 +1430,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${REGISTRY_UPDATE_CONT}.${count}.sh
+                    config_file_name=${REGISTRY_UPDATE_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "REGISTRY_UPDATE_IMG=$REGISTRY_UPDATE_IMG" >>$config_file
                     echo "REGISTRY_UPDATE_CONT=$REGISTRY_UPDATE_CONT" >>$config_file
@@ -1428,15 +1464,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_update.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/registry_update.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1454,7 +1490,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to ES $ES_ENDPOINT"
 
                     #create config file
-                    config_file=${REGISTRY_MONITOR_CONT}.${count}.sh
+                    config_file_name=${REGISTRY_MONITOR_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "REGISTRY_MONITOR_IMG=$REGISTRY_MONITOR_IMG" >>$config_file
                     echo "REGISTRY_MONITOR_CONT=$REGISTRY_MONITOR_CONT" >>$config_file
@@ -1492,15 +1530,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/registry_monitor.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1515,7 +1553,9 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
-                    config_file=${REGCRAWLER}.sh
+                    config_file_name=${REGCRAWLER}.sh
+                    config_file=${config_dir}${config_file_name}
+
                     echo "#!/bin/bash" >$config_file
                     echo "REGISTRY_URL=$CUSTOMER_REGISTRY_PROTOCOL://$CUSTOMER_REGISTRY" >>$config_file
                     echo "REGISTRY_USER=$REGISTRY_USER" >>$config_file
@@ -1548,11 +1588,11 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
@@ -1572,7 +1612,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "Connecting to ES $ES_ENDPOINT"
 
                     #create config file
-                    config_file=${IMAGE_RESCANNER_CONT}.${count}.sh
+                    config_file_name=${IMAGE_RESCANNER_CONT}.${count}.sh
+                    config_file=${config_dir}${config_file_name}
 
                     echo "#!/bin/bash" >$config_file
                     echo "IMAGE_RESCANNER_IMG=$IMAGE_RESCANNER_IMG" >>$config_file
@@ -1603,15 +1644,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SCP $config_file ${SSH_USER}@$host:$config_file
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file $cloudsight_scripts_dir/config/$config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/image_rescanner.sh "start" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/image_rescanner.sh "start" $count
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
