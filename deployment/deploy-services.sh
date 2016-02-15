@@ -229,7 +229,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
                 ;;
                 $MASTER_METRICS_SERVER_CONT)
-                    config_file=${MASTER_METRICS_SERVER_CONT}.sh
+                    config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "stop"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "delete"
                 ;;
