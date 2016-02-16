@@ -9,7 +9,7 @@ REGCRAWLER="cloudsight-regcrawler"
 
 declare -A CONTAINER_COUNTS=(
         [$ES_CONT]=5
-        [$KAFKA_CONT]=1
+        [$KAFKA_CONT]=2
         [$INDEXER_CONT]=2
         [$SEARCH_CONT]=0
         [$CONFIG_PARSER_CONT]=2
@@ -39,6 +39,7 @@ declare -A CONTAINER_HOSTS=(
         ["$ES_CONT.4"]=$ES4
         ["$ES_CONT.5"]=$ES5
         ["$KAFKA_CONT.1"]=$KAFKA1
+        ["$KAFKA_CONT.2"]=$KAFKA2
         ["$INDEXER_CONT.1"]=$INDEXER1
         ["$INDEXER_CONT.2"]=$INDEXER2
         ["$SEARCH_CONT.1"]=$SEARCH1
