@@ -973,7 +973,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "VULNERABILITY_ANNOTATOR_CONT=$VULNERABILITY_ANNOTATOR_CONT" >>$config_file
                     echo "KAFKA_VULNERABILITY_SCAN_TOPIC=$KAFKA_VULNERABILITY_SCAN_TOPIC" >>$config_file
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
-                    echo "KAFKA_PORT=$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
                     echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
@@ -1086,7 +1087,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "TIMEMACHINE_CONT=$TIMEMACHINE_CONT" >>$config_file
                     echo "TIMEMACHINE_PORT=$TIMEMACHINE_PORT" >>$config_file
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
-                    echo "KAFKA_PORT=$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
                     echo "SEARCH_SERVICE=$SEARCH_SERVICE" >> $config_file
                     echo "SEARCH_SERVICE_PORT=$SEARCH_SERVICE_PORT" >> $config_file
                     echo "SEARCH_PORT=$SEARCH_PORT" >> $config_file
@@ -1148,7 +1150,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "COMPLIANCE_ANNOTATOR_CONT=$COMPLIANCE_ANNOTATOR_CONT" >>$config_file
                     echo "KAFKA_COMPLIANCE_TOPIC=$KAFKA_COMPLIANCE_TOPIC" >>$config_file
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
-                    echo "KAFKA_PORT=$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
                     echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     #echo "COMPLIANCE_UI_PORT=$COMPLIANCE_UI_PORT" >>$config_file
@@ -1203,7 +1206,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CONFIG_PARSER_IMG=$CONFIG_PARSER_IMG" >>$config_file
                     echo "CONFIG_PARSER_CONT=$CONFIG_PARSER_CONT" >>$config_file
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
-                    echo "KAFKA_PORT=$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
@@ -1333,7 +1337,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "NOTIFICATION_PROCESSOR_CONT=$NOTIFICATION_PROCESSOR_CONT" >>$config_file
                     echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
-                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
@@ -1384,7 +1389,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "#!/bin/bash" >$config_file
                     echo "PASSWORD_ANNOTATOR_IMG=$PASSWORD_ANNOTATOR_IMG" >>$config_file
                     echo "PASSWORD_ANNOTATOR_CONT=$PASSWORD_ANNOTATOR_CONT" >>$config_file
-                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
@@ -1502,7 +1508,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGISTRY_PASSWORD=$REGISTRY_PW" >>$config_file
                     echo "REGISTRY_EMAIL=$REGISTRY_EMAIL" >>$config_file
                     echo "INSECURE_REGISTRY=$INSECURE_REGISTRY" >>$config_file
-                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
                     echo "ELASTIC_HOST=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     echo "REGISTRY_MONITOR_SINGLE_RUN=$REGISTRY_MONITOR_SINGLE_RUN" >>$config_file
@@ -1562,7 +1569,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "INSECURE_REGISTRY=$INSECURE_REGISTRY" >>$config_file
                     echo "REGISTRY_ICE_API=$REGISTRY_ICE_API" >>$config_file
                     echo "INSTANCE_ID=${REGCRAWLER}_${count}" >>$config_file
-                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_PORT with "1" to point to first KAFKA instance
+                    echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
 
