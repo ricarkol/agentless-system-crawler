@@ -35,7 +35,7 @@ declare -A IMG_TO_DIR=(
   [$PASSWORD_ANNOTATOR_IMG]="../apps/password_annotator"
   [$COMPLIANCE_ANNOTATOR_IMG]="../apps/compliance_annotator"
   [$USN_CRAWLER_IMG]="../apps/usncrawler"
-  [$REGISTRY_UPDATE_IMG]="../apps/registry_update"
+  [$REGISTRY_UPDATE_IMG]="../apps/registry_update_java"
   [$REGISTRY_MONITOR_IMG]="../apps/registry_monitor"
   [$IMAGE_RESCANNER_IMG]="../apps/image_rescanner"
   [$CONFIG_AND_METRICS_CRAWLER_IMG]="../collector/config_and_metrics_crawler"
@@ -59,6 +59,10 @@ fi
 # Builds all docker images
 for i in ${!IMG_TO_DIR[@]}
 do
+  if [[ "${IMG_TO_DIR[$i]}" =~ "_java" ]] ; then
+    echo "Building Java image from ${IMG_TO_DIR[$i]}"
+    (cd ${IMG_TO_DIR[$i]} && ant )
+  fi
   echo "Building docker image: ${REGISTRY}$i:$TAG"
   echo "  - directory: ${IMG_TO_DIR[$i]}"
   (cd ${IMG_TO_DIR[$i]} && docker build -t "${REGISTRY}$i:$TAG" .)
