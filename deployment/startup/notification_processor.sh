@@ -44,7 +44,8 @@ case $1 in
             -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
             --name ${CONTAINER_NAME} ${NOTIFICATION_PROCESSOR_IMG} \
             --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT --processor-id $PROC_ID \
-            --notification-topic notification  --kafka-url $KAFKA_SERVICE
+            --notification-topic notification  --kafka-url $KAFKA_SERVICE \
+            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT}
 
         set +x
         ;;

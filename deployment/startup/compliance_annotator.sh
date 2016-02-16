@@ -51,6 +51,7 @@ case $1 in
             -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
              --name $CONTAINER_NAME \
             ${COMPLIANCE_ANNOTATOR_IMG} --kafka-url ${KAFKA_HOST}:$KAFKA_PORT \
+            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT} \
             --receive-topic config --annotation-topic compliance \
             --notification-topic notification --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT \
             --annotator-home /var/www/html --instance-id $INSTANCE_ID

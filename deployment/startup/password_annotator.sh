@@ -46,7 +46,8 @@ case $1 in
         docker run -d --restart=always \
            -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
            --name $CONTAINER_NAME  $PASSWORD_ANNOTATOR_IMG \
-           --kafka-url $KAFKA_SERVICE --instance-id $INSTANCE_ID
+           --kafka-url $KAFKA_SERVICE --instance-id $INSTANCE_ID \
+           --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT}
 
         set +x
         ;;

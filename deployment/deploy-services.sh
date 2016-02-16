@@ -975,6 +975,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
@@ -1152,6 +1154,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "ELASTIC_HOST_1=$ES_ENDPOINT" >>$config_file
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     #echo "COMPLIANCE_UI_PORT=$COMPLIANCE_UI_PORT" >>$config_file
@@ -1208,6 +1212,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_HOST=$KAFKA_ENDPOINT" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_PORT=1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
@@ -1339,6 +1345,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "ES_PORT=$ES_PORT" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
@@ -1391,6 +1399,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "PASSWORD_ANNOTATOR_CONT=$PASSWORD_ANNOTATOR_CONT" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
@@ -1571,6 +1581,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "INSTANCE_ID=${REGCRAWLER}_${count}" >>$config_file
                     # prefix KAFKA_PORT with "1" to point to first KAFKA instance
                     echo "KAFKA_SERVICE=$KAFKA_ENDPOINT:1$KAFKA_PORT" >>$config_file
+                    # prefix KAFKA_ZOOKEEPER_PORT with "1" to point to first Zookeeper instance
+                    echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
 

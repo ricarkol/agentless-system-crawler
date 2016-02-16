@@ -49,7 +49,7 @@ COMPLIANCE_ID_PW_STRENGTH = "Linux.20-0-c"
 SSHD_CONFIG_FILES = ['/etc/ssh/sshd_config']
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, logger, receive_topic, publish_topic, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
 
         '''
         XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
@@ -76,7 +76,7 @@ class KafkaInterface(object):
         self.notify_topic_object = kafka.topics[notify_topic]
 
         # XXX replace the port in the broker url. This should be passed.
-        zk_url = kafka_url.split(":")[0] + ":2181"
+        zk_url = kafka_url.split(":")[0] + kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
@@ -155,10 +155,10 @@ def check_sshd_password_enabled(sshd_config, namespace, crawled_time, input_reqi
 
 
 
-def process_message(kafka_url, logger, receive_topic, publish_topic, notification_topic, instance_id):
+def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notification_topic, instance_id):
     
     # Initialize the kafka object
-    client = KafkaInterface(kafka_url, logger, receive_topic, publish_topic, notification_topic)
+    client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notification_topic)
     
     while True:
         try:
@@ -443,6 +443,7 @@ if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser(description="")
         parser.add_argument('--kafka-url',  type=str, required=True, help='kafka url: host:port')
+        parser.add_argument('--kafka-zookeeper-port',  type=str, required=True, help='kafka zookeeper port')
         parser.add_argument('--receive-topic', type=str, default='config', help='receive-topic')
         parser.add_argument('--notification-topic', type=str, default='notification', help='topic to send notifications')
         parser.add_argument('--annotation-topic', type=str, default='compliance', help='topic to send annotations')
@@ -452,7 +453,7 @@ if __name__ == '__main__':
         args = parser.parse_args()
         #elasticsearch_ip_port = args.elasticsearch_url
         #kafka_ip_port = args.kafka_url
-        process_message(args.kafka_url, logger, args.receive_topic, args.annotation_topic, args.notification_topic, args.instance_id)
+        process_message(args.kafka_url, args.kafka_zookeeper_port, logger, args.receive_topic, args.annotation_topic, args.notification_topic, args.instance_id)
     except Exception, e:
         print('Error: %s' % str(e))
         logger.exception(e) 

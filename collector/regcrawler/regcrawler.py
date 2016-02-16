@@ -75,7 +75,7 @@ def timeout(seconds=5, msg=os.strerror(errno.ETIMEDOUT)):
     return decorator
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, logger, receive_topic, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, notify_topic):
 
         '''
         XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
@@ -91,11 +91,10 @@ class KafkaInterface(object):
         self.notify_topic_object = kafka.topics[notify_topic]
 
         # XXX replace the port in the broker url. This should be passed.
-        zk_port = 2181
         if kafka_url.find(':') != -1:
-            zk_url = kafka_url.rsplit(":", 1)[0] + ":%d" % zk_port
+            zk_url = kafka_url.rsplit(":", 1)[0] + ":%d" % kafka_zookeeper_port
         else:
-            zk_url = kafka_url + ":%d" % zk_port
+            zk_url = kafka_url + ":%d" % kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
@@ -272,7 +271,7 @@ def get_new_image_event(kafka_client):
             logger.error('Bad data: %s not JSON formatted' % str(image_event))
 
         
-def crawl_images(registry, kafka_host, config_topic, notification_topic, registry_topic, 
+def crawl_images(registry, kafka_host, kafka_zookeeper_port, config_topic, notification_topic, registry_topic, 
                  user, password, email, ice_api, insecure_registry, bluemix_api, 
                  bluemix_org, bluemix_space, instance_id):
 
@@ -294,7 +293,7 @@ def crawl_images(registry, kafka_host, config_topic, notification_topic, registr
         except TimeoutError, e:
             logger.error('Docker cache cleanup failed: %s' % str(e))
 
-    kafka_client = KafkaInterface(kafka_host, logger, registry_topic, notification_topic)
+    kafka_client = KafkaInterface(kafka_host, kafka_zookeeper_port, logger, registry_topic, notification_topic)
     for image_info in get_new_image_event(kafka_client):
         try:
             request_uuid   = image_info['uuid']
@@ -454,6 +453,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="crawl images from docker registry")
     parser.add_argument('registry', type=str, help='container cloud registry, e.g. https://registry-ice.ng.bluemix.net')
     parser.add_argument('kafka_service', type=str, default=None, help='kafka-cs.sl.cloud9.ibm.com:9092')
+    parser.add_argument('kafka_zookeeper_port', type=str, default=None, help='kafka zookeeper port')
     parser.add_argument('--ice-api', type=str, default="False", help='use container cloud APIs')
     parser.add_argument('--user', type=str, default=None, help='username')
     parser.add_argument('--password', type=str, default=None, help='password')
@@ -470,6 +470,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     registry           = args.registry
     kafka_service      = args.kafka_service
+    kafka_zookeeper_port = kafka_zookeeper_port
     ice_api            = ast.literal_eval(args.ice_api)
     user               = args.user
     password           = args.password
@@ -483,8 +484,8 @@ if __name__ == '__main__':
     bluemix_space      = args.space
     instance_id        = args.instance_id
      
-    logger.info('regcrawler.py --ice-api %s --user %s --password xxxx --email %s --config-topic %s --notification-topic %s --registry-topic %s --insecure-registry %s --api-url %s --org %s --space %s --instance-id %s %s %s' % \
-                               (str(ice_api), user, email, config_topic, notification_topic, registry_topic, str(insecure_registry), bluemix_api, bluemix_org, bluemix_space, instance_id, registry, kafka_service))
+    logger.info('regcrawler.py --ice-api %s --user %s --password xxxx --email %s --config-topic %s --notification-topic %s --registry-topic %s --insecure-registry %s --api-url %s --org %s --space %s --instance-id %s %s %s %s' % \
+                               (str(ice_api), user, email, config_topic, notification_topic, registry_topic, str(insecure_registry), bluemix_api, bluemix_org, bluemix_space, instance_id, registry, kafka_service, kafka_zookeeper_port))
     
     if user and not email:
         print >>sys.stderr, "email is required for authentication"
@@ -504,6 +505,6 @@ if __name__ == '__main__':
         bluemix_org = user
         logger.info('Bluemix organization defaulting to %s' % bluemix_org)
         
-    crawl_images(registry, kafka_service, config_topic, notification_topic, registry_topic, 
+    crawl_images(registry, kafka_service, kafka_zookeeper_port, config_topic, notification_topic, registry_topic, 
                  user, password, email, ice_api, insecure_registry, bluemix_api, 
                  bluemix_org, bluemix_space, instance_id)
