@@ -230,8 +230,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 ;;
                 $MASTER_METRICS_SERVER_CONT)
                     config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "stop"
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/master_metrics_server.sh "delete"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "stop"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "delete"
                 ;;
                 $METRICS_SERVER_CONT)
                     # The container count doesn't really apply here as we want it on every host, so I create my own.
@@ -239,8 +239,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     for host in ${HOSTS[@]}
                         do
                             config_file_name=${METRICS_SERVER_CONT}.sh
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "stop"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/metrics_server.sh "delete"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/metrics_server.sh "stop"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/metrics_server.sh "delete"
                         done
                 ;;
                 $CONFIG_AND_METRICS_CRAWLER_CONT)
@@ -257,11 +257,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler-containers "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r vacrawler-containers
 
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo docker stop "config_and_metrics_crawler_1"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo docker rm "config_and_metrics_crawler_1"
-
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/config_and_metrics_crawler.sh "stop"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/config_and_metrics_crawler.sh "delete"
                         done
                 ;;
                 $MT_LOGSTASH_FORWARDER_CONT)
@@ -270,8 +267,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     for host in ${HOSTS[@]}
                         do
                             config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
+                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
                         done
                 ;;
                 $IMAGE_RESCANNER_CONT)
