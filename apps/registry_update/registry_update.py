@@ -152,7 +152,7 @@ def initialize():
         updates_producer = initialize_kafka_producer(kafka, kafka_service, updates_topic)
     except Exception, e:
         app.logger.warn('Kafka init failed: %s (error=%s)' % (kafka_service, str(e)))
-        exit(1)
+        exit(1)  # This doesnt exit flask but does exit this initial request
 
 @app.route('/', methods=['GET'])
 def welcome():
