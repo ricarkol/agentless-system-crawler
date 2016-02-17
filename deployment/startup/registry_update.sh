@@ -50,10 +50,10 @@ case $1 in
         set -x
         docker run -m=${MAX_CONTAINER_MEMORY} \
                    -d --restart=always -p "$REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
+                   -e KAFKA_SERVICE=${KAFKA_SERVICE} \
+                   -e INSTANCE_ID=${INSTANCE_ID} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
-                   --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG" \
-                   --listen-port "$REGISTRY_UPDATE_PORT" --kafka-service "$KAFKA_SERVICE" \
-                   --instance-id "$INSTANCE_ID"
+                   --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG"
 
         # Register with consul
         curl -s -X PUT \
