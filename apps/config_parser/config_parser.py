@@ -80,9 +80,10 @@ def timeout(seconds=5, msg=os.strerror(errno.ETIMEDOUT)):
     return decorator
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, logger, receive_topic, publish_topic, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
         self.logger        = logger
         self.kafka_url     = kafka_url
+        self.kafka_zookeeper_port = kafka_zookeeper_port
         self.receive_topic = receive_topic 
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
@@ -105,11 +106,10 @@ class KafkaInterface(object):
         self.notify_topic_object = kafka.topics[self.notify_topic]
 
         # XXX replace the port in the broker url. This should be passed.
-        zk_port = 2181
         if self.kafka_url.find(':') != -1:
-            zk_url = self.kafka_url.rsplit(":", 1)[0] + ":%d" % zk_port
+            zk_url = self.kafka_url.rsplit(":", 1)[0] + ":%d" % self.kafka_zookeeper_port
         else:
-            zk_url = self.kafka_url + ":%d" % zk_port
+            zk_url = self.kafka_url + ":%d" % self.kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
@@ -197,7 +197,7 @@ def sigterm_handler(signum=None, frame=None):
     sys.exit(0)
 signal.signal(signal.SIGTERM, sigterm_handler)
     
-def config_parser(kafka_url, logger, receive_topic, 
+def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                   publish_topic, notification_topic, 
                   known_config_files, suppress_comment, instance_id):
     parser = augeas_parser.AugeasParser(logger, suppress_comments)
@@ -206,7 +206,7 @@ def config_parser(kafka_url, logger, receive_topic,
 
     while True:
         try:
-            client = KafkaInterface(kafka_url, logger, receive_topic, 
+            client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                                     publish_topic, notification_topic)
             break
         except Exception, e:
@@ -342,6 +342,7 @@ if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser(description="")
         parser.add_argument('--kafka-url',  type=str, default=None, required=True, help='kafka-url')
+        parser.add_argument('--kafka-zookeeper-port',  type=str, required=True, help='kafka zookeeper port')
         parser.add_argument('--receive-topic', type=str, default='config', help='receive-topic')
         parser.add_argument('--publish-topic', type=str, default='config', help='publish-topic')
         parser.add_argument('--notification-topic', type=str, default='notification', help='kafka notifications-topic')
@@ -352,7 +353,7 @@ if __name__ == '__main__':
     
         suppress_comments = bool(args.suppress_comments)
         known_config_files = json.loads(args.known_config_files)
-        config_parser(args.kafka_url, logger, args.receive_topic, 
+        config_parser(args.kafka_url, args.kafka_zookeeper_port, logger, args.receive_topic, 
                       args.publish_topic, args.notification_topic, 
                       known_config_files, suppress_comments, args.instance_id)
     except Exception, e:

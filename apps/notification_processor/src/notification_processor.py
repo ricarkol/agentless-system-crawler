@@ -28,7 +28,7 @@ PROCESSOR_GROUP = "notification_processor"
 logger     = None
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, logger, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, notify_topic):
 
         '''
         XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
@@ -52,7 +52,7 @@ class KafkaInterface(object):
         self.receive_topic_object = kafka.topics[notify_topic]
 
         # XXX replace the port in the broker url. This should be passed.
-        zk_url = kafka_url.split(":")[0] + ":2181"
+        zk_url = kafka_url.split(":")[0] + kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
@@ -95,7 +95,7 @@ class NotificationListener:
         
     def process_message(self):
         
-        client = KafkaInterface(args.kafka_url, logger, args.notification_topic)
+        client = KafkaInterface(args.kafka_url, args.kafka_zookeeper_port, logger, args.notification_topic)
         t = threading.Thread(target=self.print_event_log)
         t.setDaemon(True)
         t.start()
@@ -131,6 +131,7 @@ if __name__ == '__main__':
     try:
         parser = argparse.ArgumentParser(description="")
         parser.add_argument('--kafka-url',  type=str, required=True, help='kafka url: host:port')
+        parser.add_argument('--kafka-zookeeper-port',  type=str, required=True, help='kafka zookeeper port')
         parser.add_argument('--notification-topic', type=str, required=True, help='topic to send process notification')
         parser.add_argument('--processor-id',  type=str, required=True, help='processor id')
         parser.add_argument('--elasticsearch-url',  type=str, default="http://localhost:9200", help='elasticsearch host')
