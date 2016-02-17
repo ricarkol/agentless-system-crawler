@@ -730,8 +730,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -787,8 +786,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -845,8 +843,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -903,8 +900,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -960,8 +956,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1021,8 +1016,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1076,8 +1070,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1139,8 +1132,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1198,8 +1190,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $CONFIG_PARSER_CONT)
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1330,8 +1321,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
                     echo "Connecting to ES $ES_ENDPOINT"
 
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1386,8 +1376,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $PASSWORD_ANNOTATOR_CONT)
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1438,8 +1427,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $REGISTRY_UPDATE_CONT)
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
@@ -1496,8 +1484,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $REGISTRY_MONITOR_CONT)
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
                     ES_ENDPOINT=$(eval "echo \$ES$target_node")
@@ -1563,8 +1550,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     fi
                 ;;
                 $REGCRAWLER)
-                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$KAFKA_CONT]} $count
-                    KAFKA_ENDPOINT=$(eval "echo \$KAFKA$target_node")
+                    KAFKA_ENDPOINT=$(eval "echo \${KAFKA}1")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
 
                     #create config file
