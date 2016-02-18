@@ -46,7 +46,7 @@ case $1 in
         docker run -d --restart=always \
            -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
            --name $CONTAINER_NAME  $CONFIG_PARSER_IMG \
-           --kafka-url $KAFKA_HOST:9092 --instance-id $INSTANCE_ID \
+           --kafka-url $KAFKA_HOST:$KAFKA_PORT --instance-id $INSTANCE_ID \
            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT} \
            --known-config-files "$CONFIG_PARSER_KNOWN_CONFIG_FILES"
 
