@@ -1571,6 +1571,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "KAFKA_ZOOKEEPER_PORT=1$KAFKA_ZOOKEEPER_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "BLUEMIX_ORG=VA" >>$config_file
+                    echo "BLUEMIX_SPACE=BP" >>$config_file
 
                     package=$REGCRAWLER_DEB_FILE
 
