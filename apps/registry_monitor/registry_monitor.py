@@ -536,16 +536,16 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
     while iterate:
         new_images = 0
         csv_additions = []
+        now = datetime.datetime.now()
 
-        if last_full_scan is None:
-            now = datetime.datetime.now()
+        if last_full_scan_time is None:
             if is_full_rescan_time(now):
                 rescan_all = True
                 last_full_scan_time = now
             else:
                 rescan_all = False
         else:
-            if datetime.datetime.now() - last_full_scan_time > FULL_RESCAN_FREQUENCY:
+            if now - last_full_scan_time > FULL_RESCAN_FREQUENCY:
                 rescan_all = True
                 last_full_scan_time = now
             else:
