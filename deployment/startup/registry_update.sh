@@ -58,7 +58,7 @@ case $1 in
 
         # Register with consul
         curl -s -X PUT \
-                -d "{\"name\":\"$SERVICE_NAME\", \"tags\": [ \"$CONSUL_NODE\" ], \"address\":\"$REGISTRY_UPDATE_IP\",\"port\":$REGISTRY_UPDATE_PORT, \"check\": { \"name\": \"$SERVICE_NAME-health\", \"http\": \"http://${REGISTRY_UPDATE_IP}:${REGISTRY_UPDATE_PORT}/health\", \"interval\": \"10s\" } }" \
+                -d "{\"name\":\"$SERVICE_NAME\", \"tags\": [ \"$CONSUL_NODE\" ], \"address\":\"$REGISTRY_UPDATE_IP\",\"port\":$REGISTRY_UPDATE_PORT, \"check\": { \"name\": \"$SERVICE_NAME-health\", \"http\": \"http://${REGISTRY_UPDATE_IP}:${REGISTRY_UPDATE_PORT}/registry/health\", \"interval\": \"10s\" } }" \
   http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/register
 
         set +x
