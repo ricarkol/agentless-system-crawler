@@ -470,7 +470,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     registry           = args.registry
     kafka_service      = args.kafka_service
-    kafka_zookeeper_port = kafka_zookeeper_port
+    kafka_zookeeper_port = args.kafka_zookeeper_port
     ice_api            = ast.literal_eval(args.ice_api)
     user               = args.user
     password           = args.password
