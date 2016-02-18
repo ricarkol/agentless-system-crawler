@@ -107,9 +107,9 @@ class KafkaInterface(object):
 
         # XXX replace the port in the broker url. This should be passed.
         if self.kafka_url.find(':') != -1:
-            zk_url = self.kafka_url.rsplit(":", 1)[0] + ":%d" % self.kafka_zookeeper_port
+            zk_url = self.kafka_url.rsplit(":", 1)[0] + ":%s" % self.kafka_zookeeper_port
         else:
-            zk_url = self.kafka_url + ":%d" % self.kafka_zookeeper_port
+            zk_url = self.kafka_url + ":%s" % self.kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
