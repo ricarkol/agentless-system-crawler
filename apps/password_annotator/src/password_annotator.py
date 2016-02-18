@@ -76,7 +76,7 @@ class KafkaInterface(object):
         self.notify_topic_object = kafka.topics[notify_topic]
 
         # XXX replace the port in the broker url. This should be passed.
-        zk_url = kafka_url.split(":")[0] + kafka_zookeeper_port
+        zk_url = kafka_url.split(":")[0] + ":" + kafka_zookeeper_port
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
