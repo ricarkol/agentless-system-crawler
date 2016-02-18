@@ -58,7 +58,7 @@ REGCRAWL_HOST_DATA_DIR="/mnt/data/regcrawler"
 REGCRAWL_GUEST_DATA_DIR="/mnt/data/regcrawler"
 REGISTRY_ICE_API=False
 
-REGCRAWLER_DEB_FILE="regcrawler_0.7-alchemy_amd64.deb"
+REGCRAWLER_DEB_FILE="regcrawler_0.8-alchemy_amd64.deb"
 
 # CONFIG_AND_METRICS_CRAWLER CONFIG
 CONFIG_AND_METRICS_CRAWLER_DEB_FILE=vacrawler_1.2-va-crawler_amd64.deb
