@@ -8,25 +8,27 @@
 '''
 import os
 import re
+import csv
 import pickle
 import fileinput
 import subprocess
 import calendar
 import ConfigParser
 import stat
+import sys
+import time
 from collections import defaultdict
 from kafka import KafkaClient, SimpleProducer, KeyedProducer
 import uuid
-
+import argparse
+import csv
 import logging
 import logging.handlers
-import time
 import signal
-import sys
-import argparse
-import datetime
-import csv
+from multiprocessing import Pool
 from cStringIO import StringIO
+
+from pykafka.exceptions import ProduceFailureError
 
 try:
     import simplejson as json
@@ -39,7 +41,6 @@ import pykafka
 
 import frame_annotator
 from compliance_utils import *
-from multiprocessing import Pool
 
 logger_file = "/var/log/cloudsight/compliance-annotator.log"
 PROCESSOR_GROUP = "compliance_annotator"
@@ -59,7 +60,7 @@ class KafkaInterface(object):
                 kafka_python_client.ensure_topic_exists(publish_topic)
                 kafka_python_client.ensure_topic_exists(notify_topic)
                 break
-            except UnknownError, e:
+            except Exception as e:
                 logger.info('try_num={}, error connecting to {} , reason={}'.format(try_num, kafka_url, str(e)))
                 time.sleep(60)
                 try_num = try_num + 1
@@ -117,7 +118,7 @@ def sigterm_handler(signum=None, frame=None):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 
-def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages):
+def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, logger):
 
     in_namespace = in_metadata_param['namespace']
     in_owner_namespace = in_metadata_param['owner_namespace']
@@ -338,10 +339,9 @@ def annotation_worker(param):
 
 
 def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, instance_id):
-    
+
     client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic)
-    annotator = frame_annotator.MakeScan()
-    
+
     while True:
         try:
             for data in client.next_frame():
@@ -485,7 +485,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
 
                 notification_msg = { 
                     'processor': PROCESSOR_GROUP,
-                    'instance-id': args.instance_id,
+                    'instance-id': instance_id,
                     'status': 'start',
                     'namespace': namespace,
                     'timestamp': datetime.datetime.utcnow().isoformat()+'Z',
@@ -529,11 +529,9 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 logger.info(metadata_uuid+" 06 DOCKER_IMAGE_SHORT_NAME:"+ metadata_param['docker_image_short_name'])
                 logger.info(metadata_uuid+" 07 DOCKER_IMAGE_TAG       :"+ metadata_param['docker_image_tag'])
 
-                msg = json.dumps(notification_msg)
-                #logger.info(msg)
-                client.notify(msg,metadata_uuid)
+                send_notification(client, notification_msg, metadata_uuid, logger)
 
-                UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages)
+                UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
 
                 ####
                 ### this code is used to get the list of rules to run from scserver
@@ -648,7 +646,9 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 # For some reason, combining this to one big output didn't work. It only worked when I called client.publish separately.
                 msg_buf.write(last_output)
                 msg_buf.write('\n')
-                client.publish(msg_buf.getvalue(),metadata_uuid)
+
+                send_publish(client, msg_buf, metadata_uuid, logger)
+
                 logger.info(metadata_uuid+" 11 Compliance verdict posted for "+namespace+" "+timestamp+" verdict:"+verdict_word)
 
                 # Delete uncrawled data
@@ -660,13 +660,54 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 notification_msg['timestamp'] = datetime.datetime.utcnow().isoformat()+'Z'
                 notification_msg['timestamp_ms'] = int(time.time())*1000
 
-                msg = json.dumps(notification_msg)
-                client.notify(msg,metadata_uuid)
-                logger.info(msg)
-        except Exception, e:
+                send_notification(client, notification_msg, metadata_uuid, logger)
+
+        except ProduceFailureError as error:
+            logger.error("CANNOT PUBLISH TO KAFKA - COMPONENT DOWN")
+            #component_down("/var/log/cloudsight/test",  "Could not publish to Kafka")
+
+        except Exception as e:
             logger.exception(e)
             logger.error("Uncaught exception: %s" % e)
+            raise
 
+def component_down(test_file_location, message):
+    with open(test_file_location, "a") as file:
+        file.write("DOWN {} {}".format(time.time(), message))
+
+def send_notification(client, notification_msg, metadata_uuid, logger):
+    msg = json.dumps(notification_msg)
+    # This block will retry 50 times, then throw a ProduceFailureError
+    for retry in range(50):
+        try:
+            client.notify(msg,metadata_uuid)
+        except ProduceFailureError as error:
+            if retry == 49:
+                logger.error("Retry count exhausted (client notify) - component down")
+                ## Raises the previous error
+                raise
+            else:
+                logger.debug("Attempting retry of client notify {}".format(retry))
+                time.sleep(1)
+                continue
+        break
+    logger.info(msg)
+
+def send_publish(client, msg_buf, metadata_uuid, logger):
+    # This block will retry 50 times, then throw a ProduceFailureError
+    for retry in range(50):
+        try:
+            client.publish(msg_buf.getvalue(),metadata_uuid)
+        except ProduceFailureError as error:
+            if retry == 49:
+                logger.error("Retry count exhausted (client publish) - component down")
+                ## Raises the previous error
+                raise
+            else:
+                logger.error("Attempting retry of client publish {}".format(retry))
+                time.sleep(1)
+                continue
+        break
 
 if __name__ == '__main__':
     log_dir = os.path.dirname(logger_file)
