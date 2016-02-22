@@ -6,11 +6,26 @@
 @author: Byungchul Tak, adapted this to compliance.
 (c) IBM Research 2015
 '''
+import os
+import re
+import csv
+import pickle
+import fileinput
+import subprocess
+import calendar
+import ConfigParser
+import stat
+import sys
+import time
+from collections import defaultdict
+from kafka import KafkaClient, SimpleProducer, KeyedProducer
+import uuid
 import argparse
 import csv
 import logging
 import logging.handlers
 import signal
+from multiprocessing import Pool
 from cStringIO import StringIO
 
 from pykafka.exceptions import ProduceFailureError
