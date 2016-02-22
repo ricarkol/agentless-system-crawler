@@ -33,6 +33,7 @@ HOST_SUPERVISOR_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${SUPERVISOR
 HOST_CLOUDSIGHT_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${CLOUDSIGHT_DIR}
 mkdir -p HOST_SUPERVISOR_LOG_DIR
 mkdir -p HOST_CLOUDSIGHT_LOG_DIR
+mkdir -p $HOST_CLOUDSIGHT_LOG_DIR/$config_file_name
 
 case $1 in
     start)
@@ -46,6 +47,9 @@ case $1 in
         # start compliance annotator
         set -x		
         #docker run -d --restart=always -p $COMPLIANCE_UI_PORT:80 \
+
+        # -v ${HOST_CLOUDSIGHT_LOG_DIR}/${config_file_name}/test:${CONTAINER_CLOUDSIGHT_LOG_DIR}/test \
+
         docker run -d --restart=always \
             -v ${HOST_SUPERVISOR_LOG_DIR}:${CONTAINER_SUPERVISOR_LOG_DIR} \
             -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \

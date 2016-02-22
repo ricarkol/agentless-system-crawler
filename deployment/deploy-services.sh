@@ -1153,6 +1153,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     #echo "COMPLIANCE_UI_PORT=$COMPLIANCE_UI_PORT" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "COMPONENT_NAME=$config_file_name" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
