@@ -374,7 +374,7 @@ def crawl_images(registry, kafka_host, kafka_zookeeper_port, config_topic, notif
                 container_name = str(uuid.uuid1())
                     
                 start_time = time.time()
-                crawl_command = "bash -x /opt/cloudsight/collector/crawler/crawl_docker_image.sh %s %s %s %s %s %s %s %s" % \
+                crawl_command = "bash -x /opt/cloudsight/collector/crawler/crawl_docker_image.sh %s %s %s %s %s %s %s %s %s" % \
                                                  (namespace, 
                                                   'kafka://%s/%s' % (kafka_host, config_topic), 
                                                   'kafka://%s/%s' % (kafka_host, notification_topic),
@@ -382,7 +382,8 @@ def crawl_images(registry, kafka_host, kafka_zookeeper_port, config_topic, notif
                                                   namespace,
                                                   owner_namespace,
                                                   request_uuid,
-                                                  instance_id)
+                                                  instance_id,
+                                                  log_file)
                                                   
                 logger.info('Invoking crawler: %s' % crawl_command)
                 
