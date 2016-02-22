@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [ $#  -ne 8 ]; then
+if [ $#  -lt 8 ]; then
         echo 1>&2 "Crawls a docker image. Actually runs a container with it and then crawls it."
         echo 1>&2 "  "
         echo 1>&2 "Usage: $0 <docker_image_id> <URL> <NOTIFICATION_URL>"
         echo 1>&2 "          <container_name> <cs_namespace> <owner_namespace>"
-        echo 1>&2 "          <request_id> <instance_id>"
+        echo 1>&2 "          <request_id> <instance_id> [<logfile>]"
         echo 1>&2 "  i.e.: $0 cloudsight-base kafka://demo3.sl.cloud9.ibm.com:9092/config"
         echo 1>&2 "                           kafka://demo3.sl.cloud9.ibm.com:9092/notification"
         echo 1>&2 "                           container_name_1 registry1/maureen1/ubuntu:latest"
@@ -24,6 +24,11 @@ OWNER_NAMESPACE=$6
 REQUEST_UUID=$7
 INSTANCE_ID=$8
 FEATURES=os,disk,file,package,config,dockerhistory,dockerinspect
+if [ $# -ge 9 ]; then
+  LOGFILE="--logfile $9"
+else
+  LOGFILE=
+fi
 
 if [ -f ./binaries/sleep ]
 then
@@ -156,7 +161,7 @@ echo "$REQUEST_UUID Running ${CRAWLER_PY}"
 printf "$REQUEST_UUID "
 python2.7 ${CRAWLER_PY} --crawlmode OUTCONTAINER --crawlContainers $CONTAINER_ID \
     --url $URL --since EPOCH \
-    --features $FEATURES --numprocesses 1 \
+    --features $FEATURES --numprocesses 1 $LOGFILE \
     --extraMetadataFile /tmp/crawler_metadata.json \
     --frequency -1 --compress false --options "{\"connection\": {}, \
 	\"file\": {\"exclude_dirs\": [\"boot\", \"dev\", \"proc\", \
