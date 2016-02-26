@@ -35,6 +35,8 @@ except:
     import json
 
 log_file = "/var/log/regcrawler.log"
+child_log_file = "/var/log/regcrawler_child.log"
+
 http_request_timeout= 120
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
@@ -383,7 +385,7 @@ def crawl_images(registry, kafka_host, kafka_zookeeper_port, config_topic, notif
                                                   owner_namespace,
                                                   request_uuid,
                                                   instance_id,
-                                                  log_file)
+                                                  child_log_file)
                                                   
                 logger.info('Invoking crawler: %s' % crawl_command)
                 
