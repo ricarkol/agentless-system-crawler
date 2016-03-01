@@ -36,10 +36,10 @@ except:
 ### Configuration Parameters ###
 ################################
 loop_sleep_time_per_image=60
-reg_update_sleep_time=10 # seconds between each consecutive rescan request within one loop
+reg_update_sleep_time=1 # seconds between each consecutive rescan request within one loop
 total_compliance_results=27 # this includes the overall verdict json
-logger_file = "/var/log/cloudsight/image_rescanner.log"
-log_prefix="rescan_v_007"
+logger_file_name = "image_rescanner.log"
+log_prefix="rescan_v_100"
 ################################
 ################################
 
@@ -52,11 +52,32 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 if __name__ == '__main__':
 
-    log_dir = os.path.dirname(logger_file)
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument('--elasticsearch-url',  type=str, required=True, help='elasticsearch url: host:port')
+    parser.add_argument('--regcrawl1-ip',  type=str, required=True, help='IP address of the REGCRAWL1 host')
+    parser.add_argument('--regcrawl2-ip',  type=str, required=False, default='', help='IP address of the REGCRAWL2 host')
+    parser.add_argument('--regcrawl3-ip',  type=str, required=False, default='', help='IP address of the REGCRAWL3 host')
+    parser.add_argument('--singlemode',   action='store_true', help='Run one iteration')
+    parser.add_argument('--dryrun',  action='store_true', help='Only print out curl command without executing')
+    parser.add_argument('--image',  type=str, required=False, default='all', help='Image with tag')
+    parser.add_argument('--numdays',  type=int, required=False, default=2, help='Image with tag')
+    parser.add_argument('--logdir',  type=str, required=False, default='/var/log/cloudsight', help='directory for log')
+    args = parser.parse_args()
+    elasticsearch_ip_port = args.elasticsearch_url
+    regcrawl1_ip = args.regcrawl1_ip
+    regcrawl2_ip = args.regcrawl2_ip
+    regcrawl3_ip = args.regcrawl3_ip
+    singlemode = args.singlemode
+    image = args.image
+    numdays = args.numdays
+    log_dir = args.logdir
+    dryrun = args.dryrun
+
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
         os.chmod(log_dir,0755)
 
+    logger_file=os.path.join(log_dir, logger_file_name)
     format = '%(asctime)s %(levelname)s %(lineno)s %(funcName)s: %(message)s'
     logging.basicConfig(format=format, level=logging.INFO)
     logger = logging.getLogger(__name__)
@@ -71,22 +92,12 @@ if __name__ == '__main__':
     urllib3_logger = logging.getLogger('urllib3')
     urllib3_logger.setLevel(logging.CRITICAL)
 
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument('--elasticsearch-url',  type=str, required=True, help='elasticsearch url: host:port')
-    parser.add_argument('--regcrawl1-ip',  type=str, required=True, help='IP address of the REGCRAWL1 host')
-    parser.add_argument('--regcrawl2-ip',  type=str, required=True, help='IP address of the REGCRAWL2 host')
-    parser.add_argument('--regcrawl3-ip',  type=str, required=True, help='IP address of the REGCRAWL3 host')
-    parser.add_argument('--test',  type=bool, required=False, default=False, help='Run in test mode')
-    args = parser.parse_args()
-    elasticsearch_ip_port = args.elasticsearch_url
-    regcrawl1_ip = args.regcrawl1_ip
-    regcrawl2_ip = args.regcrawl2_ip
-    regcrawl3_ip = args.regcrawl3_ip
-    test = args.test
+
 
     # TODO Need to collect list of namespaces from the registry-monitor and registry-update
 
     #print elasticsearch_ip_port, regcrawl1_ip, regcrawl2_ip, regcrawl3_ip
+    logger.info("======================================================================================")
     logger.info(log_prefix+" 001 "+elasticsearch_ip_port+" "+regcrawl1_ip+" "+regcrawl2_ip+" "+regcrawl3_ip)
     #time.sleep(5)
     #logger.info("XXXX1-1 regcrawl1_ip:"+regcrawl1_ip)
@@ -101,57 +112,74 @@ if __name__ == '__main__':
     while True:
         try:
             logline = ""
-            # Retrieve namespaces
             today_str=""
             now = datetime.datetime.now()
             today_str=str(now.year)+"."+str(now.month).zfill(2)+"."+str(now.day-0).zfill(2)
             #today_str="2015.11.05"
 
             oneday = datetime.timedelta(days=1)
-            yesterday = now - oneday
-            yesterday_str=str(yesterday.year)+"."+str(yesterday.month).zfill(2)+"."+str(yesterday.day-0).zfill(2)
-            #print "Today", today_str 
-            #print "Yesterday", yesterday_str
 
-            logger.info(log_prefix+" 002 "+yesterday_str+" "+today_str)
+            config_days="config-"+today_str
+            compliance_days="compliance-"+today_str
+            vulnerability_days="vulnerabilityscan-"+today_str
+            newday = now
+            for i in range(1,numdays):
+                newday = newday - oneday
+                newday_str=str(newday.year)+"."+str(newday.month).zfill(2)+"."+str(newday.day-0).zfill(2)
+                config_days=config_days+",config-"+newday_str
+                compliance_days=compliance_days+",compliance-"+newday_str
+                vulnerability_days=vulnerability_days+",vulnerabilityscan-"+newday_str
+
+            logger.info(log_prefix+" 002 "+config_days)
+            logger.info(log_prefix+" 002 "+compliance_days)
+            logger.info(log_prefix+" 002 "+vulnerability_days)
 
             namespace_list=[]
-            ####################################################
-            # Build the list of namespaces from config index
-            #logger.info("Building namespace list.")
-            url = "http://"+elasticsearch_ip_port+"/config-"+yesterday_str+",config-"+today_str+"/_search?pretty=true"
-            data = "{ \
-                        \"aggs\" : { \
-                            \"my_agg\" : { \
-                                \"terms\" : { \
-                                    \"field\" : \"namespace.raw\", \
-                                    \"size\" : 0 \
+            if (image == "all"):
+                ####################################################
+                # Build the list of namespaces from config index
+                #logger.info("Building namespace list.")
+                url = "http://"+elasticsearch_ip_port+"/"+config_days+"/_search?pretty=true"
+                data = "{ \
+                            \"aggs\" : { \
+                                \"my_agg\" : { \
+                                    \"terms\" : { \
+                                        \"field\" : \"namespace.raw\", \
+                                        \"size\" : 0 \
+                                    } \
                                 } \
-                            } \
-                        }, \
-                        \"size\":0 \
-                    }'"
-            response = requests.get(url, data=data)
-            if (response.ok):
-                #print response.content
-                outdata = json.loads(response.content)
-                if "error" in outdata.keys():
-                    logger.error(log_prefix+" Failed to retrieve namespace list data from ES. Idling for 10 minutes.")
-                    time.sleep(600)
-                    continue
-                # collect list of namespaces in today's config index
-                if "aggregations" in outdata.keys() and "my_agg" in outdata["aggregations"] and "buckets" in outdata["aggregations"]["my_agg"]:
-                    nmspc_dict = outdata["aggregations"]["my_agg"]["buckets"]
-                    for i in range(0,len(nmspc_dict)):
-                        json_str = json.dumps(nmspc_dict[i])
-                        json_data = json.loads(json_str)
-                        namespace_list.append(json_data["key"])
-                        #print json_data["key"]
+                            }, \
+                            \"size\":0 \
+                        }'"
+                response = requests.get(url, data=data)
+                if (response.ok):
+                    #print response.content
+                    outdata = json.loads(response.content)
+                    if "error" in outdata.keys():
+                        if singlemode:
+                            logger.error(log_prefix+" Failed to retrieve namespace list data from ES.")
+                            sys.exit(1)                          
+                        else:
+                            logger.error(log_prefix+" Failed to retrieve namespace list data from ES. Idling for 10 minutes.")
+                            time.sleep(600)
+                            continue
+                    # collect list of namespaces in today's config index
+                    if "aggregations" in outdata.keys() and "my_agg" in outdata["aggregations"] and "buckets" in outdata["aggregations"]["my_agg"]:
+                        nmspc_dict = outdata["aggregations"]["my_agg"]["buckets"]
+                        for i in range(0,len(nmspc_dict)):
+                            json_str = json.dumps(nmspc_dict[i])
+                            json_data = json.loads(json_str)
+                            namespace_list.append(json_data["key"])
+                            #print json_data["key"]
+                else:
+                    response.raise_for_status()
+                #time.sleep(1)
+                logger.info(log_prefix+" 003 namespace list collected from config index: %d images found" % len(namespace_list))
+                if singlemode:
+                    print (log_prefix+" 003 namespace list collected from config index: %d images found" % len(namespace_list))
             else:
-                response.raise_for_status()
-            #time.sleep(1)
-            logger.info(log_prefix+" 003 namespace list collected from config index: %d images found" % len(namespace_list))
-            
+                namespace_list.append(image)
+
             rescan_list=set()
             ####################################################
             # Check compliance results
@@ -160,7 +188,7 @@ if __name__ == '__main__':
             compliance_rescan_num = 0
             for nmspc in namespace_list:
                 #print nmspc
-                url = "http://"+elasticsearch_ip_port+"/compliance-"+yesterday_str+",compliance-"+today_str+"/_search?pretty=true"
+                url = "http://"+elasticsearch_ip_port+"/"+compliance_days+"/_search?pretty=true"
                 data = "{ \
                         \"query\": { \
                             \"bool\":{ \
@@ -187,9 +215,13 @@ if __name__ == '__main__':
                     #print response.content
                     outdata = json.loads(response.content)
                     if "error" in outdata.keys():
-                        logger.error(log_prefix+" Failed to retrieve compliance scan data from ES. Idling for 10 minutes.")
-                        time.sleep(600)
-                        continue
+                        if singlemode:
+                            logger.error(log_prefix+" Failed to retrieve compliance scan data from ES.")
+                            sys.exit(1)
+                        else:
+                            logger.error(log_prefix+" Failed to retrieve compliance scan data from ES. Idling for 10 minutes.")
+                            time.sleep(600)
+                            continue
                     if "aggregations" in outdata.keys() and "my_agg" in outdata["aggregations"] and "buckets" in outdata["aggregations"]["my_agg"]:
                         comp_result_dict = json.loads(response.content)["aggregations"]["my_agg"]["buckets"]
                         #for i in range(0,len(comp_result_dict)):
@@ -200,10 +232,15 @@ if __name__ == '__main__':
                             rescan_list.add(nmspc)
                             compliance_rescan_num = compliance_rescan_num + 1
                             logger.info("%s missing some compliance scan! Only %d found" % (nmspc, len(comp_result_dict)))
+                        else:
+                            logger.info("%s compliance scan OK" % nmspc)
+
                 else:
                     response.raise_for_status()
 
             logger.info(log_prefix+" 004 namespace list collected from compliance index %d images to rescan" % compliance_rescan_num)
+            if singlemode:
+                print(log_prefix+" 004 namespace list collected from compliance index %d images to rescan" % compliance_rescan_num)
 
             ####################################################
             # Check vulnerability results
@@ -211,7 +248,7 @@ if __name__ == '__main__':
             #logger.info("Checking for missing vulnerability scans.")
             vulnerability_rescan_num = 0
             for nmspc in namespace_list:
-                url = "http://"+elasticsearch_ip_port+"/vulnerabilityscan-"+yesterday_str+",vulnerabilityscan-"+today_str+"/_count?pretty=true"
+                url = "http://"+elasticsearch_ip_port+"/"+vulnerability_days+"/_count?pretty=true"
                 data="{ \
                         \"query\" : { \
                             \"bool\":{ \
@@ -231,10 +268,14 @@ if __name__ == '__main__':
                         rescan_list.add(nmspc)
                         vulnerability_rescan_num = vulnerability_rescan_num + 1
                         logger.info("%s missing vulnerability scan!" % nmspc)
+                    else:
+                        logger.info("%s vulnerability scan OK" % nmspc)
                 else:
                     response.raise_for_status()
 
             logger.info(log_prefix+" 005 namespace list collected from vulnerabilityscan index %d images to rescan" % vulnerability_rescan_num)
+            if singlemode:
+                print(log_prefix+" 005 namespace list collected from vulnerabilityscan index %d images to rescan" % vulnerability_rescan_num)
 
             #########################################################
             # Issue rescan command
@@ -264,7 +305,9 @@ if __name__ == '__main__':
                 data="{ \"repository\":\""+repository+"\",\"tag\":\""+tag+"\",\"id\":\""+dummy_id+"\"}"
                 headers={'Accept': 'application/json', 'Content-Type': 'application/json'}
                 logger.info(log_prefix+" 009 "+log_prefix+" url="+url+" data="+data)
-                if not test:
+                if dryrun:
+                    logger.info("curl --silent -v -XPOST -H 'Content-Type: application/json' -d '{\"repository\": \"%s\", \"tag\": \"%s\", \"id\": \"%s\"}' http://localhost:8000/registry/update" % (repository, tag, dummy_id))
+                else:
                     response = requests.post(url, data=data, headers=headers)
                     if (response.ok):
                         #print response.content
@@ -275,11 +318,16 @@ if __name__ == '__main__':
                     # Between each issue of rescan command, it sleeps some time not to choke the reg update container.
                     time.sleep(reg_update_sleep_time)
                 
-            # Sleep length is dependent upon the number of rescanned images. If there is no image to rescan, it waits 5 min.
-            sleep_time = 3600+loop_sleep_time_per_image*rescan_count
-            logger.info(log_prefix+" 010 Sleeping "+str(sleep_time)+" seconds. There are "+str(len(namespace_list))+" namespaces.")
-            time.sleep(sleep_time)
         except Exception as e:
             logger.info('Rescanner exception %s. Sleeping for a minute then restarting' % str(e))
             time.sleep(60)
+
+        if singlemode:
+            break
+
+        # Sleep length is dependent upon the number of rescanned images. If there is no image to rescan, it waits 5 min.
+        sleep_time = 3600+loop_sleep_time_per_image*rescan_count
+        logger.info(log_prefix+" 010 Sleeping "+str(sleep_time)+" seconds. There are "+str(len(namespace_list))+" namespaces.")
+        time.sleep(sleep_time)
+
 
