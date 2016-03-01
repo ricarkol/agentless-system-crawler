@@ -122,6 +122,8 @@ class KafkaInterface(object):
     def next_frame(self):
         while True:
             message = self.consumer.consume()
+            # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
+            # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
             if message is not None:
                 yield message.value
         
