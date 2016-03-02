@@ -1,5 +1,7 @@
 CloudSight is a Cloud-native application monitoring and analytics service.
 
+Please raise any issues in the alchemy-va/problems repository.
+
 Build and deploy instructions are in docs/INSTALL.
 
 Directory structure:
