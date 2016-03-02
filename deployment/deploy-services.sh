@@ -1639,7 +1639,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGCRAWL3=$REGCRAWL3" >>$config_file
 
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
-                    $SCP ../kelk-deployment/latest/components/image_rescanner.sh ${SSH_USER}@$host:image_rescanner.sh
+                    $SCP startup/image_rescanner.sh ${SSH_USER}@$host:image_rescanner.sh
                         STAT=$?
                             exit_code=$((exit_code + STAT))
 
