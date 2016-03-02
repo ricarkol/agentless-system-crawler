@@ -8,5 +8,6 @@ RUN pip install elasticsearch elasticsearch-dsl
 RUN pip install requests
 
 ADD . /opt/rescanner/
+RUN chmod u+x /opt/rescanner/rescan.py
 
 ENTRYPOINT [ "/opt/rescanner/rescan.py" ]
