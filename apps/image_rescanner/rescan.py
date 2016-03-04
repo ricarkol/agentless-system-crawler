@@ -15,6 +15,7 @@ import datetime
 import csv
 import requests
 import uuid
+import pprint
 
 #import urllib
 #import urllib2
@@ -49,6 +50,22 @@ def sigterm_handler(signum=None, frame=None):
     sys.exit(0)
 signal.signal(signal.SIGTERM, sigterm_handler)
 
+def index_date_exists(index):
+    url = "http://"+elasticsearch_ip_port+"/"+index+"/_search?pretty=true"
+    try:
+        response = requests.get(url)
+        # print response.content
+        if (response.ok):
+            return True
+        else:
+            outdata = json.loads(response.content)
+            if "error" in outdata.keys():
+                print outdata["error"]
+            return False
+    except Exception as e:
+        print(str(e))
+        return False
+    return True
 
 if __name__ == '__main__':
 
@@ -60,7 +77,8 @@ if __name__ == '__main__':
     parser.add_argument('--singlemode',   action='store_true', help='Run one iteration')
     parser.add_argument('--dryrun',  action='store_true', help='Only print out curl command without executing')
     parser.add_argument('--image',  type=str, required=False, default='all', help='Image with tag')
-    parser.add_argument('--numdays',  type=int, required=False, default=2, help='Image with tag')
+    parser.add_argument('--numdays',  type=int, required=False, default=2, help='How many days to process')
+    parser.add_argument('--startday',  type=int, required=False, default=0, help='How many days ago should the first day be')
     parser.add_argument('--logdir',  type=str, required=False, default='/var/log/cloudsight', help='directory for log')
     args = parser.parse_args()
     elasticsearch_ip_port = args.elasticsearch_url
@@ -70,6 +88,7 @@ if __name__ == '__main__':
     singlemode = args.singlemode
     image = args.image
     numdays = args.numdays
+    startday = args.startday
     log_dir = args.logdir
     dryrun = args.dryrun
 
@@ -92,43 +111,54 @@ if __name__ == '__main__':
     urllib3_logger = logging.getLogger('urllib3')
     urllib3_logger.setLevel(logging.CRITICAL)
 
-
-
     # TODO Need to collect list of namespaces from the registry-monitor and registry-update
 
-    #print elasticsearch_ip_port, regcrawl1_ip, regcrawl2_ip, regcrawl3_ip
     logger.info("======================================================================================")
     logger.info(log_prefix+" 001 "+elasticsearch_ip_port+" "+regcrawl1_ip+" "+regcrawl2_ip+" "+regcrawl3_ip)
-    #time.sleep(5)
-    #logger.info("XXXX1-1 regcrawl1_ip:"+regcrawl1_ip)
-    #cmd="ssh -o StrictHostKeyChecking=no root@"+regcrawl1_ip+" ls"
-    #p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    #ret = ""
-    #for line in p.stdout.readlines():
-    #    ret = ret+line
-    #logger.info("XXXX1-2 "+ret)
 
     counter=0
     while True:
         try:
-            logline = ""
-            today_str=""
-            now = datetime.datetime.now()
-            today_str=str(now.year)+"."+str(now.month).zfill(2)+"."+str(now.day-0).zfill(2)
-            #today_str="2015.11.05"
+            if (numdays == 0):
+	            config_days="config-*"
+	            compliance_days="compliance-*"
+	            vulnerability_days="vulnerabilityscan-*"
+            else:
+	            today_str=""
+	            oneday = datetime.timedelta(days=1)
+	            now = datetime.datetime.now()
+	            for i in range(0,startday):
+	            	now = now - oneday
 
-            oneday = datetime.timedelta(days=1)
+	            today_str=str(now.year)+"."+str(now.month).zfill(2)+"."+str(now.day-0).zfill(2)
 
-            config_days="config-"+today_str
-            compliance_days="compliance-"+today_str
-            vulnerability_days="vulnerabilityscan-"+today_str
-            newday = now
-            for i in range(1,numdays):
-                newday = newday - oneday
-                newday_str=str(newday.year)+"."+str(newday.month).zfill(2)+"."+str(newday.day-0).zfill(2)
-                config_days=config_days+",config-"+newday_str
-                compliance_days=compliance_days+",compliance-"+newday_str
-                vulnerability_days=vulnerability_days+",vulnerabilityscan-"+newday_str
+	            config_days_list=[]
+	            compliance_days_list=[]
+	            vulnerability_days_list=[]
+	            newday = now
+	            for i in range(0,numdays):
+	                newday_str=str(newday.year)+"."+str(newday.month).zfill(2)+"."+str(newday.day-0).zfill(2)
+	                new_config_day="config-"+newday_str
+	                if index_date_exists(new_config_day):
+	                    config_days_list.append(new_config_day)
+	                new_compliance_day="compliance-"+newday_str
+	                if index_date_exists(new_compliance_day):
+	                    compliance_days_list.append(new_compliance_day)
+	                new_vulnerability_day="vulnerabilityscan-"+newday_str
+	                if index_date_exists(new_vulnerability_day):
+	                    vulnerability_days_list.append(new_vulnerability_day)
+	                newday = newday - oneday
+
+	            if not config_days_list:
+	                raise LookupError("No config index for this date range")
+	            if not compliance_days_list:
+	                raise LookupError("No compliance index for this date range")
+	            if not vulnerability_days_list:
+	                raise LookupError("No vulnerability index for this date range")
+
+	            config_days=",".join(config_days_list)
+	            compliance_days=",".join(compliance_days_list)
+	            vulnerability_days=",".join(vulnerability_days_list)
 
             logger.info(log_prefix+" 002 "+config_days)
             logger.info(log_prefix+" 002 "+compliance_days)
@@ -177,6 +207,9 @@ if __name__ == '__main__':
                 logger.info(log_prefix+" 003 namespace list collected from config index: %d images found" % len(namespace_list))
                 if singlemode:
                     print (log_prefix+" 003 namespace list collected from config index: %d images found" % len(namespace_list))
+                    # for nmspc in namespace_list:
+                    #     logger.info(nmspc)
+
             else:
                 namespace_list.append(image)
 
@@ -222,6 +255,7 @@ if __name__ == '__main__':
                             logger.error(log_prefix+" Failed to retrieve compliance scan data from ES. Idling for 10 minutes.")
                             time.sleep(600)
                             continue
+#                    pprint.pprint(outdata)
                     if "aggregations" in outdata.keys() and "my_agg" in outdata["aggregations"] and "buckets" in outdata["aggregations"]["my_agg"]:
                         comp_result_dict = json.loads(response.content)["aggregations"]["my_agg"]["buckets"]
                         #for i in range(0,len(comp_result_dict)):
@@ -319,8 +353,11 @@ if __name__ == '__main__':
                     time.sleep(reg_update_sleep_time)
                 
         except Exception as e:
-            logger.info('Rescanner exception %s. Sleeping for a minute then restarting' % str(e))
-            time.sleep(60)
+	        if singlemode:
+	            print('Rescanner exception %s' % str(e))
+	        else:
+	            logger.info('Rescanner exception %s. Sleeping for a minute then restarting' % str(e))
+	            time.sleep(60)
 
         if singlemode:
             break
