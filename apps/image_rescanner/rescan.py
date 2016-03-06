@@ -110,6 +110,9 @@ if __name__ == '__main__':
     # for each requests.get call. By setting level to CRITICAL, it is suppressing most of the logs.
     urllib3_logger = logging.getLogger('urllib3')
     urllib3_logger.setLevel(logging.CRITICAL)
+    # To get rid of messages on a mac also need this:
+    requests_logger = logging.getLogger('requests')
+    requests_logger.setLevel(logging.CRITICAL)
 
     # TODO Need to collect list of namespaces from the registry-monitor and registry-update
 
