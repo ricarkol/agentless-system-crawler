@@ -204,6 +204,9 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
         if os.path.exists(packages_filename):
             with open(packages_filename) as f:
                 content = f.readlines()
+        else:
+            logger.info("ERROR package file not found while checking 9-0-a.",nmspace,crawltm)
+            content = []
     
         # Initialize
         str_compliant = "true"
@@ -243,9 +246,12 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
 
     elif comp_id=="Linux.9-0-b":
 
-        packages_filename = prefix+"/__compliance_packages.txt"
-        with open(packages_filename) as f:
-            content = f.readlines()
+        if os.path.exists(packages_filename):
+            with open(packages_filename) as f:
+                content = f.readlines()
+        else:
+            logger.info("ERROR package file not found while checking 9-0-b.",nmspace,crawltm)
+            content = []
     
         # Initialize
         str_compliant = "true"
@@ -285,9 +291,12 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
     
     elif comp_id=="Linux.9-0-c":
 
-        packages_filename = prefix+"/__compliance_packages.txt"
-        with open(packages_filename) as f:
-            content = f.readlines()
+        if os.path.exists(packages_filename):
+            with open(packages_filename) as f:
+                content = f.readlines()
+        else:
+            logger.info("ERROR package file not found while checking 9-0-c.",nmspace,crawltm)
+            content = []
     
         # Initialize
         str_compliant = "true"
@@ -317,10 +326,13 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
 
     elif comp_id=="Linux.9-0-d":
 
-        packages_filename = prefix+"/__compliance_packages.txt"
-        with open(packages_filename) as f:
-            content = f.readlines()
-    
+        if os.path.exists(packages_filename):
+            with open(packages_filename) as f:
+                content = f.readlines()
+        else:
+            logger.info("ERROR package file not found while checking 9-0-d.",nmspace,crawltm)
+            content = []
+
         # Initialize
         str_compliant = "true"
         str_reason = "ftp server not found"
