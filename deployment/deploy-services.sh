@@ -23,6 +23,11 @@ elif [ $# -eq 4 ]
         echo "Processing all containers"
         IGNORE_ES=false
         CONTAINER_NAME=
+    elif [ "$4" = "singlescan" ]
+        then
+        echo "Processing container:" $4 " as registry-monitor"
+        IGNORE_ES=true
+        CONTAINER_NAME=cloudsight-registry-monitor-singlerun
     else
         echo "Processing container:" $4
         IGNORE_ES=false
@@ -70,6 +75,12 @@ done
 
 cloudsight_scripts_dir="/opt/cloudsight/kafka-elk-cloudsight"
 . ../config/component_configs.sh
+
+if [ "$4" = "singlescan" ]
+    then
+    echo "Processing singlescan"
+    REGISTRY_MONITOR_SINGLE_RUN=True
+fi
 
 config_dir="/tmp/"
 
@@ -1484,7 +1495,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         echo "Failed to start $container.$count in $host"
                     fi
                 ;;
-                $REGISTRY_MONITOR_CONT)
+                $REGISTRY_MONITOR_CONT | $REGISTRY_MONITOR_SINGLERUN_CONT)
                     KAFKA_ENDPOINT=$(eval "echo \${KAFKA1}")
                     echo "Connecting to KAFKA $KAFKA_ENDPOINT"
                     balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
