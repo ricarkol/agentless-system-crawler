@@ -30,6 +30,12 @@ if [ -z "$IMAGE_TAG" ] ; then
     IMAGE_TAG="latest"
 fi
 
+if [ "$REGISTRY_MONITOR_SINGLE_RUN" = "True" ]; then
+    RESTART_ALWAYS=
+else
+    RESTART_ALWAYS=--restart=always
+fi
+
 HOST_CLOUDSIGHT_LOG_DIR=${HOST_CONTAINER_LOG_DIR}/${CONTAINER_NAME}/${CLOUDSIGHT_DIR}
 mkdir -p HOST_CLOUDSIGHT_LOG_DIR
 
@@ -45,7 +51,7 @@ case $1 in
 
         mkdir -p $REGCRAWL_HOST_DATA_DIR
 
-        echo "docker run -d --restart=always" \
+        echo "docker run -d ${RESTART_ALWAYS}" \
              "-v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR}" \
              "-v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR}" \
              "--name $CONTAINER_NAME $REGISTRY_MONITOR_IMG --user $REGISTRY_USER" \
@@ -57,7 +63,7 @@ case $1 in
              "$REGISTRY_URL $KAFKA_SERVICE --instance-id $INSTANCE_ID"
 
         # Start registry-monitor
-        docker run -m=${MAX_CONTAINER_MEMORY} -d --restart=always \
+        docker run -m=${MAX_CONTAINER_MEMORY} -d "$RESTART_ALWAYS" \
                    -v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    --name "$CONTAINER_NAME" \
