@@ -198,11 +198,12 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
     outstr=""
     ret_status = 0
 
+    packages_filename = prefix+"/__compliance_packages.txt"
     if comp_id=="Linux.9-0-a":
 
-        packages_filename = prefix+"/__compliance_packages.txt"
-        with open(packages_filename) as f:
-            content = f.readlines()
+        if os.path.exists(packages_filename):
+            with open(packages_filename) as f:
+                content = f.readlines()
     
         # Initialize
         str_compliant = "true"
