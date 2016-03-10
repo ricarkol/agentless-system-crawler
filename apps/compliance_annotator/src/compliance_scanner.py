@@ -148,11 +148,9 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
                     print "Directory path:", subdir
                     return 0
 
-    #print "Uncrawling for", in_namespace, in_tm
     logger.info(in_metadata_param['uuid']+" Uncrawling for "+in_namespace+" "+in_tm)
 
     prefix = temporary_directory+"/compliance-"+str(uuid.uuid4())
-    #print "prefix:",prefix
     logger.info(in_metadata_param['uuid']+" uncrawl directory prefix:"+prefix)
 
     #######################
@@ -199,7 +197,6 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
         if stat.S_ISREG(fmode):
             os.chmod(prefix + filepath, fmode)
 
-    #print "    03 files reproduced in local file system"
     logger.info(in_metadata_param['uuid']+" files recreated in local file system")
 
     # Go through the second pass and update the mode of directories
@@ -216,10 +213,9 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
             if stat.S_ISDIR(fmode):
                 os.chmod(prefix + filepath, fmode)
         except OSError as exception:
-            print "WARNING: os.chmod failed for "+prefix + filepath
+            logger.info("WARNING: os.chmod failed for "+prefix + filepath)
             continue
 
-    #print "    04 mode of files updated"
     logger.info(in_metadata_param['uuid']+" file mode udpated")
 
     ############################
@@ -238,7 +234,7 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
             if not os.path.exists( prefix + os.path.dirname(filepath) ):
                 os.makedirs(prefix + os.path.dirname(filepath))
         except OSError as exception:
-            print "WARNING: os.makedirs failed for "+prefix + os.path.dirname(filepath)
+            logger.info("WARNING: os.makedirs failed for "+prefix + os.path.dirname(filepath))
             continue
 
         cfilename = prefix + filepath
@@ -248,7 +244,6 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
         cfile.write(content.encode("UTF-8"))
         cfile.close()
 
-    #print "    06 config file contents filled in"
     logger.info(in_metadata_param['uuid']+" config file content filled in")
 
     # Create tmp directory under ${prefix} directory so that shell script can use tmp directory
@@ -256,7 +251,7 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
         if not os.path.exists( prefix + "/tmp" ):
             os.makedirs( prefix + "/tmp" )
     except OSError as exception:
-        print "WARNING: os.makedirs failed for "+prefix + "/tmp"
+        logger.info("WARNING: os.makedirs failed for "+prefix + "/tmp")
 
     ##########################
     # Uncrawl Package Feature
@@ -281,9 +276,8 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
     #f.write(in_owner_namespace+"\n")
     #f.close()
     json.dump(in_metadata_param, open(metadata_filename,'w+'))
-    #print "    07 metadata file created"
     logger.info(in_metadata_param['uuid']+" metadata file created")
-    return 0
+    return prefix
 
 def annotation_worker(param):
     rule_id = param[0]
@@ -370,20 +364,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                         metadata = json.loads(fvalue)
                 stream.close()
 
-
-                ############################
-                ############################################
-                ############################################################
-                ############################################################################
-                #namespace = str(metadata['namespace']).strip()
-                #if not "XXXXXXXX" in namespace:
-                #    logger.info("-------Skipping------- "+namespace)
-                #    continue
-                ############################################################################
-                ############################################################
-                ############################################
-                ############################
-
+                # Skip unrecognizable frames.
                 if not metadata==None and not 'namespace' in metadata.keys():
                     logger.info("Frame with no namespace detected. Skipping.")
                     continue
@@ -391,7 +372,6 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                     logger.info("Frame with no uuid detected. Skipping. namespace="+metadata['namespace'])
                     continue
 
-                #logger.info("------------------------------------------------------------")
                 logger.info(metadata['uuid']+" NEW_FRAME -- "+str(metadata))
                 log_message=""
                 log_message=log_message+"len(files):"+str(len(files))
@@ -496,17 +476,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 features = metadata.get('features',None)
                 if features and 'configparam' in features:
                     logger.info(metadata_uuid+" 01 Skipping configparam frame for "+namespace+" "+timestamp)
-
-                    #for i in range(0,len(configparam)):
-                    #    if "ssh" in str(configparam[i]):
-                    #        logger.info(configparam[i])
-
                     continue
-
-                #if len(files)>0:
-                #    for i in range(0,len(files)):
-                #        if "/etc/init/ssh" in str(files[i]):
-                #            logger.info(files[i])
 
                 if len(files)==0 and len(configs)==0 and len(packages)==0 and len(osinfo)==0:
                     os_supported = False
@@ -531,7 +501,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
 
                 send_notification(client, notification_msg, metadata_uuid, logger)
 
-                UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
+                prefix = UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
 
                 ####
                 ### this code is used to get the list of rules to run from scserver
@@ -596,9 +566,6 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 #logger.info(metadata_uuid+" 09 Compliance annotation finished for "+namespace+" "+timestamp)
                 #######################################################################
 
-
-                ######################################################################
-                prefix = GetUncrawlDirectoryName(namespace, timestamp)
                 reqid = 1
                 msg_buf = StringIO()
                 msg_buf.write(json.dumps(metadata))
@@ -608,9 +575,6 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                     msg_buf.write(output.strip())
                     msg_buf.write('\n')
                     reqid = reqid + 1
-                #logger.info(msg_buf.getvalue())
-                ######################################################################
-
 
                 # Form the overall compliance result
                 combined_output = msg_buf.getvalue()
@@ -652,7 +616,6 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 logger.info(metadata_uuid+" 11 Compliance verdict posted for "+namespace+" "+timestamp+" verdict:"+verdict_word)
 
                 # Delete uncrawled data
-                prefix = GetUncrawlDirectoryName(namespace, timestamp)
                 RemoveTempContent(prefix)
                 logger.info(metadata_uuid+" 12 Uncrawl directory deleted "+prefix)
 
