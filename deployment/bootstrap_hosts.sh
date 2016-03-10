@@ -28,6 +28,7 @@ fi
 SCP="scp -o StrictHostKeyChecking=no"
 SSH="ssh -o StrictHostKeyChecking=no"
 
+# Reads in from hosts, manipulates the string of hosts into an array of variable names
 if [ "$TARGET_HOST" != "" ]
    then
    HOSTS_LINE=`grep "HOSTS=(" ../config/hosts.${ENV}`
