@@ -229,7 +229,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     echo "Sleeping for 15 seconds to starve upstreams before performing additional shutdowns"
                     sleep 15
                 ;;
-                $REGISTRY_MONITOR_CONT)
+                $REGISTRY_MONITOR_CONT | $REGISTRY_MONITOR_SINGLERUN_CONT)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "delete" $count
                 ;;
