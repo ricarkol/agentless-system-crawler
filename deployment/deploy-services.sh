@@ -1506,7 +1506,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     #create config file
                     config_file_name=${REGISTRY_MONITOR_CONT}.${count}.sh
                     config_file=${config_dir}${config_file_name}
-		
+
                     echo "#!/bin/bash" >$config_file
                     echo "REGISTRY_MONITOR_IMG=$REGISTRY_MONITOR_IMG" >>$config_file
                     echo "REGISTRY_MONITOR_CONT=$REGISTRY_MONITOR_CONT" >>$config_file
