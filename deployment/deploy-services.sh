@@ -156,7 +156,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 echo "================================================"
                 echo "SHUTTING DOWN $container $count IN $host"
                 config_file=${container}.${count}.sh
-		case "$container" in
+                case "$container" in
                 $ES_CONT)
                     if [ "$IGNORE_ES" = "true" ]
                         then
@@ -231,8 +231,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 ;;
                 $REGISTRY_MONITOR_CONT | $REGISTRY_MONITOR_SINGLERUN_CONT)
                     config_file=${REGISTRY_MONITOR_CONT}.${count}.sh
-		    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
-		    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "delete" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "delete" $count
                 ;;
                 $REGCRAWLER)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service regcrawler "stop"
