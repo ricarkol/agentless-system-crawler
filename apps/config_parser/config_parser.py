@@ -315,7 +315,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                         except KafkaError, e:
                             logger.error('%s: Filed to send notification to kafka for %s: %s' % \
                                          (request_id, namespace, str(e)))
-                        raise
+                        continue
 
                 else:
                     logger.info("%s: No annotations found in frame for %s" % \
