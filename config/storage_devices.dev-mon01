@@ -20,7 +20,8 @@ declare -A DOCKER_DEVICES=(
   [$ES4]="/dev/xvdc" 
   [$ES5]="/dev/xvdc" 
   [$KAFKA1]="/dev/xvdc" 
-  [$KAFKA2]="/dev/xvdc" 
+  [$KAFKA2]="/dev/xvdc"
+  [$KAFKA3]="/dev/xvdc"
   )
 DOCKER_PARTITION_START=1MB
 DOCKER_PARTITION_END=100GB
@@ -45,5 +46,6 @@ declare -A DATA_DEVICES=(
   [$ES4]="/dev/xvdc" 
   [$ES5]="/dev/xvdc" 
   [$KAFKA1]="/dev/xvdc" 
-  [$KAFKA2]="/dev/xvdc" 
+  [$KAFKA2]="/dev/xvdc"
+  [$KAFKA3]="/dev/xvdc"
   )
