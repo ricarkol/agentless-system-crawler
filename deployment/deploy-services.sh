@@ -232,7 +232,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 ;;
                 $REGISTRY_MONITOR_CONT | $REGISTRY_MONITOR_SINGLERUN_CONT)
 		    echo "[SEG] #2 $cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count"
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
+                    config_file=${REGISTRY_MONITOR_CONT}.${count}.sh
+		    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "stop" $count
                     echo "[SEG] #3 $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh \"delete\" $count"
 		    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file $cloudsight_scripts_dir/registry_monitor.sh "delete" $count
                 ;;
