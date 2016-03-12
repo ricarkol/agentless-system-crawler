@@ -48,11 +48,12 @@ feature2channel     = {
                    'group':        'Group'
                    }
 
-logger          = None
-log_file        = '/var/log/cloudsight/config-parser.log'
-obj_factory     = None
-processor_group = "config-parser"
-max_kafka_retries= 600
+logger                = None
+log_file              = '/var/log/cloudsight/config-parser.log'
+obj_factory           = None
+processor_group       = "config-parser"
+max_kafka_retries     = 600
+kafka_reconnect_after = 60
         
 
 class TimeoutError(Exception):
@@ -116,8 +117,17 @@ class KafkaInterface(object):
                                  consumer_group=processor_group,
                                  auto_commit_enable=True,
                                  zookeeper_connect = zk_url)
-        self.producer = self.publish_topic_object.get_producer()
-        self.notifier = self.notify_topic_object.get_producer()
+        self.producer = self.publish_topic_object.get_sync_producer()
+        self.notifier = self.notify_topic_object.get_sync_producer()
+
+    def stop_kafka_clients(self):
+        if hasattr(self, 'consumer'):
+            self.consumer.stop()
+        if hasattr(self, 'producer'):
+            self.producer.stop()
+        if hasattr(self, 'notifier'):
+            self.notifier.stop()
+        
 
     def next_frame(self):
         while True:
@@ -129,7 +139,7 @@ class KafkaInterface(object):
         
     @timeout(60)
     def send_message(self, producer, msg):
-        producer.produce([msg])
+        producer.produce(msg)
 
     def post_to_kafka(self, producer, msg, request_id):
         message_posted = False
@@ -144,7 +154,10 @@ class KafkaInterface(object):
                 self.logger.warn('%s: Kafka send failed: %s (error=%s)' % (request_id, self.kafka_url, str(e)))
 
             time.sleep(1)
-            self.connect_to_kafka()
+
+            if i and not (i % kafka_reconnect_after):
+                self.stop_kafka_clients()
+                self.connect_to_kafka()
 
         if not message_posted:
             raise KafkaError('Failed to publish message to Kafka after %d retries: %s' % (max_kafka_retries, msg))
