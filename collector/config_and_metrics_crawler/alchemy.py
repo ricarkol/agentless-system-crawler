@@ -151,6 +151,10 @@ def get_namespace(instance_identifier, type):
         metadata_json = json.loads(metadata)
         tagformat = metadata_json['meta']['tagformat']
         tagseparator = metadata_json['meta']['tagseparator']
+
+        # Issue 123: logmet is not parsing _ correctly
+        if tagseparator == '_':
+            tagseparator = '.'
     except Exception:
         return None
 
