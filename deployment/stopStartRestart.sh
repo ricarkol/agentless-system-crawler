@@ -192,10 +192,9 @@ doit() {
         ;;
         esac
     done
-
 }
 
-if [ "$FUNCTION" != "stop" ] || [ "$FUNCTION" = "restart" ]
+if [ "$FUNCTION" = "stop" ] || [ "$FUNCTION" = "restart" ]
     then
     echo ""
     echo "================================================"
@@ -211,7 +210,6 @@ if [ "$FUNCTION" != "stop" ] || [ "$FUNCTION" = "restart" ]
             doit "stop"
         fi
     done
-
 fi
 
 if [ "$FUNCTION" = "start" ] || [ "$FUNCTION" = "restart" ]
@@ -243,4 +241,3 @@ else
     echo "================================================"
     exit 1
 fi
-
