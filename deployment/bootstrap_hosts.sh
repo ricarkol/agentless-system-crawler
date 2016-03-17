@@ -143,8 +143,6 @@ for host in ${!DOCKER_DEVICES_LARGE[@]}
    echo "Creating docker partition on host $host at device $DEVICE"
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /etc/default/docker
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/apt-get -y install lxc-docker
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
    $SCP ../config/docker.config.${ENV} ${SSH_USER}@$host:/tmp/docker
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
 
