@@ -182,7 +182,17 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT)
+        $MASTER_METRICS_SERVER_CONT)
+            if [ "$PROCESS_UTILS" = "true" ]
+                then
+                echo
+                echo "Processing $OPERATION $container $count IN $host"
+                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
+                STAT=$?
+                exit_code=$((exit_code + STAT))
+            fi
+        ;;
+        $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT | $MT_LOGSTASH_FORWARDER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
                 echo
@@ -196,6 +206,14 @@ doit() {
                         exit_code=$((exit_code + STAT))
                     done
             fi
+        ;;
+        $REGISTRY_MONITOR_SINGLERUN_CONT)
+        if  [ "$PROCESS_ES" == "true" ] || \
+            [ "$PROCESS_VA" == "true" ] || \
+            [ "$PROCESS_UTILS" == "true" ] ; then
+            echo "registry-monitor-singlerun is not affected"
+            break
+        fi
         ;;
         *)
             echo "Containers of type $container not yet supported"
