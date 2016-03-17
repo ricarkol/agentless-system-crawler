@@ -127,12 +127,22 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $KAFKA_CONT | $INDEXER_CONT | $VULNERABILITY_INDEXER_CONT | $COMPLIANCE_INDEXER_CONT | $NOTIFICATION_INDEXER_CONT | $VULNERABILITY_ANNOTATOR_CONT | $SEARCH_CONT | $TIMEMACHINE_CONT | $COMPLIANCE_ANNOTATOR_CONT | $CONFIG_PARSER_CONT | $USNCRAWLER_CONT | $NOTIFICATION_PROCESSOR_CONT | $PASSWORD_ANNOTATOR_CONT | $REGISTRY_MONITOR_CONT)
+        $KAFKA_CONT | $INDEXER_CONT | $VULNERABILITY_INDEXER_CONT | $COMPLIANCE_INDEXER_CONT | $NOTIFICATION_INDEXER_CONT | $TIMEMACHINE_CONT | $COMPLIANCE_ANNOTATOR_CONT | $CONFIG_PARSER_CONT | $PASSWORD_ANNOTATOR_CONT | $REGISTRY_MONITOR_CONT | $VULNERABILITY_ANNOTATOR_CONT)
             if [ "$PROCESS_VA" = "true" ]
                 then
                 echo
                 echo "Processing $OPERATION $container $count IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
+                STAT=$?
+                exit_code=$((exit_code + STAT))
+            fi
+        ;;
+        $USNCRAWLER_CONT | $NOTIFICATION_PROCESSOR_CONT | $SEARCH_CONT)
+            if [ "$PROCESS_VA" = "true" ]
+                then
+                echo
+                echo "Processing $OPERATION $container $count IN $host"
+                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
             fi
@@ -152,16 +162,6 @@ doit() {
                 fi
             fi
         ;;
-        $CONSUL_CONT | $IMAGE_RESCANNER_CONT)
-            if [ "$PROCESS_UTILS" = "true" ]
-                then
-                echo
-                echo "Processing $OPERATION $container $count IN $host"
-                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
-                STAT=$?
-                exit_code=$((exit_code + STAT))
-            fi
-        ;;
         $REGCRAWLER)
             if [ "$PROCESS_VA" = "true" ]
                 then
@@ -172,7 +172,27 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT)
+        $CONSUL_CONT | $IMAGE_RESCANNER_CONT)
+            if [ "$PROCESS_UTILS" = "true" ]
+                then
+                echo
+                echo "Processing $OPERATION $container $count IN $host"
+                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}_${count}
+                STAT=$?
+                exit_code=$((exit_code + STAT))
+            fi
+        ;;
+        $MASTER_METRICS_SERVER_CONT)
+            if [ "$PROCESS_UTILS" = "true" ]
+                then
+                echo
+                echo "Processing $OPERATION $container $count IN $host"
+                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
+                STAT=$?
+                exit_code=$((exit_code + STAT))
+            fi
+        ;;
+        $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT | $MT_LOGSTASH_FORWARDER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
                 echo
@@ -186,6 +206,14 @@ doit() {
                         exit_code=$((exit_code + STAT))
                     done
             fi
+        ;;
+        $REGISTRY_MONITOR_SINGLERUN_CONT)
+        if  [ "$PROCESS_ES" == "true" ] || \
+            [ "$PROCESS_VA" == "true" ] || \
+            [ "$PROCESS_UTILS" == "true" ] ; then
+            echo "registry-monitor-singlerun is not affected"
+            break
+        fi
         ;;
         *)
             echo "Containers of type $container not yet supported"
