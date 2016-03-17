@@ -229,13 +229,53 @@ def registry_login(registry, user, password, email, ice_api, bluemix_api, bluemi
 def query_image_scanned(elasticsearch_ip_port, image_id):
     '''Query ElasticSearch to see if the image has previously been scanned'''
 
+   # which ES index are we querying to see if the image is in the system
+   index_type = "config"
+
+    def index_date_exists(index):
+    url = "http://"+elasticsearch_ip_port+"/"+index+"/_search?pretty=true"
+    try:
+        response = requests.get(url)
+        # print response.content
+        if (response.ok):
+            return True
+        else:
+            outdata = json.loads(response.content)
+            if "error" in outdata.keys():
+                print outdata["error"]
+            return False
+    except Exception as e:
+        print(str(e))
+        return False
+    return True
+
     # Query config-* indices with the container_image = image id 
     # Then we can retrieve the uuid (request uuid)
     # And check vulnerabilityscan for this request uuid to see if it's in the system
 
     request_uuid = None
 
-    url = "http://"+elasticsearch_ip_port+"/config-*/_search?pretty=true"
+    today_str=""
+    now = datetime.datetime.now()
+    today_str=str(now.year)+"."+str(now.month).zfill(2)+"."+str(now.day-0).zfill(2)
+
+    oneday = datetime.timedelta(days=1)
+    yesterday = now - oneday
+    yesterday_str=str(yesterday.year)+"."+str(yesterday.month).zfill(2)+"."+str(yesterday.day-0).zfill(2)
+
+    index_date_range = []
+    for index in ["%s-%s" % (index_type, datestr) for datestr in (today_str, yesterday_str)]:
+        if index_date_exists(index):
+            index_date_range.append(index)
+
+    if not index_date_range:
+        # Neither today's nor yesterday's index exist
+        # Therefore put this image on the queue anyway
+        return False
+
+    indicies = ",".join(index_date_range)
+
+    url = "http://"+elasticsearch_ip_port+"/"+indicies+"/_search?pretty=True"
     data = json.dumps({
                 "query": {
                      "bool" : {
