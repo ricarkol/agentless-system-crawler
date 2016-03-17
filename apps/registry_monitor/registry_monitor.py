@@ -229,8 +229,8 @@ def registry_login(registry, user, password, email, ice_api, bluemix_api, bluemi
 def query_image_scanned(elasticsearch_ip_port, image_id):
     '''Query ElasticSearch to see if the image has previously been scanned'''
 
-   # which ES index are we querying to see if the image is in the system
-   index_type = "config"
+    # which ES index are we querying to see if the image is in the system
+    index_type = "config"
 
     def index_date_exists(index):
         url = "http://"+elasticsearch_ip_port+"/"+index+"/_search?pretty=true"
