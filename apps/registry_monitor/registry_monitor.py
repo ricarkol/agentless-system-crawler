@@ -233,21 +233,21 @@ def query_image_scanned(elasticsearch_ip_port, image_id):
    index_type = "config"
 
     def index_date_exists(index):
-    url = "http://"+elasticsearch_ip_port+"/"+index+"/_search?pretty=true"
-    try:
-        response = requests.get(url)
-        # print response.content
-        if (response.ok):
-            return True
-        else:
-            outdata = json.loads(response.content)
-            if "error" in outdata.keys():
-                print outdata["error"]
+        url = "http://"+elasticsearch_ip_port+"/"+index+"/_search?pretty=true"
+        try:
+            response = requests.get(url)
+            # print response.content
+            if (response.ok):
+                return True
+            else:
+                outdata = json.loads(response.content)
+                if "error" in outdata.keys():
+                    print outdata["error"]
+                return False
+        except Exception as e:
+            print(str(e))
             return False
-    except Exception as e:
-        print(str(e))
-        return False
-    return True
+        return True
 
     # Query config-* indices with the container_image = image id 
     # Then we can retrieve the uuid (request uuid)
