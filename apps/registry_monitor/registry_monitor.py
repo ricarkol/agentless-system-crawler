@@ -255,7 +255,6 @@ def query_image_scanned(elasticsearch_ip_port, image_id):
 
     request_uuid = None
 
-    today_str=""
     now = datetime.datetime.now()
     today_str=str(now.year)+"."+str(now.month).zfill(2)+"."+str(now.day-0).zfill(2)
 
