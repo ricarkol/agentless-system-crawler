@@ -11,14 +11,29 @@ if [ $# -eq 1 ]
    echo "Bootstrapping the designated environment:" $1
    ENV=$1
    TARGET_HOST=
+   OVERWRITE=
 elif [ $# -eq 2 ]
    then
    echo "------------------------------------------------"
    echo "Bootstrapping:" $2 "only, in environment:" $1
    ENV=$1
    TARGET_HOST=$2
+   OVERWRITE=
+elif [ $# -eq 3 ]
+   then
+   echo "------------------------------------------------"
+   echo "Bootstrapping:" $2 "only, in environment:" $1
+   ENV=$1
+   TARGET_HOST=$2
+   if [ "$3" = "overwrite" ]; then
+      OVERWRITE="true"
+      echo "Forcing overwrite of partition information"
+   else
+      echo "Usage: $0 <ENV> [<TARGET_HOST> [overwrite]]"
+      exit 1
+   fi
 else
-   echo "Usage: $0 <ENV> [<TARGET_HOST>]"
+   echo "Usage: $0 <ENV> [<TARGET_HOST> [overwrite]]"
    exit 1
 fi
 
@@ -77,7 +92,7 @@ for host in ${!DOCKER_DEVICES[@]}
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/sbin/service docker stop
    
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT $OVERWRITE
 
    STAT=$?
    if [ $STAT -eq 0 ] 
@@ -134,7 +149,7 @@ for host in ${!DOCKER_DEVICES_LARGE[@]}
    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/mv /tmp/docker /etc/default/docker
 
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_LARGE_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT 
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DOCKER_PARTITION_START $DOCKER_PARTITION_LARGE_END $PARTITION_NUMBER $DOCKER_PARTITION_FSTYPE $DOCKER_PARTITION_MOUNTPOINT $OVERWRITE
 
    STAT=$?
 
@@ -178,7 +193,7 @@ for host in ${!DATA_DEVICES[@]}
    echo "------------------------------------------------"
    echo "Creating data partition on host $host at device $DEVICE"
    $SCP utils/create_partition.sh ${SSH_USER}@$host:create_partition.sh
-   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DATA_PARTITION_START $DATA_PARTITION_END $PARTITION_NUMBER $DATA_PARTITION_FSTYPE $DATA_PARTITION_MOUNTPOINT
+   $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo ./create_partition.sh $DEVICE $DATA_PARTITION_START $DATA_PARTITION_END $PARTITION_NUMBER $DATA_PARTITION_FSTYPE $DATA_PARTITION_MOUNTPOINT $OVERWRITE
 
    STAT=$?
 
