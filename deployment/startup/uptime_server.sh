@@ -20,7 +20,7 @@ fi
 
 . $CONFIG_FILE
 
-CONTAINER_NAME=${MASTER_METRICS_SERVER_CONT}
+CONTAINER_NAME=${UPTIME_SERVER_CONT}
 INSTANCE_ID=`hostname`:$CONTAINER_NAME
 
 if [ -z "$IMAGE_TAG" ] ; then
@@ -32,8 +32,8 @@ case $1 in
         echo "Starting ${CONTAINER_NAME}."
         if [ ! -z "$REGISTRY" ]; then
             set -x
-            docker pull $REGISTRY/$MASTER_METRICS_SERVER_IMG:$IMAGE_TAG 2>&1 > /dev/null
-            docker tag -f $REGISTRY/$MASTER_METRICS_SERVER_IMG:$IMAGE_TAG $MASTER_METRICS_SERVER_IMG
+            docker pull $REGISTRY/$UPTIME_SERVER_IMG:$IMAGE_TAG 2>&1 > /dev/null
+            docker tag -f $REGISTRY/$UPTIME_SERVER_IMG:$IMAGE_TAG $UPTIME_SERVER_IMG
             set +x
         fi
         # Pass all of the args to docker as supplied to the config file in deploy-services
@@ -42,8 +42,9 @@ case $1 in
             --restart=always \
             -p 8586:8586 \
 			--name ${CONTAINER_NAME} \
-			-it $MASTER_METRICS_SERVER_IMG \
+			-it $UPTIME_SERVER_IMG \
 			--hosts ${CLOUDSIGHT_HOSTS[@]} \
+			--host ${UPTIME_SERVER_NODE_NAME} \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}/metrics_server_error.log
         set +x
         ;;

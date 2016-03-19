@@ -240,10 +240,10 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -r /opt/cloudsight/collector 
                     #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
                 ;;
-                $MASTER_METRICS_SERVER_CONT)
-                    config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "stop"
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "delete"
+                $UPTIME_SERVER_CONT)
+                    config_file_name=${UPTIME_SERVER_CONT}.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/uptime_server.sh "stop"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/uptime_server.sh "delete"
                 ;;
                 $METRICS_SERVER_CONT)
                     # The container count doesn't really apply here as we want it on every host, so I create my own.
@@ -381,30 +381,30 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     done
 
                 ;;
-                $MASTER_METRICS_SERVER_CONT)
-                    config_file_name=${MASTER_METRICS_SERVER_CONT}.sh
+                $UPTIME_SERVER_CONT)
+                    config_file_name=${UPTIME_SERVER_CONT}.sh
                     config_file=${config_dir}${config_file_name}
 
                     #create config file
                     echo "#!/bin/bash" >$config_file
-                    echo "MASTER_METRICS_SERVER_IMG=$MASTER_METRICS_SERVER_IMG" >>$config_file
-                    echo "MASTER_METRICS_SERVER_CONT=$MASTER_METRICS_SERVER_CONT" >>$config_file
-                    echo "MASTER_METRICS_SERVER_NODE_NAME=$host" >>$config_file
+                    echo "UPTIME_SERVER_IMG=$UPTIME_SERVER_IMG" >>$config_file
+                    echo "UPTIME_SERVER_CONT=$UPTIME_SERVER_CONT" >>$config_file
+                    echo "UPTIME_SERVER_NODE_NAME=$host" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "CLOUDSIGHT_HOSTS=( ${HOSTS[@]} )" >>$config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
-                    $SCP startup/master_metrics_server.sh ${SSH_USER}@$host:master_metrics_server.sh
+                    $SCP startup/uptime_server.sh ${SSH_USER}@$host:uptime_server.sh
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv master_metrics_server.sh $cloudsight_scripts_dir/master_metrics_server.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv uptime_server.sh $cloudsight_scripts_dir/uptime_server.sh
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/master_metrics_server.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/uptime_server.sh
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
@@ -416,7 +416,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/master_metrics_server.sh "start"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/uptime_server.sh "start"
                         STAT=$?
                         exit_code=$((exit_code + STAT))
 
