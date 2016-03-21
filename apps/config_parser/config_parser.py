@@ -139,6 +139,7 @@ class KafkaInterface(object):
             except Exception, e:
                 self.logger.error('Failed to get new message from kafka: %s' % str(e))
                 try:
+                    time.sleep(5)
                     self.stop_kafka_clients()
                 except Exception, e: 
                     self.logger.error('Failed to stop kafka client to %s (error=%s)' % (self.kafka_url, str(e)))
@@ -168,7 +169,7 @@ class KafkaInterface(object):
             except Exception, e:
                 self.logger.warn('%s: Kafka send failed: %s (error=%s)' % (request_id, self.kafka_url, str(e)))
 
-            time.sleep(1)
+            time.sleep(5)
 
             if i and not (i % kafka_reconnect_after):
                 try:
