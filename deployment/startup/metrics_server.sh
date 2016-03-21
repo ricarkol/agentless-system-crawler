@@ -42,9 +42,11 @@ case $1 in
             --restart=always \
             -p 8587:8587 \
 			-v ${HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR}:${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
+			-v /var/run/docker.sock:/var/run/docker.sock \
 			--name ${CONTAINER_NAME} \
 			-it $METRICS_SERVER_IMG \
 			--snapshot_dir ${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
+            --host ${METRICS_SERVER_NODE_NAME} \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}metrics_server_error.log
         set +x
         ;;
