@@ -132,8 +132,21 @@ class KafkaInterface(object):
         self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
     def next_frame(self):
+        message = None
         while True:
-            message = self.consumer.consume()
+            try:
+                message = self.consumer.consume()
+            except Exception, e:
+                self.logger.error('Failed to get new message from kafka: %s' % str(e))
+                try:
+                    self.stop_kafka_clients()
+                except Exception, e: 
+                    self.logger.error('Failed to stop kafka client to %s (error=%s)' % (self.kafka_url, str(e)))
+                try:
+                    self.connect_to_kafka()
+                except Exception, e:
+                    self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, str(e)))
+
             # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
             # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
             if message is not None:
