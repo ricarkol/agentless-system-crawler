@@ -57,11 +57,29 @@ def test_send_non_stop(url, space_ids):
         os.symlink(temp_filename, dummy_log_filename)
 
     while True:
+
+        proc = subprocess.Popen(
+            'cat /opt/cloudsight/logcrawler/logstash_home/.sincedb_* | '
+            'awk \'{sum+=$4}END{print sum}\'', shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        sincedb_size = proc.stdout.read().strip()
+        (out, err) = proc.communicate()
+
+        proc = subprocess.Popen(
+            'find -L /var/log/crawler_container_logs -type f -exec ls -Llnq {} \+ '
+            '| grep -v type-mapping | awk \'{sum+=$5}END{print sum}\'', shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        real_size = proc.stdout.read().strip()
+        (out, err) = proc.communicate()
+
+        print 'sincedb=%s real=%s\n' % (sincedb_size, real_size)
+
         timestamp = int(time.time())
         seq = (seq + 1) % 1000
         hostname = socket.gethostname()
 
-        msgs = []
         for space_id in space_ids:
             # write the dummy log
             tmp_message = "%s: Crawler to logmet test message %d %d (1)\r\n" % (hostname, seq, timestamp)
@@ -70,11 +88,17 @@ def test_send_non_stop(url, space_ids):
             dummy_logfile[space_id].write(tmp_message)
             dummy_logfile[space_id].flush()
 
+            msgs = []
+
             # Create a list of metrics
             msgs.append("%s.crawler.%s.ping %d %d\r\n" % (space_id, hostname, seq, timestamp))
 
-        # send the dummy metrics
-        client.send_messages(msgs)
+            msgs.append("%s.crawler.stats.%s.logcrawler.sincedb_size %s %d\r\n" % (space_id, hostname, sincedb_size, timestamp))
+            msgs.append("%s.crawler.stats.%s.logcrawler.real_size %s %d\r\n" % (space_id, hostname, real_size, timestamp))
+
+            # send the dummy metrics
+            client.send_messages(msgs)
+
         time.sleep(60)
     client.close()
 
