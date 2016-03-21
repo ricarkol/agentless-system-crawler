@@ -54,6 +54,7 @@ obj_factory           = None
 processor_group       = "config-parser"
 max_kafka_retries     = 600
 kafka_reconnect_after = 60
+kafka_send_timeout    = 60
         
 
 class TimeoutError(Exception):
@@ -62,7 +63,7 @@ class TimeoutError(Exception):
 class KafkaError(Exception):
     pass
 
-def timeout(seconds=5, msg=os.strerror(errno.ETIMEDOUT)):
+def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
     def decorator(func):
         def timeout_handler(sig, frame):
             raise TimeoutError(msg)
@@ -119,6 +120,7 @@ class KafkaInterface(object):
                                  zookeeper_connect = zk_url)
         self.producer = self.publish_topic_object.get_sync_producer()
         self.notifier = self.notify_topic_object.get_sync_producer()
+        self.logger.info('Connected to kafka broker at %s' % self.kafka_url)
 
     def stop_kafka_clients(self):
         if hasattr(self, 'consumer'):
@@ -127,7 +129,7 @@ class KafkaInterface(object):
             self.producer.stop()
         if hasattr(self, 'notifier'):
             self.notifier.stop()
-        
+        self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
     def next_frame(self):
         while True:
@@ -137,7 +139,7 @@ class KafkaInterface(object):
             if message is not None:
                 yield message.value
         
-    @timeout(60)
+    @timeout(kafka_send_timeout)
     def send_message(self, producer, msg):
         producer.produce(msg)
 
@@ -156,8 +158,14 @@ class KafkaInterface(object):
             time.sleep(1)
 
             if i and not (i % kafka_reconnect_after):
-                self.stop_kafka_clients()
-                self.connect_to_kafka()
+                try:
+                    self.stop_kafka_clients()
+                except Exception, e: 
+                    self.logger.error('%s: Failed to stop kafka client to %s (error=%s)' % (request_id, self.kafka_url, str(e)))
+                try:
+                    self.connect_to_kafka()
+                except Exception, e:
+                    self.logger.error('%s: Failed to reconnect to kafka at %s (error=%s)' % (request_id, self.kafka_url, str(e)))
 
         if not message_posted:
             raise KafkaError('Failed to publish message to Kafka after %d retries: %s' % (max_kafka_retries, msg))
@@ -335,6 +343,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                 logger.info("%s: Finished processing request %s" % (request_id, namespace))
         except Exception, e:
             logger.error("Uncaught exception: %s" % e)
+            raise
 
 
 if __name__ == '__main__':
