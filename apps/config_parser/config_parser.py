@@ -136,17 +136,14 @@ class KafkaInterface(object):
         while True:
             try:
                 message = self.consumer.consume()
-            except Exception, e:
-                self.logger.error('Failed to get new message from kafka: %s' % str(e))
+            except Exception as e:
+                self.logger.error('Failed to get new message from kafka: %s' % repr(e))
                 try:
                     time.sleep(5)
                     self.stop_kafka_clients()
-                except Exception, e: 
-                    self.logger.error('Failed to stop kafka client to %s (error=%s)' % (self.kafka_url, str(e)))
-                try:
                     self.connect_to_kafka()
-                except Exception, e:
-                    self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, str(e)))
+                except Exception as e:
+                    self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, repr(e)))
 
             # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
             # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
@@ -164,22 +161,19 @@ class KafkaInterface(object):
                 self.send_message(producer, msg)
                 message_posted = True
                 break
-            except TimeoutError, e:
-                self.logger.warn('%s: Kafka send timed out: %s (error=%s)' % (request_id, self.kafka_url, str(e)))
-            except Exception, e:
-                self.logger.warn('%s: Kafka send failed: %s (error=%s)' % (request_id, self.kafka_url, str(e)))
+            except TimeoutError as e:
+                self.logger.warn('%s: Kafka send timed out: %s (error=%s)' % (request_id, self.kafka_url, repr(e)))
+            except Exception as e:
+                self.logger.warn('%s: Kafka send failed: %s (error=%s)' % (request_id, self.kafka_url, repr(e)))
 
-            time.sleep(5)
+            time.sleep(1)
 
-            if i and not (i % kafka_reconnect_after):
+            if i > kafka_reconnect_after:
                 try:
-                    self.stop_kafka_clients()
-                except Exception, e: 
-                    self.logger.error('%s: Failed to stop kafka client to %s (error=%s)' % (request_id, self.kafka_url, str(e)))
-                try:
-                    self.connect_to_kafka()
-                except Exception, e:
-                    self.logger.error('%s: Failed to reconnect to kafka at %s (error=%s)' % (request_id, self.kafka_url, str(e)))
+                     self.stop_kafka_clients()
+                     self.connect_to_kafka()
+                except Exception as e:
+                     self.logger.error('%s: Failed to reconnect to kafka at %s (error=%s)' % (request_id, self.kafka_url, repr(e)))
 
         if not message_posted:
             raise KafkaError('Failed to publish message to Kafka after %d retries: %s' % (max_kafka_retries, msg))
@@ -220,9 +214,9 @@ class KafkaInterface(object):
             message["namespace"]      = metadata['namespace']
             message["crawl_timestamp"]= metadata['timestamp']
             message["uuid"]           = metadata['uuid']
-        except Exception, e:
+        except Exception as e:
             self.logger.warn('%s: Missing metadata in kafka notification: %s' % \
-                             (request_id, str(e)))
+                             (request_id, repr(e)))
 
         msg = json.dumps(message)
         self.post_to_kafka(self.notifier, msg, request_id)
@@ -246,9 +240,9 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
             client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                                     publish_topic, notification_topic)
             break
-        except Exception, e:
+        except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
-                        (kafka_url, str(e)))
+                        (kafka_url, repr(e)))
             time.sleep(5)
     if not client:
         return
@@ -272,7 +266,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                             metadata = json.loads(fvalue)
                             namespace = metadata['namespace']
                             request_id = metadata['uuid']
-                        except (ValueError, KeyError), e:
+                        except (ValueError, KeyError) as e:
                             logger.error("%s: Bad data in frame: %s, %s" % \
                                         (request_id, fkey, fvalue))
                 stream.close()
@@ -292,24 +286,24 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                                   event="start",
                                   processor=processor_group, 
                                   instance_id=instance_id)
-                except KafkaError, e:
+                except KafkaError as e:
                     logger.error('%s: Failed to send notification to kafka for namespace %s: %s' % \
-                                  (request_id, namespace, str(e)))
+                                  (request_id, namespace, repr(e)))
                             
                 try:
                     annotations = parser.parse_update(frame, known_config_files, request_id, namespace)
-                except Exception, e:
+                except Exception as e:
                     logger.error("%s: Failed to parse frame for namespace %s: %s" % \
-                                    (request_id, namespace, str(e)))
+                                    (request_id, namespace, repr(e)))
                     try:
                         client.notify(request_id=request_id, 
                                       metadata=metadata, 
                                       event="error",
                                       processor=processor_group, 
-                                      instance_id=instance_id, text=str(e))
-                    except KafkaError, e:
+                                      instance_id=instance_id, text=repr(e))
+                    except KafkaError as e:
                         logger.error('%s: Filed to send notification to kafka for namespace %s, %s' % \
-                                     (request_id, namespace, str(e)))
+                                     (request_id, namespace, repr(e)))
                     continue
                
                 annotations.append(('configparam', 
@@ -325,18 +319,18 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                     
                     try:
                         client.publish(annotations, metadata, request_id)
-                    except Exception, e:
+                    except Exception as e:
                         logger.error('%s: Failed to send annotations to kafka for %s, %s' % \
-                                     (request_id, namespace, str(e)))
+                                     (request_id, namespace, repr(e)))
                         try:
                             client.notify(request_id=request_id, 
                                           metadata=metadata, 
                                           event="error", 
                                           processor=processor_group, 
-                                          instance_id=instance_id, text=str(e))
-                        except KafkaError, e:
-                            logger.error('%s: Filed to send notification to kafka for %s: %s' % \
-                                         (request_id, namespace, str(e)))
+                                          instance_id=instance_id, text=repr(e))
+                        except KafkaError as e:
+                            logger.error('%s: Failed to send notification to kafka for %s: %s' % \
+                                         (request_id, namespace, repr(e)))
                         continue
 
                 else:
@@ -350,12 +344,12 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                                   processor=processor_group, 
                                   instance_id=instance_id, 
                                   text="produced %d annotations" % (len(annotations) - 1))
-                except KafkaError, e:
+                except KafkaError as e:
                     logger.error('%s: Failed to send notification to kafka for %s: %s' % \
-                                  (request_id, namespace, str(e)))
+                                  (request_id, namespace, repr(e)))
                             
                 logger.info("%s: Finished processing request %s" % (request_id, namespace))
-        except Exception, e:
+        except Exception as e:
             logger.error("Uncaught exception: %s" % e)
             raise
 
@@ -394,8 +388,8 @@ if __name__ == '__main__':
         config_parser(args.kafka_url, args.kafka_zookeeper_port, logger, args.receive_topic, 
                       args.publish_topic, args.notification_topic, 
                       known_config_files, suppress_comments, args.instance_id)
-    except Exception, e:
-        print('Error: %s' % str(e))
+    except Exception as e:
+        print('Error: %s' % repr(e))
         logger.exception(e) 
 
 
