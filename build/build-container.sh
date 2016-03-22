@@ -66,7 +66,7 @@ do
 
      if [[ "${IMG_TO_DIR[$i]}" =~ "_java" ]] ; then
          echo "Building Java image from ${IMG_TO_DIR[$i]}"
-         (cd ${IMG_TO_DIR[$i]} && /opt/Ant1.8.2/bin/ant )
+         (cd ${IMG_TO_DIR[$i]} && ant )
      fi
 
      echo "Building docker image: ${REGISTRY}$i:$TAG"
