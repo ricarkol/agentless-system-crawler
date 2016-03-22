@@ -32,7 +32,10 @@ DOCKER_PARTITION_MOUNTPOINT=/var/lib/docker
 declare -A DOCKER_DEVICES_LARGE=(
    [$REGCRAWL1]="/dev/xvdc"
    [$REGCRAWL2]="/dev/xvdc"
-   [$REGCRAWL3]="/dev/xvdc" 
+   [$REGCRAWL3]="/dev/xvdc"
+   [$REGCRAWL4]="/dev/xvdc"
+   [$REGCRAWL5]="/dev/xvdc"
+   [$REGCRAWL6]="/dev/xvdc"
   )
 DOCKER_PARTITION_LARGE_END=-1
 
