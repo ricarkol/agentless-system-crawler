@@ -46,7 +46,10 @@ case $1 in
 			--hosts ${CLOUDSIGHT_HOSTS[@]} \
 			--host ${UPTIME_SERVER_NODE_NAME} \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}/metrics_server_error.log
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

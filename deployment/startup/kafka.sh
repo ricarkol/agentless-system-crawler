@@ -85,7 +85,10 @@ case $1 in
                    -v $HOST_SUPERVISOR_LOG_DIR:$CONTAINER_SUPERVISOR_LOG_DIR  \
 	                 -v $HOST_CLOUDSIGHT_LOG_DIR:$CONTAINER_CLOUDSIGHT_LOG_DIR \
                    --name ${CONTAINER_NAME} $KAFKA_IMG
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

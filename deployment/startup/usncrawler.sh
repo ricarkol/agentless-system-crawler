@@ -47,7 +47,9 @@ case $1 in
              --elastic-search $ELASTIC_HOST_1:$ES_PORT \
              --data-root /opt/usncrawler/sec_data --sleeptime $USN_CRAWLER_SLEEP_TIME
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

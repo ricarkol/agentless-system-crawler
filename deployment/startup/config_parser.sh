@@ -50,7 +50,9 @@ case $1 in
            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT} \
            --known-config-files "$CONFIG_PARSER_KNOWN_CONFIG_FILES"
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

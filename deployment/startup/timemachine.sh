@@ -54,7 +54,9 @@ case $1 in
             --elastic-search-cluster $ELASTIC_HOST_1:$ES_PORT \
             --port $TIMEMACHINE_PORT
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

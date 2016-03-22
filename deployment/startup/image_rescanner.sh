@@ -50,7 +50,10 @@ case $1 in
             -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
              --name $CONTAINER_NAME \
             ${IMAGE_RESCANNER_IMG} --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT --regcrawl1-ip $REGCRAWL1 --regcrawl2-ip $REGCRAWL2 --regcrawl3-ip $REGCRAWL3
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

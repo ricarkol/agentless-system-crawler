@@ -73,6 +73,10 @@ case $1 in
                    --insecure-registry "$INSECURE_REGISTRY" --alchemy-registry-api "$ALCHEMY_REGISTRY_URL" \
                    --elasticsearch-url "$ELASTIC_HOST:$ES_PORT" \
                    "$REGISTRY_URL" "$KAFKA_SERVICE" --instance-id "$INSTANCE_ID"
+
+        STAT=$?
+        echo $STAT
+        exit $STAT
         ;;
 
    stop)

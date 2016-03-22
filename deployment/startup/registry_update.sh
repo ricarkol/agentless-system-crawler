@@ -47,6 +47,7 @@ case $1 in
             set +x
         fi
         # Start registry-update
+        exit_code=0
         set -x
         docker run -m=${MAX_CONTAINER_MEMORY} \
                    -d --restart=always -p "$REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
@@ -55,13 +56,19 @@ case $1 in
                    -e LOG_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG"
+        STAT=$?
+        exit_code=$((exit_code + STAT))
 
         # Register with consul
         curl -s -X PUT \
                 -d "{\"name\":\"$SERVICE_NAME\", \"tags\": [ \"$CONSUL_NODE\" ], \"address\":\"$REGISTRY_UPDATE_IP\",\"port\":$REGISTRY_UPDATE_PORT, \"check\": { \"name\": \"$SERVICE_NAME-health\", \"http\": \"http://${REGISTRY_UPDATE_IP}:${REGISTRY_UPDATE_PORT}/registry/health\", \"interval\": \"10s\" } }" \
   http://$CONSUL_AGENT_HOST_IP:8500/v1/agent/service/register
 
+        STAT=$?
+        exit_code=$((exit_code + STAT))
+
         set +x
+        exit $exit_code
         ;;
 
    stop)

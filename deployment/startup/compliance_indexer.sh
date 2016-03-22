@@ -51,7 +51,9 @@ case $1 in
             -v ${HOST_SUPERVISOR_LOG_DIR}:${CONTAINER_SUPERVISOR_LOG_DIR} \
             -e CONTAINER_NAME=`hostname`:${CONTAINER_NAME} --name ${CONTAINER_NAME} $GENERIC_INDEXER_IMG 
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

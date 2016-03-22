@@ -68,7 +68,10 @@ case $1 in
 			--numprocesses "$NUM_CORES" \
 			--namespace ${CONFIG_AND_METRICS_CRAWLER_SPACE_ID}.va.`hostname` \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}config-and-metrics-crawler-containers-error.log
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

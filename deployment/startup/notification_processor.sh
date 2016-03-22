@@ -47,7 +47,9 @@ case $1 in
             --notification-topic notification  --kafka-url $KAFKA_SERVICE \
             --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT}
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

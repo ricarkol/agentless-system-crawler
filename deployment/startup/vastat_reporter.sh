@@ -50,7 +50,10 @@ case $1 in
             -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
              --name $CONTAINER_NAME \
             ${VASTAT_REPORTER_IMG} --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)
