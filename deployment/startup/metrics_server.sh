@@ -48,7 +48,10 @@ case $1 in
 			--snapshot_dir ${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
             --host ${METRICS_SERVER_NODE_NAME} \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}metrics_server_error.log
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

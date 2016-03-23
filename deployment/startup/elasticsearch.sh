@@ -62,7 +62,9 @@ case $1 in
               -v $HOST_SUPERVISOR_LOG_DIR:$CONTAINER_SUPERVISOR_LOG_DIR \
               --name $CONTAINER_NAME $ES_IMG
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

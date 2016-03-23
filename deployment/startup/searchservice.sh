@@ -42,7 +42,9 @@ case $1 in
 
         docker run -d -p 8885:8885 -e ES_IP=$ELASTIC_HOST_1 -e ES_PORT=$ES_PORT --name   ${CONTAINER_NAME} $SEARCH_IMG 
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

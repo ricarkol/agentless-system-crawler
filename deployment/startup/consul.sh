@@ -86,7 +86,10 @@ start() {
         -rejoin \
         $RECURSORS \
         -node $NODE
+
+    STAT=$?
     set +x
+    exit $STAT
 }
 
 stop() {

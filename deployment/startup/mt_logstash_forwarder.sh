@@ -50,7 +50,10 @@ case $1 in
 			${LSF_SPACE_NAME} \
             ${LSF_TARGET} \
 			2>> /var/log/cloudsight/mt-logstash-forwarder.log
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

@@ -59,7 +59,10 @@ case $1 in
             --receive-topic config --annotation-topic compliance \
             --notification-topic notification --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT \
             --annotator-home /var/www/html --instance-id $INSTANCE_ID
+
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)

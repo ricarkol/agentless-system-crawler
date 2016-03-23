@@ -44,3 +44,6 @@ docker run -d  \
            --insecure-registry "$INSECURE_REGISTRY" \
            "$REGISTRY_URL" "$KAFKA_SERVICE"
 
+STAT=$?
+exit $STAT
+

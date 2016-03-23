@@ -49,7 +49,9 @@ case $1 in
            --kafka-url $KAFKA_SERVICE --instance-id $INSTANCE_ID \
            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT}
 
+        STAT=$?
         set +x
+        exit $STAT
         ;;
 
    stop)
