@@ -49,7 +49,7 @@ echo "Consul Node: $NODE"
 
 # compute joins 
 JOINS=""
-for h in ${CONSUL_CLUSTER[@]}
+for h in ${CONSUL_SERVER_CLUSTER[@]}
 do
 if [ $h != ${CONSUL_IP} ]
 then
