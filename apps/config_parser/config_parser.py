@@ -29,14 +29,15 @@ from functools import wraps
 import errno
 import signal
 import datetime
+import pykafka.cluster
+
+
 try:
     from cStringIO import StringIO
 except:
     from StringIO import StringIO
-try:
-    import simplejson as json
-except:
-    import json
+
+import json
 
 import kafka as kafka_python
 import pykafka
@@ -90,6 +91,8 @@ class KafkaInterface(object):
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
 
+        # Monkey patching the logger file of cluster, so that we get the output to our logs
+        pykafka.cluster.log = logger
         self.connect_to_kafka()
 
     def connect_to_kafka(self):
