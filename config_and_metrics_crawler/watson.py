@@ -17,7 +17,7 @@ def get_namespace(long_id, options):
             namespace = ".".join([lines[p[1:]].strip('\'') 
                         for p in lines.get('CRAWLER_METRIC_PREFIX',"").split(':')])
             if namespace:
-                namespace = namespace + '.' + long_id[:16]
+                namespace = namespace + '.' + long_id[:12]
             return namespace
     except IOError:
         logger.error('/etc/csf_env.properties not found in container with id:' +
