@@ -250,6 +250,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
+                            echo ""
+                            echo "SHUTTING DOWN $container IN $host"
                             config_file_name=${METRICS_SERVER_CONT}.sh
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/metrics_server.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/metrics_server.sh "delete"
@@ -260,6 +262,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
+                            echo ""
+                            echo "SHUTTING DOWN $container IN $host"
                             config_file_name=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
                             # To deal with legacy issues
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service vacrawler "stop"
@@ -278,6 +282,8 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     # Count through hosts and stop the config and metrics crawler on every host.
                     for host in ${HOSTS[@]}
                         do
+                            echo ""
+                            echo "SHUTTING DOWN $container IN $host"
                             config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
@@ -323,6 +329,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     for host in ${HOSTS[@]}
                         do
 
+                        echo ""
+                        echo "STARTING UP $container IN $host"
                         config_file_name=${CONFIG_AND_METRICS_CRAWLER_CONT}.sh
                         config_file=${config_dir}${config_file_name}
 
@@ -424,13 +432,15 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         then
                         echo "Failed to start $container.$count in $host"
                     fi
-                    echo "Metrics Server Deployed"
+                    echo "Uptime Server Deployed"
 
                 ;;
                 $METRICS_SERVER_CONT)
                     for host in ${HOSTS[@]}
                         do
 
+                        echo ""
+                        echo "STARTING UP $container IN $host"
                         config_file_name=${METRICS_SERVER_CONT}.sh
                         config_file=${config_dir}${config_file_name}
 
@@ -477,11 +487,14 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         fi
                         echo "Metrics Server Deployed"
                     done
+
                 ;;
                 $MT_LOGSTASH_FORWARDER_CONT)
                     for host in ${HOSTS[@]}
                         do
 
+                        echo ""
+                        echo "STARTING UP $container IN $host"
                         config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
                         config_file=${config_dir}${config_file_name}
 
