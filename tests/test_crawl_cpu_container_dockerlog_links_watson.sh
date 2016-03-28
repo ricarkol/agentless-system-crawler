@@ -1,15 +1,17 @@
 #!/bin/bash
 
 # Tests the --linkContainerLogFiles option for the OUTCONTAINERcrawler mode .
-# Expected behavior: crawler is stared specifying --linkContainerLogFiles
+# Expected behavior: crawler is stared with --linkContainerLogFiles
 # Following should be true:
-#   1. There should container specific links in /var/log/crawl_container_logs/...
-# Returns 1 if success, 0 otherwise
-
-# Tests the --linkContainerLogFiles option for the OUTCONTAINERcrawler mode .
-# This option maintains symlinks for some logfiles inside the container. By
-# default /var/log/messages and the docker (for all containers) are symlinked
-# to a central location: /var/log/crawl_container_logs/...
+#   1. There should be a container specific dir in /var/log/crawl_container_logs/
+#   2. There should be log files specified in defaults.py 
+#      for watson: these are: 
+#               /etc/csf_env.properties
+#               /var/log/messages  
+#               docker.log
+#   3. all the files listed in /etc/logfiles in docker container
+#      the file /etc/logfiles is optional, can be empty
+#
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
@@ -17,7 +19,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# clean up temporaty files
+# clean up temporay files
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*
 
 CONTAINER_NAME=test_crawl_cpu_container_log_links_1
@@ -35,12 +37,32 @@ docker run -d --name $CONTAINER_NAME ubuntu bash -c "\
 DOCKER_ID=`docker inspect -f '{{ .Id }}' ${CONTAINER_NAME}`
 DOCKER_SHORT_ID=`echo $DOCKER_ID | cut -c 1-12`
 NAMESPACE=watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
+logdir=/var/log/crawler_container_logs/$NAMESPACE
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers ${DOCKER_ID} \
      --linkContainerLogFiles \
 	--environment watson > /dev/null
 
-grep -c $MSG /var/log/crawler_container_logs/f75ec4e7-eb9d-463a-a90f-f8226572fbcc/0000/${CONTAINER_ID}/docker.log
+if [ ! -d $logdir ]; then
+    echo 0      # expected container logdir did not exist
+    exit 
+fi
 
-docker rm -f $NAME > /dev/null
+if [ ! -f $logdir/etc/csf_env.properties ] ; then
+    echo 0      # file configured in defaults.py dir not exist
+    exit 
+fi
+
+if [ ! -h $logdir/var/log/messages ]; then
+    echo 0      # file configured in defaults.py dir not exist
+    exit 
+fi
+
+if [ ! -f $logdir/docker.log ] ; then
+    echo 0      # file configured in defaults.py dir not exist
+    exit 
+fi
+
+echo 1
+docker rm -f $CONTAINER_NAME > /dev/null
