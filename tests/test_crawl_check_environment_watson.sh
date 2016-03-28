@@ -9,9 +9,6 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# The namespace generated for the crawled container looks like <HOST_IP>/<CONTAINER_NAME>
-# I have some python code to get the local host IP. XXX replace it with bash
-
 CONTAINER_NAME_1=test_crawl_check_environment_watson_1
 CONTAINER_NAME_2=test_crawl_check_environment_watson_2
 CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`

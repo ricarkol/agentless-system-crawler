@@ -1,8 +1,15 @@
 #!/bin/bash
 
 # Tests the --linkContainerLogFiles option for the OUTCONTAINERcrawler mode .
-# Expected behavior: crawler is stared without specifying --linkContainerLogFiles
-# There should not be any container specific links in /var/log/crawl_container_logs/...
+# Expected behavior: crawler is stared specifying --linkContainerLogFiles
+# Following should be true:
+#   1. There should container specific links in /var/log/crawl_container_logs/...
+# Returns 1 if success, 0 otherwise
+
+# Tests the --linkContainerLogFiles option for the OUTCONTAINERcrawler mode .
+# This option maintains symlinks for some logfiles inside the container. By
+# default /var/log/messages and the docker (for all containers) are symlinked
+# to a central location: /var/log/crawl_container_logs/...
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
@@ -13,7 +20,8 @@ fi
 # clean up temporaty files
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*
 
-CONTAINER_NAME=test_crawl_cpu_container_check_no_links_watson
+CONTAINER_NAME=test_crawl_cpu_container_log_links_1
+CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`
 
 docker rm -f ${CONTAINER_NAME} 2> /dev/null > /dev/null
 docker run -d --name $CONTAINER_NAME ubuntu bash -c "\
@@ -30,12 +38,9 @@ NAMESPACE=watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers ${DOCKER_ID} \
+     --linkContainerLogFiles \
 	--environment watson > /dev/null
 
-if [ -f /var/log/crawler_container_logs/${NAMESPACE} ]; then
-	echo 0
-else
-	echo 1
-fi
+grep -c $MSG /var/log/crawler_container_logs/f75ec4e7-eb9d-463a-a90f-f8226572fbcc/0000/${CONTAINER_ID}/docker.log
 
-docker rm -f $CONTAINER_NAME > /dev/null
+docker rm -f $NAME > /dev/null
