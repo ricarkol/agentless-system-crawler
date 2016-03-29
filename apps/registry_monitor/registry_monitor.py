@@ -32,6 +32,7 @@ except:
     import json
 
 log_file = "/var/log/cloudsight/registry-monitor.log"
+blacklist_file = "/etc/va-blacklist.txt"
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
 except AttributeError:
@@ -338,6 +339,19 @@ def is_full_rescan_time(now):
             return True
     return False
 
+def load_blacklisted_users():
+    blacklisted_users = []
+
+    try:
+        with file(blacklist_file) as bf:
+            for user in bf:
+                blacklisted_users.append(user) 
+    except IOError, e:
+        logger.warn('Blacklist file %s does not exist or cannot be accessed')
+
+    logger.info('Loaded %d blacklisted users' % len(blacklisted_users))
+    return blacklisted_users
+
 
 def load_known_images():
     known_images = dict()
@@ -420,7 +434,8 @@ def get_next_image_v1(registry_scheme, registry_host, auth):
                         'repository': repository,
                         'tag': tag,
                         'id': image_id,
-                        'name': image['name']
+                        'name': image['name'],
+                        'user_space': image['name'].split('/')[-2]
                         }
             yield image_tag
 
@@ -436,18 +451,21 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
             raise RegistryError('Failed to list images in %s' % registry_host)
 
         #images = {"name": "string", "id": "string"}
+        # "name" is in the form registry-host/user_namespace/image_name:tag
         images_alchemy = ret.json()
         logger.info('Received %d image names from registry' % len(images_alchemy))
         for image_alchemy in images_alchemy:
             repository, tag = image_alchemy['name'].rsplit(':')
             image_name = repository.split('/',1)[1]
+            user_space = repository.split('/',2)[-2]
             image_id = image_alchemy['id']
 
             image = {
                     'repository': repository,
                     'tag': tag,
                     'id': image_id,
-                    'name': image_name
+                    'name': image_name,
+                    'user_space': user_space
                     }
             yield image
     else:
@@ -485,7 +503,8 @@ def get_next_image_v2(registry_scheme, registry_host, auth, alchemy_registry_api
                          'repository': '%s/%s' % (registry_host, image_name),
                          'tag': tag,
                          'id': digest,
-                         'name': image_name
+                         'name': image_name,
+                         'user_space': image_name.split('/',1)[0]
                          }
                 yield image
                  
@@ -590,12 +609,20 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             else:
                 rescan_all = False
 
+        # Reload this every hour in case reg-update has been redeployed with an updated list
+        blacklisted_users = load_blacklisted_users()
+
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
                 repository = image['repository']
                 tag        = image['tag']
                 image_id   = image['id']
                 image_name = image['name']
+                user_space = image['user_space']
+
+                if user_space in blacklisted_users:
+                    logger.info('Skipping image from known internal user test')
+                    continue
 
                 if image_name not in known_images:
                     known_images[image_name] = dict()

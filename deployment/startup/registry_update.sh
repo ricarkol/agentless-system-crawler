@@ -46,6 +46,16 @@ case $1 in
             docker tag -f $REGISTRY/$REGISTRY_UPDATE_IMG:$IMAGE_TAG $REGISTRY_UPDATE_IMG 
             set +x
         fi
+
+        echo "docker run -m=${MAX_CONTAINER_MEMORY}" \
+             "-d --restart=always -p $REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
+             "-e KAFKA_SERVICE=${KAFKA_SERVICE}" \
+             "-e INSTANCE_ID=${INSTANCE_ID}" \
+             "-e LOG_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR}" \
+             "-v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR}" \
+             "-v ${HOST_BLACKLIST_DIR}:${CONTAINER_BLACKLIST_DIR}" \
+             "--name $CONTAINER_NAME $REGISTRY_UPDATE_IMG"
+
         # Start registry-update
         exit_code=0
         set -x
@@ -54,7 +64,9 @@ case $1 in
                    -e KAFKA_SERVICE=${KAFKA_SERVICE} \
                    -e INSTANCE_ID=${INSTANCE_ID} \
                    -e LOG_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR} \
+                   -e BLACKLIST_DIR=${CONTAINER_BLACKLIST_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
+                   -v ${HOST_BLACKLIST_DIR}:${CONTAINER_BLACKLIST_DIR} \
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG"
         STAT=$?
         exit_code=$((exit_code + STAT))
