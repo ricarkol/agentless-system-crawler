@@ -10,12 +10,34 @@ logger = logging.getLogger('crawlutils')
 def get_namespace(long_id, options):
     assert type(long_id) is str or unicode, "long_id is not a string"
     assert 'root_fs' in options
+
+    def _is_valid_prefix(prefix, lines):
+        parts = prefix.split(':')
+        for part in parts:
+            if part[0] != '$':
+                logger.error('CRAWLER_METRIC_PREFIX value is missing $. value={}, container id={}'.format(prefix,
+                      long_id));
+                return False
+            if part[1:] not in lines:
+                logger.error('undefined property:{} /etc/csf_env.properties, container id={}'.format(part[1:],
+                      long_id));
+                return False
+        return True
+                 
     try:
         with open(os.path.join(options['root_fs'],'etc/csf_env.properties'),'r') as rp:
             namespace = None
             lines = dict([l.strip().split('=') for l in rp.readlines()])
-            namespace = ".".join([lines[p[1:]].strip('\'') 
-                        for p in lines.get('CRAWLER_METRIC_PREFIX',"").split(':')])
+            if 'CRAWLER_METRIC_PREFIX' not in lines:
+                logger.error('CRAWLER_METRIC_PREFIX not found in /etc/csf_env.properties container id:' +
+                      long_id);
+                return
+
+            prefix = lines['CRAWLER_METRIC_PREFIX']
+            if not _is_valid_prefix(prefix, lines):
+                return
+
+            namespace = ".".join([lines[p[1:]].strip('\'') for p in prefix.split(':')])
             if namespace:
                 namespace = namespace + '.' + long_id[:12]
             return namespace
