@@ -10,7 +10,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 #    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
-CONTAINER_NAME_1=test_crawl_bad_properties_watson_1
+CONTAINER_NAME_1=test_crawl_no_metric_prefix_watson
 
 # start container 1 (watson)
 docker rm -f ${CONTAINER_NAME_1} 2> /dev/null > /dev/null

@@ -9,7 +9,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-CONTAINER_NAME_1=test_crawl_bad_properties_watson_1
+CONTAINER_NAME_1=test_crawl_bad_metric_prefix_watson
 
 #    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
 # start container 1 (watson)

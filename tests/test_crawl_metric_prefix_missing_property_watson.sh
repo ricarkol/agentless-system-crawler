@@ -10,7 +10,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-CONTAINER_NAME_1=test_crawl_bad_properties_watson_1
+CONTAINER_NAME_1=test_crawl_metric_prefix_missing_property_watson
 
 # start container 1 (watson)
 docker rm -f ${CONTAINER_NAME_1} 2> /dev/null > /dev/null

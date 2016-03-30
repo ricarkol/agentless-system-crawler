@@ -8,7 +8,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-CONTAINER_NAME=test_crawl_cpu_container_check_metadata
+CONTAINER_NAME=test_crawl_cpu_container_check_metadata_watson
 CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`
 
 docker rm -f ${CONTAINER_NAME} 2> /dev/null > /dev/null
