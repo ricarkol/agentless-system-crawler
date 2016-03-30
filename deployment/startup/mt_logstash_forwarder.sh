@@ -40,6 +40,7 @@ case $1 in
         set -x
         docker run -d --net=host --pid=host \
             --restart=always \
+            --log-opt max-size=50m --log-opt max-file=5 \
 			-v /var/log:/var/log \
 			-v /mnt/data/elasticsearch:/mnt/data/elasticsearch \
 			--name ${CONTAINER_NAME} \

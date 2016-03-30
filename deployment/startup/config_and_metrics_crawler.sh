@@ -46,6 +46,7 @@ case $1 in
         set -x
         docker run -d --privileged --net=host --pid=host \
             --restart=always \
+            --log-opt max-size=50m --log-opt max-file=5 \
 			-v /cgroup:/cgroup \
 			-v /sys/fs/cgroup:/sys/fs/cgroup \
 			-v /var/run/docker.sock:/var/run/docker.sock \

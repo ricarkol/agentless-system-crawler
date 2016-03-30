@@ -40,6 +40,7 @@ case $1 in
         set -x
         docker run -d \
             --restart=always \
+            --log-opt max-size=50m --log-opt max-file=5 \
             -p 8587:8587 \
 			-v ${HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR}:${CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR} \
 			-v /var/run/docker.sock:/var/run/docker.sock \

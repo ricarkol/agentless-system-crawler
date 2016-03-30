@@ -50,6 +50,7 @@ case $1 in
         exit_code=0
         set -x
         docker run -m=${MAX_CONTAINER_MEMORY} \
+                   --log-opt max-size=50m --log-opt max-file=5 \
                    -d --restart=always -p "$REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
                    -e KAFKA_SERVICE=${KAFKA_SERVICE} \
                    -e INSTANCE_ID=${INSTANCE_ID} \

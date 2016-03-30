@@ -54,6 +54,7 @@ case $1 in
         # Start Elasticsearch
         set -x
         docker run -d --restart=always \
+              --log-opt max-size=50m --log-opt max-file=5 \
               -p $ES_PORT:$ES_PORT -p 9300:9300 -p 9400:9400 -p 8888:80 -h $HOSTNAME \
               -e ES_HEAP_SIZE=$ES_HEAP_SIZE -e ES_CLUSTER_NAME=$ES_CLUSTER_NAME \
               -e ES_NODE_NAME=$HOSTNAME -e ES_PUBLISH_HOST=$PUBLISH_HOST \

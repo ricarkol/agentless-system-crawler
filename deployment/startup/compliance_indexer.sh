@@ -44,6 +44,7 @@ case $1 in
         # Start the compliance indexer (based on the generic-indexer docker image)
         set -x
         docker run -d --restart=always -e HOST_IP=$ELASTIC_HOST_1 \
+            --log-opt max-size=50m --log-opt max-file=5 \
             -e KAFKA_TOPIC=$KAFKA_COMPLIANCE_TOPIC \
             -e ZK_IP=$KAFKA_HOST  -e LS_HEAP_SIZE=$LS_HEAP_SIZE \
             -e KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE  -e PROCESSOR_ID=${PROC_ID} \

@@ -72,6 +72,7 @@ start() {
     # Start the consul agent
     set -x
     docker run -d \
+        --log-opt max-size=50m --log-opt max-file=5 \
         --restart=always \
         --net=host \
         -e GOMAXPROCS=4 \

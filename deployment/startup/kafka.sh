@@ -67,6 +67,7 @@ case $1 in
         set -x
 
         docker run -d --restart=always -p $HOST_KAFKA_PORT:$CONTAINER_KAFKA_PORT  \
+                   --log-opt max-size=50m --log-opt max-file=5 \
                    -p $HOST_KAFKA_ZOOKEEPER_PORT:$CONTAINER_KAFKA_ZOOKEEPER_PORT \
                    -p $HOST_KAFKA_JMX_PORT:$CONTAINER_KAFKA_JMX_PORT \
                    -p $HOST_KAFKA_ZOOKEEPER_JMX_PORT:$CONTAINER_KAFKA_ZOOKEEPER_JMX_PORT \
