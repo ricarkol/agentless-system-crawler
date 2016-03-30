@@ -1,6 +1,10 @@
 #!/bin/bash
 
 # Tests the OUTCONTAINER crawler mode for watson environment
+# The some of the properties in /etc/csf_env.properties file
+# have the word export in front of them, and some have
+# arbitrary whitespace in them. This should lead to a 
+# successful crawl
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then

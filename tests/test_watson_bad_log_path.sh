@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
    exit 1
 fi
 
-# checks logs files specified in /etc/logfile are absoulte paths only
-# also, checks that a warning message is added to a log file
+# one of the log files specified in the /etc/logfiles
+# is not absolute path, but the other one is.
+# The crawler links files with absolute paths only
 # /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
+# Returns 1 if success, 0 otherwise
 
 NAME=test_watson_bad_log_path
 # Cleanup

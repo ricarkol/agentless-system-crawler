@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Tests the watson environment.  The env properties file exists 
-# CRAWLER_METRIC_PREFIX specifies a property not defined in the
-# csf_env.properties file
+# CRAWLER_METRIC_PREFIX value specifies a property not defined 
+# in the csf_env.properties file
+# This should lead to a failure
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then

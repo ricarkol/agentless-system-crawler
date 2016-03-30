@@ -2,6 +2,7 @@
 
 # Tests the watson environment.  The env properties file exists 
 # but does not contain required CRAWLER_METRIC_PREFIX
+# the crawler skips the container
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
@@ -9,10 +10,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-#    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
 CONTAINER_NAME_1=test_crawl_no_metric_prefix_watson
 
-# start container 1 (watson)
 docker rm -f ${CONTAINER_NAME_1} 2> /dev/null > /dev/null
 docker run -d --name $CONTAINER_NAME_1 ubuntu bash -c "\
     echo CLOUD_APP_GROUP=\'watson_test\' >>/etc/csf_env.properties; \

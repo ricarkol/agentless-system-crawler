@@ -7,7 +7,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # since no files are listed in /etc/logfiles no links are created
-# /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
 # Returns 1 if success, 0 otherwise
 
 NAME=test_watson_no_log_file_list
@@ -39,7 +38,7 @@ ID1=`docker ps | grep $NAME | awk '{print $1}'`
 sleep 2
 
 # By now the log should be there
-test_log_fc=`find /var/log/crawler_container_logs/watson_test.service_1.service_v003.$ID1/* | grep -c "test..log"`
+test_log_fc=`find /var/log/crawler_container_logs/watson_test.service_1.service_v003.$ID1 | grep -c "test..log"`
 
 if [ $test_log_fc == 0 ];
 then

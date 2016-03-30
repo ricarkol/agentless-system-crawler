@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Tests the watson environment.  2 containers are created, one ready for
-# watson, and one not. Check that only the watson one is crawled.  Returns 1
-# if success, 0 otherwise
+# watson, and one not. Check that only the watson one is crawled.  
+# Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
@@ -47,9 +47,8 @@ N4=`grep -c '"namespace":"'${NAMESPACE_2}'"' /tmp/check_metadata_frame`
 docker rm -f ${CONTAINER_NAME_1} > /dev/null
 docker rm -f ${CONTAINER_NAME_2} > /dev/null
 
-# Only contianer 1 with watson ready container should be crawled: N1=1 and N2=1
-# Container 1 should be crawled, and its namespace should be in watson format: N3=0 and N4=1
-# Container 2 should not be crawled: N5=0
+# Container 1 should be crawled, and its namespace should be in watson format: N1=1, N2=1, N3=1
+# Container 2 should not be crawled: N4=0
 if [ $N1 == "1" ] && [ $N2 == "1" ] && [ $N3 == "1" ] && [ $N4 == "0" ]
 then
 	echo 1

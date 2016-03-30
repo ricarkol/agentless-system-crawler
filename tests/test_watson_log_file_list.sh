@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
    echo "This script must be run as root" 
@@ -9,13 +8,14 @@ fi
 
 # checks logs files specified in /etc/logfile are linked in proper locations
 # /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
+# Returns 1 if success, 0 otherwise
 
 NAME=test_watson_log_file_list
 # Cleanup
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 docker rm -f $NAME 2> /dev/null > /dev/null
 
-timeout 10 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
+timeout 15 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=nofeatures --url file:///tmp/`uuid` \
     --environment watson \
 	--linkContainerLogFiles --frequency 1 --numprocesses 1 \

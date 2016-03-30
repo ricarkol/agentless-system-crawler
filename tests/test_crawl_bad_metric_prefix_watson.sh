@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Tests the watson environment.  The env properties file exists 
-# but does not contain required CRAWLER_METRIC_PREFIX
+# but CRAWLER_METRIC_PREFIX value does not have $ in front of
+# key names so crawler skips this container
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
@@ -10,8 +11,6 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 CONTAINER_NAME_1=test_crawl_bad_metric_prefix_watson
-
-#    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
 # start container 1 (watson)
 docker rm -f ${CONTAINER_NAME_1} 2> /dev/null > /dev/null
 docker run -d --name $CONTAINER_NAME_1 ubuntu bash -c "\
@@ -24,12 +23,12 @@ docker run -d --name $CONTAINER_NAME_1 ubuntu bash -c "\
 
 DOCKER_ID_1=`docker inspect -f '{{ .Id }}' ${CONTAINER_NAME_1}`
 DOCKER_SHORT_ID1=`echo $DOCKER_ID_1 | cut -c 1-12`
+NAMESPACE_1=watson_test.service_1.service_v003.$DOCKER_SHORT_ID1
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers $DOCKER_ID_1,$DOCKER_ID_2 \
 	--environment watson > /tmp/check_metadata_frame
 
-NAMESPACE_1=watson_test.service_1.service_v003.$DOCKER_SHORT_ID1
 
 N1=`grep -c cpu-0 /tmp/check_metadata_frame`
 N2=`grep -c ^metadata /tmp/check_metadata_frame`

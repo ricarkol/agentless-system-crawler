@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Tests the --linkContainerLogFiles option for the OUTCONTAINERcrawler mode .
+# Tests the --linkContainerLogFiles option for the OUTCONTAINER crawler mode 
+# in watson environment.
 # Expected behavior: crawler is stared without specifying --linkContainerLogFiles
 # There should not be any container specific links in /var/log/crawl_container_logs/...
 # Returns 1 if success, 0 otherwise

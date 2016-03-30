@@ -4,6 +4,7 @@
 import os
 import json
 import logging
+import copy
 
 logger = logging.getLogger('crawlutils')
 
@@ -59,7 +60,9 @@ def get_log_file_list(long_id, options):
     assert 'root_fs' in options
     assert 'container_logs' in options
 
-    container_logs = options.get('container_logs', {})
+    container_logs = {}
+    if 'container_logs' in options:
+        container_logs = copy.deepcopy(options['container_logs'])
     for log in container_logs:
         name = log['name']
         if not os.path.isabs(name) or '..' in name:
@@ -72,7 +75,7 @@ def get_log_file_list(long_id, options):
             for l in rp.readlines():
                 container_logs.append({'name': l.strip(), 'type': None})
     except IOError:
-        logger.info('/etc/logfiles not found in container with id:' +
+        logger.warning('/etc/logfiles not found in container with id:' +
                       long_id);
     return container_logs
 
