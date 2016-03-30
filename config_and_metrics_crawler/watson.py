@@ -27,7 +27,16 @@ def get_namespace(long_id, options):
     try:
         with open(os.path.join(options['root_fs'],'etc/csf_env.properties'),'r') as rp:
             namespace = None
-            lines = dict([l.strip().split('=') for l in rp.readlines()])
+            lines = {}
+            for line in rp.readlines():
+                # strip preceeding export if exists
+                line = line.strip()
+                if line.startswith('export'):
+                    line = line[6:].strip() # len(export)=6
+                parts = line.split('=')
+                if len(parts) == 2:
+                    lines[parts[0]] = parts[1]
+
             if 'CRAWLER_METRIC_PREFIX' not in lines:
                 logger.error('CRAWLER_METRIC_PREFIX not found in /etc/csf_env.properties container id:' +
                       long_id);
