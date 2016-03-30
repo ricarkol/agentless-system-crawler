@@ -32,7 +32,9 @@ except:
     import json
 
 log_file = "/var/log/cloudsight/registry-monitor.log"
-blacklist_file = "/etc/va-blacklist.txt"
+blacklist_dir = os.getenv['CONTAINER_BLACKLIST_DIR']
+blacklist_file = os.path.join(blacklist_dir, "va-blacklist.txt")
+
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
 except AttributeError:
