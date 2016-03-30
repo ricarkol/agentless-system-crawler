@@ -28,7 +28,7 @@ fi
 # clean up temporay files
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*
 
-CONTAINER_NAME=test_crawl_cpu_container_log_links_1
+CONTAINER_NAME=test_crawl_cpu_container_etc_logfile_links_watson
 
 docker rm -f ${CONTAINER_NAME} 2> /dev/null > /dev/null
 docker run -d --name $CONTAINER_NAME ubuntu bash -c "\

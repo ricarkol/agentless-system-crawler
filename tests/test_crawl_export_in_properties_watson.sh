@@ -8,15 +8,16 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-CONTAINER_NAME=test_crawl_cpu_container_check_metadata_watson
+CONTAINER_NAME=test_crawl_export_in_properties_watson
 CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`
 
 docker rm -f ${CONTAINER_NAME} 2> /dev/null > /dev/null
 docker run -d --name $CONTAINER_NAME ubuntu bash -c "\
-    echo CLOUD_APP_GROUP=\'watson_test\' >>/etc/csf_env.properties; \
-    echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
+    echo \"export CLOUD_APP_GROUP='watson_test'\" >>/etc/csf_env.properties; \
+    echo \"export       CLOUD_APP='service_1'   \" >>/etc/csf_env.properties; \
     echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
     echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
+    echo XXX_CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
     echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
     sleep 600" 2> /dev/null > /dev/null
 

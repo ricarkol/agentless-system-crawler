@@ -11,7 +11,7 @@ fi
 # also, checks that a warning message is added to a log file
 # /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
 
-NAME=watson_test
+NAME=test_watson_bad_log_path
 # Cleanup
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 rm -f /tmp/$NAME.log /tmp/$NAME-0.log /tmp/$NAME-1.log /tmp/$NAME-2.log

@@ -10,7 +10,7 @@ fi
 # checks logs files specified in /etc/logfile are linked in proper locations
 # /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
 
-NAME=watson_test
+NAME=test_watson_log_file_list
 # Cleanup
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 docker rm -f $NAME 2> /dev/null > /dev/null
