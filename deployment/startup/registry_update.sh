@@ -58,9 +58,8 @@ case $1 in
                    -e BLACKLIST_FILENAME=${BLACKLIST_FILENAME} \
                    -e INSTANCE_ID=${INSTANCE_ID} \
                    -e LOG_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR} \
-                   -e BLACKLIST_DIR=${CONTAINER_BLACKLIST_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
-                   -v ${HOST_BLACKLIST_DIR}:${CONTAINER_BLACKLIST_DIR} \
+                   -v ${HOST_BLACKLIST_DIR}:/etc \
                    --name "$CONTAINER_NAME" "$REGISTRY_UPDATE_IMG"
         STAT=$?
         exit_code=$((exit_code + STAT))
