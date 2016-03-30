@@ -7,6 +7,7 @@ import subprocess
 import traceback
 import json
 import logging
+import copy
 
 logger = logging.getLogger('crawlutils')
 
@@ -207,7 +208,7 @@ def get_container_log_prefix(instance_identifier, options):
 
 def get_log_file_list(long_id, options):
     assert 'container_logs' in options
-    container_logs = options['container_logs']
+    container_logs = copy.deepcopy(options['container_logs'])
     for log in container_logs:
         name = log['name']
         if not os.path.isabs(name) or '..' in name:

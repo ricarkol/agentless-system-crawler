@@ -60,9 +60,7 @@ def get_log_file_list(long_id, options):
     assert 'root_fs' in options
     assert 'container_logs' in options
 
-    container_logs = {}
-    if 'container_logs' in options:
-        container_logs = copy.deepcopy(options['container_logs'])
+    container_logs = copy.deepcopy(options['container_logs'])
     for log in container_logs:
         name = log['name']
         if not os.path.isabs(name) or '..' in name:
