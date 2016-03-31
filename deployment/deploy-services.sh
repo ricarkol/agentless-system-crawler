@@ -1483,7 +1483,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
                     echo "HOST_BLACKLIST_DIR=$HOST_BLACKLIST_DIR" >>$config_file
                     echo "CONTAINER_BLACKLIST_DIR=$CONTAINER_BLACKLIST_DIR" >>$config_file 
-                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file                           
+                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
@@ -1552,7 +1552,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
                     echo "HOST_BLACKLIST_DIR=$HOST_BLACKLIST_DIR" >>$config_file
                     echo "CONTAINER_BLACKLIST_DIR=$CONTAINER_BLACKLIST_DIR" >>$config_file
-                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file       
+                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
