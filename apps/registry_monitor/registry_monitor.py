@@ -498,6 +498,9 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                             bluemix_org, bluemix_space, instance_id, alchemy_registry_api, elasticsearch_ip_port):
     global kinterface, registry_v2_alchemy_api
     
+    logger.info('======================================================')
+    logger.info('         Starting registry-monitor service')
+    logger.info('======================================================')
     logger.info('Monitoring registry at: %s' % registry)
 
     kinterface = KafkaInterface(kafka_url=kafka_service)
@@ -589,6 +592,12 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                 last_full_scan_time = now
             else:
                 rescan_all = False
+
+        if single_run:
+            rescan_all = True
+
+        if rescan_all:
+            logger.info('Full rescan will take place')
 
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
@@ -775,8 +784,6 @@ if __name__ == '__main__':
     if ice_api and not bluemix_org:
         bluemix_org = user
         logger.info('Bluemix organization defaulting to %s' % bluemix_org)
-        
-    print >>sys.stderr, "starting registry-monitor service"
      
     monitor_registry_images(registry, kafka_service, single_run, notification_topic, 
                             registry_topic, user, password, email, ice_api, 
