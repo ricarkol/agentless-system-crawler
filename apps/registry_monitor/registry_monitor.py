@@ -590,6 +590,12 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             else:
                 rescan_all = False
 
+        if single_run:
+            rescan_all = True
+
+        if rescan_all:
+            logger.info('Full rescan will take place')
+
         try:
             for image in get_next_image(registry_scheme, registry_host, registry_version, auth, alchemy_registry_api):
                 repository = image['repository']
