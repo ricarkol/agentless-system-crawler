@@ -164,12 +164,13 @@ class KafkaInterface(object):
                 self.consumer_test_complete = True
                 raise TestException("Test")
             #### TEST BLOCK END ####
+            self.logger.info("Attempting to consume")
             message = self.consumer.consume()
         except KafkaException as e:
             self.logger.error('Failed to get new message from kafka: %s' % repr(e))
             self.consumer_reconnect_process()
 
-
+        self.logger.info("Consumed successfully")
         # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
         # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
         if message is not None:
