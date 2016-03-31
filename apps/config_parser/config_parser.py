@@ -157,10 +157,10 @@ class KafkaInterface(object):
         try:
             #### TEST BLOCK ####
             if self.test and not self.consumer_test_complete:
-                self.logger.info("TEST --------- Testing that consumer is running")
+                self.logger.info("TEST --------- Testing that consumer is running.")
 
                 assert self.consumer._running is True
-                self.logger.info("TEST --------- Consumer is running, skipping attempt to consumer, will restart kafka connection")
+                self.logger.info("TEST --------- Consumer is running, skipping attempt to consume, will restart kafka connection.")
                 self.consumer_test_complete = True
                 raise TestException("Test")
             #### TEST BLOCK END ####
