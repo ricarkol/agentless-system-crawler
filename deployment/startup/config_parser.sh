@@ -44,6 +44,7 @@ case $1 in
         # Start the config indexer
         set -x
         docker run -d --restart=always \
+           --log-opt max-size=50m --log-opt max-file=5 \
            -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
            --name $CONTAINER_NAME  $CONFIG_PARSER_IMG \
            --kafka-url $KAFKA_HOST:$KAFKA_PORT --instance-id $INSTANCE_ID \

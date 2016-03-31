@@ -43,7 +43,9 @@ case $1 in
         fi
         # Start the config indexer
         set -x
-        docker run -d --restart=always -e HOST_IP=$ELASTIC_HOST_1 -e ZK_IP=$KAFKA_HOST \
+        docker run -d --restart=always \
+            --log-opt max-size=50m --log-opt max-file=5 \
+            -e HOST_IP=$ELASTIC_HOST_1 -e ZK_IP=$KAFKA_HOST \
             -e LS_HEAP_SIZE=$LS_HEAP_SIZE  -e PROCESSOR_ID=config_indexer_$PROC_ID \
             -e KAFKA_MAX_MSG_SIZE=$KAFKA_MAX_MSG_SIZE -e INSTANCE_ID=${INSTANCE_ID} \
             -e CONTAINER_NAME=`hostname`:${CONTAINER_NAME} \

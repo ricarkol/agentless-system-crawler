@@ -52,6 +52,7 @@ case $1 in
         mkdir -p $REGCRAWL_HOST_DATA_DIR
 
         echo "docker run -d ${RESTART}" \
+             "--log-opt max-size=50m --log-opt max-file=5" \
              "-v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR}" \
              "-v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR}" \
              "--name $CONTAINER_NAME $REGISTRY_MONITOR_IMG --user $REGISTRY_USER" \
@@ -64,6 +65,7 @@ case $1 in
 
         # Start registry-monitor
         docker run -m=${MAX_CONTAINER_MEMORY} -d $RESTART \
+                   --log-opt max-size=50m --log-opt max-file=5 \
                    -v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    --name "$CONTAINER_NAME" \

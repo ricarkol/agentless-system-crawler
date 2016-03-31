@@ -40,6 +40,7 @@ case $1 in
         set -x
         docker run -d \
             --restart=always \
+            --log-opt max-size=50m --log-opt max-file=5 \
             -p 8586:8586 \
 			--name ${CONTAINER_NAME} \
 			-it $UPTIME_SERVER_IMG \
