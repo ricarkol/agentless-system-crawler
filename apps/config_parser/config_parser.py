@@ -16,11 +16,9 @@ the configuration parameters, and re-emits them to three channels:
 
 
 import augeas_parser
-import requests
 import logging
 import logging.handlers
 import time
-import signal
 import sys
 import argparse
 import csv
@@ -30,6 +28,8 @@ import errno
 import signal
 import datetime
 import pykafka.cluster
+from retry import retry
+from pykafka.exceptions import KafkaException
 
 
 try:
@@ -54,6 +54,7 @@ log_file              = '/var/log/cloudsight/config-parser.log'
 obj_factory           = None
 processor_group       = "config-parser"
 max_kafka_retries     = 600
+max_read_message_retries = 60
 kafka_reconnect_after = 60
 kafka_send_timeout    = 60
         
@@ -62,6 +63,9 @@ class TimeoutError(Exception):
     pass
 
 class KafkaError(Exception):
+    pass
+
+class TestException(KafkaException):
     pass
 
 def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
@@ -83,13 +87,15 @@ def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
     return decorator
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, test=False):
         self.logger        = logger
         self.kafka_url     = kafka_url
         self.kafka_zookeeper_port = kafka_zookeeper_port
         self.receive_topic = receive_topic 
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
+        self.test = test
+        self.consumer_test_complete = False
 
         # Monkey patching the logger file of cluster, so that we get the output to our logs
         pykafka.cluster.log = logger
@@ -100,7 +106,7 @@ class KafkaInterface(object):
         XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
         to create one.
         '''
-        kafka_python_client = kafka_python.KafkaClient(self.kafka_url)
+        kafka_python_client = kafka_python.SimpleClient(self.kafka_url)
         kafka_python_client.ensure_topic_exists(self.receive_topic)
         kafka_python_client.ensure_topic_exists(self.publish_topic)
         kafka_python_client.ensure_topic_exists(self.notify_topic)
@@ -134,24 +140,41 @@ class KafkaInterface(object):
             self.notifier.stop()
         self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
+    def consumer_reconnect_process(self):
+        if self.consumer._running is True:
+            self.logger.info("Consumer running, stopping Kafka Clients")
+            self.stop_kafka_clients()
+            time.sleep(1)
+        self.connect_to_kafka()
+        time.sleep(1)
+        self.logger.error("Kafka restart attempted {}".format(self.kafka_url))
+        raise KafkaException("Kafka restart attempted {}".format(self.kafka_url))
+
+
+    @retry(KafkaException, tries=max_read_message_retries, delay=0.1, backoff=0.1, max_delay=2.0)
     def next_frame(self):
         message = None
-        while True:
-            try:
-                message = self.consumer.consume()
-            except Exception as e:
-                self.logger.error('Failed to get new message from kafka: %s' % repr(e))
-                try:
-                    time.sleep(5)
-                    self.stop_kafka_clients()
-                    self.connect_to_kafka()
-                except Exception as e:
-                    self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, repr(e)))
+        try:
+            #### TEST BLOCK ####
+            if self.test and not self.consumer_test_complete:
+                self.logger.info("TEST --------- Testing that consumer is running.")
 
-            # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
-            # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
-            if message is not None:
-                yield message.value
+                assert self.consumer._running is True
+                self.logger.info("TEST --------- Consumer is running, skipping attempt to consume, will restart kafka connection.")
+                self.consumer_test_complete = True
+                raise TestException("Test")
+            #### TEST BLOCK END ####
+            self.logger.info("Attempting to consume")
+            message = self.consumer.consume()
+        except KafkaException as e:
+            self.logger.error('Failed to get new message from kafka: %s' % repr(e))
+            self.consumer_reconnect_process()
+
+        self.logger.info("Consumed successfully")
+        # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
+        # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
+        if message is not None:
+            yield message.value
         
     @timeout(kafka_send_timeout)
     def send_message(self, producer, msg):
@@ -233,7 +256,7 @@ signal.signal(signal.SIGTERM, sigterm_handler)
     
 def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                   publish_topic, notification_topic, 
-                  known_config_files, suppress_comment, instance_id):
+                  known_config_files, suppress_comment, instance_id, test):
     parser = augeas_parser.AugeasParser(logger, suppress_comments)
   
     client = None 
@@ -241,7 +264,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
     while True:
         try:
             client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
-                                    publish_topic, notification_topic)
+                                    publish_topic, notification_topic, test)
             break
         except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
@@ -373,6 +396,9 @@ if __name__ == '__main__':
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     logger.propagate = False
+    logger.info("===================================================")
+    logger.info("STARTING NEW CONFIG PARSER INSTANCE")
+    logger.info("===================================================")
 
     try:
         parser = argparse.ArgumentParser(description="")
@@ -383,6 +409,7 @@ if __name__ == '__main__':
         parser.add_argument('--notification-topic', type=str, default='notification', help='kafka notifications-topic')
         parser.add_argument('--suppress-comments', type=str, default='true', help='suppress comments=true|false')
         parser.add_argument('--instance-id', type=str, default='unknown', help='config-parser instance-id')
+        parser.add_argument('--test', action='store_true')
         parser.add_argument('--known-config-files', type=str, default='[]', help='list of config files to parse')
         args = parser.parse_args()
     
@@ -390,9 +417,10 @@ if __name__ == '__main__':
         known_config_files = json.loads(args.known_config_files)
         config_parser(args.kafka_url, args.kafka_zookeeper_port, logger, args.receive_topic, 
                       args.publish_topic, args.notification_topic, 
-                      known_config_files, suppress_comments, args.instance_id)
+                      known_config_files, suppress_comments, args.instance_id, args.test)
     except Exception as e:
         print('Error: %s' % repr(e))
-        logger.exception(e) 
+        logger.exception(e)
+
 
 

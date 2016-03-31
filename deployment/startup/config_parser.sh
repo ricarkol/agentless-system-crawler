@@ -49,7 +49,7 @@ case $1 in
            --name $CONTAINER_NAME  $CONFIG_PARSER_IMG \
            --kafka-url $KAFKA_HOST:$KAFKA_PORT --instance-id $INSTANCE_ID \
            --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT} \
-           --known-config-files "$CONFIG_PARSER_KNOWN_CONFIG_FILES"
+           --known-config-files "$CONFIG_PARSER_KNOWN_CONFIG_FILES" --test
 
         STAT=$?
         set +x
