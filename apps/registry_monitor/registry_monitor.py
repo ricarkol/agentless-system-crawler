@@ -499,7 +499,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
     global kinterface, registry_v2_alchemy_api
     
     logger.info('======================================================')
-    logger.info('Starting registry-monitor service')
+    logger.info('         Starting registry-monitor service')
     logger.info('======================================================')
     logger.info('Monitoring registry at: %s' % registry)
 
