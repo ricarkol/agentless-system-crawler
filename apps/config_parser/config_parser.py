@@ -151,7 +151,7 @@ class KafkaInterface(object):
         raise KafkaException("Kafka restart attempted {}".format(self.kafka_url))
 
 
-    @retry(KafkaException, tries=max_read_message_retries, delay=0.1, backoff=0.5, max_delay=2)
+    @retry(KafkaException, tries=max_read_message_retries, delay=0.1, backoff=0.1, max_delay=2.0)
     def next_frame(self):
         message = None
         try:
