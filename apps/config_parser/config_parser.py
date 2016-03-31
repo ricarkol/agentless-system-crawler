@@ -141,7 +141,7 @@ class KafkaInterface(object):
     def next_frame(self):
         message = None
         try:
-            if self.test and self.consumer_test_complete:
+            if self.test and not self.consumer_test_complete:
                 self.logger.info("TEST --------- Testing that consumer is running")
 
                 assert self.consumer._running is True
@@ -396,6 +396,9 @@ if __name__ == '__main__':
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     logger.propagate = False
+    logger.info("===================================================")
+    logger.info("STARTING NEW CONFIG PARSER INSTANCE")
+    logger.info("===================================================")
 
     try:
         parser = argparse.ArgumentParser(description="")
