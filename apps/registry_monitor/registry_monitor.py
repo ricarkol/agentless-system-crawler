@@ -32,8 +32,7 @@ except:
     import json
 
 log_file = "/var/log/cloudsight/registry-monitor.log"
-blacklist_dir = os.getenv['CONTAINER_BLACKLIST_DIR']
-blacklist_file = os.path.join(blacklist_dir, "va-blacklist.txt")
+blacklist_file = os.path.join(os.getenv['BLACKLIST_DIR'], os.getenv['BLACKLIST_FILENAME'])
 
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
@@ -519,6 +518,10 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                             bluemix_org, bluemix_space, instance_id, alchemy_registry_api, elasticsearch_ip_port):
     global kinterface, registry_v2_alchemy_api
     
+    logger.info("===========================================================")
+    logger.info("            Starting registry-monitor service")
+    logger.info("===========================================================")
+
     logger.info('Monitoring registry at: %s' % registry)
 
     kinterface = KafkaInterface(kafka_url=kafka_service)
@@ -804,8 +807,6 @@ if __name__ == '__main__':
     if ice_api and not bluemix_org:
         bluemix_org = user
         logger.info('Bluemix organization defaulting to %s' % bluemix_org)
-        
-    print >>sys.stderr, "starting registry-monitor service"
      
     monitor_registry_images(registry, kafka_service, single_run, notification_topic, 
                             registry_topic, user, password, email, ice_api, 
