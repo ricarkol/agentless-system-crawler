@@ -92,6 +92,7 @@ class KafkaInterface(object):
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
         self.test = test
+        self.consumer_test_complete = False
 
         # Monkey patching the logger file of cluster, so that we get the output to our logs
         pykafka.cluster.log = logger
@@ -136,15 +137,16 @@ class KafkaInterface(object):
             self.notifier.stop()
         self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
-    @retry(Exception, tries=max_kafka_retries, delay=1.0, backoff=1, max_delay=6)
+    @retry(Exception, tries=max_kafka_retries, delay=0.1, backoff=0.5, max_delay=2)
     def next_frame(self):
         message = None
         try:
-            if self.test:
+            if self.test and self.consumer_test_complete:
                 self.logger.info("TEST --------- Testing that consumer is running")
 
                 assert self.consumer._running is True
                 self.logger.info("TEST --------- Consumer is running, skipping attempt to consumer, will restart kafka connection")
+                self.consumer_test_complete = True
                 raise Exception("Test")
             message = self.consumer.consume()
         except Exception as e:
@@ -153,11 +155,9 @@ class KafkaInterface(object):
                 if self.consumer._running is True:
                     self.logger.info("Consumer running, stopping Kafka Clients")
                     self.stop_kafka_clients()
-                    time.sleep(3)
+                    time.sleep(1)
                 self.connect_to_kafka()
-
-                time.sleep(3)
-
+                time.sleep(1)
                 if self.consumer._running is False:
                     self.logger.info("Retry connect to kafka complete. consumer is NOT running")
                     raise KafkaError()
