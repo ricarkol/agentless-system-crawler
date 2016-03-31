@@ -30,6 +30,7 @@ import errno
 import signal
 import datetime
 import pykafka.cluster
+from retry import retry
 
 
 try:
@@ -83,13 +84,14 @@ def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
     return decorator
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, test=False):
         self.logger        = logger
         self.kafka_url     = kafka_url
         self.kafka_zookeeper_port = kafka_zookeeper_port
         self.receive_topic = receive_topic 
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
+        self.test = test
 
         # Monkey patching the logger file of cluster, so that we get the output to our logs
         pykafka.cluster.log = logger
@@ -100,7 +102,7 @@ class KafkaInterface(object):
         XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
         to create one.
         '''
-        kafka_python_client = kafka_python.KafkaClient(self.kafka_url)
+        kafka_python_client = kafka_python.SimpleClient(self.kafka_url)
         kafka_python_client.ensure_topic_exists(self.receive_topic)
         kafka_python_client.ensure_topic_exists(self.publish_topic)
         kafka_python_client.ensure_topic_exists(self.notify_topic)
@@ -134,24 +136,45 @@ class KafkaInterface(object):
             self.notifier.stop()
         self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
+    @retry(Exception, tries=max_kafka_retries, delay=1.0, backoff=1, max_delay=6)
     def next_frame(self):
         message = None
-        while True:
-            try:
-                message = self.consumer.consume()
-            except Exception as e:
-                self.logger.error('Failed to get new message from kafka: %s' % repr(e))
-                try:
-                    time.sleep(5)
-                    self.stop_kafka_clients()
-                    self.connect_to_kafka()
-                except Exception as e:
-                    self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, repr(e)))
+        try:
+            if self.test:
+                self.logger.info("TEST --------- Testing that consumer is running")
 
-            # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
-            # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
-            if message is not None:
-                yield message.value
+                assert self.consumer._running is True
+                self.logger.info("TEST --------- Consumer is running, skipping attempt to consumer, will restart kafka connection")
+                raise Exception("Test")
+            message = self.consumer.consume()
+        except Exception as e:
+            self.logger.error('Failed to get new message from kafka: %s' % repr(e))
+            try:
+                if self.consumer._running is True:
+                    self.logger.info("Consumer running, stopping Kafka Clients")
+                    self.stop_kafka_clients()
+                    time.sleep(3)
+                self.connect_to_kafka()
+
+                time.sleep(3)
+
+                if self.consumer._running is False:
+                    self.logger.info("Retry connect to kafka complete. consumer is NOT running")
+                    raise KafkaError()
+                self.logger.info("Retry connect to kafka complete. consumer running")
+            except KafkaError as err:
+                self.logger.error('Failed to reconnect to kafka - starting consumer again.')
+                self.connect_to_kafka()
+                raise
+            except Exception as e:
+                self.logger.error('Failed to reconnect to kafka at %s (error=%s)' % (self.kafka_url, repr(e)))
+                raise
+
+
+        # Could log the config_parser instance ID as well if passed into KafkaInterface.__init__
+        # self.logger.info('CP Partition %s offset %s' % (message.partition_id, message.offset))
+        if message is not None:
+            yield message.value
         
     @timeout(kafka_send_timeout)
     def send_message(self, producer, msg):
@@ -233,7 +256,7 @@ signal.signal(signal.SIGTERM, sigterm_handler)
     
 def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                   publish_topic, notification_topic, 
-                  known_config_files, suppress_comment, instance_id):
+                  known_config_files, suppress_comment, instance_id, test):
     parser = augeas_parser.AugeasParser(logger, suppress_comments)
   
     client = None 
@@ -241,7 +264,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
     while True:
         try:
             client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
-                                    publish_topic, notification_topic)
+                                    publish_topic, notification_topic, test)
             break
         except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
@@ -383,6 +406,7 @@ if __name__ == '__main__':
         parser.add_argument('--notification-topic', type=str, default='notification', help='kafka notifications-topic')
         parser.add_argument('--suppress-comments', type=str, default='true', help='suppress comments=true|false')
         parser.add_argument('--instance-id', type=str, default='unknown', help='config-parser instance-id')
+        parser.add_argument('--test', action='store_true')
         parser.add_argument('--known-config-files', type=str, default='[]', help='list of config files to parse')
         args = parser.parse_args()
     
@@ -390,7 +414,7 @@ if __name__ == '__main__':
         known_config_files = json.loads(args.known_config_files)
         config_parser(args.kafka_url, args.kafka_zookeeper_port, logger, args.receive_topic, 
                       args.publish_topic, args.notification_topic, 
-                      known_config_files, suppress_comments, args.instance_id)
+                      known_config_files, suppress_comments, args.instance_id, args.test)
     except Exception as e:
         print('Error: %s' % repr(e))
         logger.exception(e) 
