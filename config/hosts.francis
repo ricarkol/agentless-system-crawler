@@ -1,23 +1,23 @@
 #!/bin/bash
 
-ANNOTATOR1=francis.hursley.ibm.com
-ANNOTATOR2=francis.hursley.ibm.com
-ANNOTATOR3=francis.hursley.ibm.com
-ES1=francis.hursley.ibm.com
-ES2=francis.hursley.ibm.com
-ES3=francis.hursley.ibm.com
-ES4=francis.hursley.ibm.com
-ES5=francis.hursley.ibm.com
-INDEXER1=francis.hursley.ibm.com
-INDEXER2=francis.hursley.ibm.com
-INDEXER3=francis.hursley.ibm.com
-KAFKA1=francis.hursley.ibm.com
-KAFKA2=francis.hursley.ibm.com
-SEARCH1=francis.hursley.ibm.com
-REGCRAWL1=francis.hursley.ibm.com
-REGCRAWL2=francis.hursley.ibm.com
-REGCRAWL3=francis.hursley.ibm.com
-POLICY1=francis.hursley.ibm.com
+ANNOTATOR1=9.20.33.162
+ANNOTATOR2=9.20.33.162
+ANNOTATOR3=9.20.33.162
+ES1=9.20.33.162
+ES2=9.20.33.162
+ES3=9.20.33.162
+ES4=9.20.33.162
+ES5=9.20.33.162
+INDEXER1=9.20.33.162
+INDEXER2=9.20.33.162
+INDEXER3=9.20.33.162
+KAFKA1=9.20.33.162
+KAFKA2=9.20.33.162
+SEARCH1=9.20.33.162
+REGCRAWL1=9.20.33.162
+REGCRAWL2=9.20.33.162
+REGCRAWL3=9.20.33.162
+POLICY1=9.20.33.162
 
 HOSTS=( $ES1 )
 
