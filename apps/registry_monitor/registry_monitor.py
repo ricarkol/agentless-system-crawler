@@ -623,7 +623,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                 user_space = image['user_space']
 
                 if user_space in blacklisted_users:
-                    logger.info('Skipping image from known internal user test')
+                    logger.info('Blacklist so ignored: %s:%s' % (repository, tag))
                     continue
 
                 if image_name not in known_images:
