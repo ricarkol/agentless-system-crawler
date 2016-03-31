@@ -16,11 +16,9 @@ the configuration parameters, and re-emits them to three channels:
 
 
 import augeas_parser
-import requests
 import logging
 import logging.handlers
 import time
-import signal
 import sys
 import argparse
 import csv
@@ -31,6 +29,7 @@ import signal
 import datetime
 import pykafka.cluster
 from retry import retry
+from pykafka.exceptions import KafkaException
 
 
 try:
@@ -55,6 +54,7 @@ log_file              = '/var/log/cloudsight/config-parser.log'
 obj_factory           = None
 processor_group       = "config-parser"
 max_kafka_retries     = 600
+max_read_message_retries = 60
 kafka_reconnect_after = 60
 kafka_send_timeout    = 60
         
@@ -63,6 +63,9 @@ class TimeoutError(Exception):
     pass
 
 class KafkaError(Exception):
+    pass
+
+class TestException(KafkaException):
     pass
 
 def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
@@ -137,7 +140,7 @@ class KafkaInterface(object):
             self.notifier.stop()
         self.logger.info('Stopped kafka client on %s' % self.kafka_url)
 
-    @retry(Exception, tries=max_kafka_retries, delay=0.1, backoff=0.5, max_delay=2)
+    @retry(Exception, tries=max_read_message_retries, delay=0.1, backoff=0.5, max_delay=2)
     def next_frame(self):
         message = None
         try:
@@ -147,9 +150,9 @@ class KafkaInterface(object):
                 assert self.consumer._running is True
                 self.logger.info("TEST --------- Consumer is running, skipping attempt to consumer, will restart kafka connection")
                 self.consumer_test_complete = True
-                raise Exception("Test")
+                raise TestException("Test")
             message = self.consumer.consume()
-        except Exception as e:
+        except KafkaException as e:
             self.logger.error('Failed to get new message from kafka: %s' % repr(e))
             try:
                 if self.consumer._running is True:
@@ -420,6 +423,7 @@ if __name__ == '__main__':
                       known_config_files, suppress_comments, args.instance_id, args.test)
     except Exception as e:
         print('Error: %s' % repr(e))
-        logger.exception(e) 
+        logger.exception(e)
+        
 
 
