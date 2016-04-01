@@ -216,6 +216,7 @@ if __name__ == '__main__':
     except Exception as e:
         print('Error: %s' % repr(e))
         logger.exception(e)
+        raise 
 
 
 
