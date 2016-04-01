@@ -9,6 +9,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+HOST_NAMESPACE=dev-test
 CONTAINER_NAME_1=test_crawl_check_environment_watson_1
 CONTAINER_NAME_2=test_crawl_check_environment_watson_2
 CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`
@@ -34,10 +35,10 @@ DOCKER_SHORT_ID2=`echo $DOCKER_ID_2 | cut -c 1-12`
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers $DOCKER_ID_1,$DOCKER_ID_2 \
-	--environment watson > /tmp/check_metadata_frame
+	--environment watson --namespace ${HOST_NAMESPACE}  > /tmp/check_metadata_frame
 
-NAMESPACE_1=watson_test.service_1.service_v003.$DOCKER_SHORT_ID1
-NAMESPACE_2=watson_test.service_1.service_v003.$DOCKER_SHORT_ID2
+NAMESPACE_1=${HOST_NAMESPACE}.watson_test.service_1.service_v003.$DOCKER_SHORT_ID1
+NAMESPACE_2=${HOST_NAMESPACE}.watson_test.service_1.service_v003.$DOCKER_SHORT_ID2
 
 N1=`grep -c cpu-0 /tmp/check_metadata_frame`
 N2=`grep -c ^metadata /tmp/check_metadata_frame`
@@ -55,3 +56,5 @@ then
 else
 	echo 0
 fi
+
+rm -rf /var/log/crawler_container_logs/${HOST_NAMESPACE}.*

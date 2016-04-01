@@ -10,6 +10,7 @@ logger = logging.getLogger('crawlutils')
 
 def get_namespace(long_id, options):
     assert type(long_id) is str or unicode, "long_id is not a string"
+    assert 'host_namespace' in options
     assert 'root_fs' in options
 
     def _is_valid_prefix(prefix, lines):
@@ -49,7 +50,7 @@ def get_namespace(long_id, options):
 
             namespace = ".".join([lines[p[1:]].strip('\'') for p in prefix.split(':')])
             if namespace:
-                namespace = namespace + '.' + long_id[:12]
+                namespace = options['host_namespace']+ "." +namespace + '.' + long_id[:12]
             return namespace
     except IOError:
         logger.error('/etc/csf_env.properties not found in container with id:' +

@@ -12,6 +12,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+HOST_NAMESPACE=dev-test
 CONTAINER_NAME=test_crawl_export_in_properties_watson
 CONTAINER_IMAGE=`docker inspect --format {{.Id}} ubuntu:latest`
 
@@ -30,7 +31,7 @@ DOCKER_SHORT_ID=`echo $DOCKER_ID | cut -c 1-12`
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers $DOCKER_ID \
-	--environment watson --numprocesses 1 > /tmp/check_metadata_frame
+	--environment watson --numprocesses 1 --namespace ${HOST_NAMESPACE}> /tmp/check_metadata_frame
 
 docker rm -f ${CONTAINER_NAME} > /dev/null
 
@@ -48,7 +49,7 @@ docker rm -f ${CONTAINER_NAME} > /dev/null
 #}
 
 TIMESTAMP_DAY_PART=`date +"%Y-%m-%dT"`
-NAMESPACE=watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
+NAMESPACE=${HOST_NAMESPACE}.watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
 
 grep ^metadata /tmp/check_metadata_frame \
 			| grep '"system_type":"container"' \
@@ -59,3 +60,4 @@ grep ^metadata /tmp/check_metadata_frame \
 			| grep '"namespace":"'${NAMESPACE}'"' \
 			| grep -c metadata
 
+rm -rf /var/log/crawler_container_logs/${HOST_NAMESPACE}.*

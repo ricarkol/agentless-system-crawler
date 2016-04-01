@@ -28,13 +28,13 @@ do
 	DOCKER_ID=`docker inspect -f '{{ .Id }}' test_crawl_cpu_many_containers_$i`
 
 done
-
+HOST_NAMESPACE=dev-test
 IDS=`docker ps | grep test_crawl_cpu_many_containers | awk '{printf "%s,",  $1}' | sed s/,$//g`
 IFS=',' read -ra ADDR <<< "$IDS"
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=nofeatures --crawlContainers $IDS --numprocesses 2 --environment watson  \
-	--linkContainerLogFiles 
+	--linkContainerLogFiles --namespace ${HOST_NAMESPACE}
 #        --url file:///tmp/test_crawl_cpu_many_containers_input_logfile_links_watson
 
 COUNT2=0
@@ -43,7 +43,7 @@ for i in `seq 0 $COUNT1`
 do
 	MSG=${CONTAINER_ID[$i]}
         # By now the log should be there
-        R=`find /var/log/crawler_container_logs/watson_test.service_1.service_v003.${ADDR[$i]}/* | grep -c "input_file_name"`
+        R=`find /var/log/crawler_container_logs/${HOST_NAMESPACE}.watson_test.service_1.service_v003.${ADDR[$i]}/* | grep -c "input_file_name"`
         if [ $R == 0 ];
         then
           PASS=0;
@@ -65,4 +65,4 @@ else
 	echo 0
 fi
 
-
+rm -rf /var/log/crawler_container_logs/dev-test.*

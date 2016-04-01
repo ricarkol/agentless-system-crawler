@@ -11,6 +11,7 @@ fi
 # Returns 1 if success, 0 otherwise
 
 NAME=test_watson_log_file_list
+HOST_NAMESPACE=dev-test
 # Cleanup
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 docker rm -f $NAME 2> /dev/null > /dev/null
@@ -19,7 +20,7 @@ timeout 15 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCON
 	--features=nofeatures --url file:///tmp/`uuid` \
     --environment watson \
 	--linkContainerLogFiles --frequency 1 --numprocesses 1 \
-	--url file:///tmp/$NAME --format graphite & #2>/dev/null &
+	--url file:///tmp/$NAME --format graphite --namespace ${HOST_NAMESPACE} & #2>/dev/null &
 PID=$!
 
 MSG=`uuid`
@@ -41,7 +42,7 @@ ID1=`docker ps | grep $NAME | awk '{print $1}'`
 sleep 2
 
 # By now the log should be there
-test_log_fc=`find /var/log/crawler_container_logs/watson_test.service_1.service_v003.$ID1/* | grep -c "test..log"`
+test_log_fc=`find /var/log/crawler_container_logs/${HOST_NAMESPACE}.watson_test.service_1.service_v003.$ID1/* | grep -c "test..log"`
 
 if [ $test_log_fc == 2 ];
 then
@@ -51,3 +52,4 @@ else
 fi
 
 docker rm -f $NAME > /dev/null
+rm -rf /var/log/crawler_container_logs/${HOST_NAMESPACE}.*

@@ -44,15 +44,16 @@ docker run -d --name $CONTAINER_NAME ubuntu bash -c "\
     echo $CONTAINER_NAME >> /var/log/test2.log; \
     sleep 600" 2> /dev/null > /dev/null
 
+HOST_NAMESPACE=dev-test
 DOCKER_ID=`docker inspect -f '{{ .Id }}' ${CONTAINER_NAME}`
 DOCKER_SHORT_ID=`echo $DOCKER_ID | cut -c 1-12`
-NAMESPACE=watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
+NAMESPACE=${HOST_NAMESPACE}.watson_test.service_1.service_v003.${DOCKER_SHORT_ID}
 logdir=/var/log/crawler_container_logs/$NAMESPACE
 
 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=cpu --crawlContainers ${DOCKER_ID} \
      --linkContainerLogFiles \
-	--environment watson > /dev/null
+	--environment watson --namespace ${HOST_NAMESPACE} > /dev/null
 
 if [ ! -f $logdir/var/log/test1.log ]; then
     echo 0      # expected log file did not exist
