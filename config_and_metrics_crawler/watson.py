@@ -19,7 +19,7 @@ def get_namespace(long_id, options):
                 logger.error('CRAWLER_METRIC_PREFIX value is missing $. value={}, container id={}'.format(prefix,
                       long_id));
                 return False
-            if part[1:] not in lines:
+            if part[1:] not in lines or lines[part[1:]] =='' :
                 logger.error('undefined property:{} /etc/csf_env.properties, container id={}'.format(part[1:],
                       long_id));
                 return False
