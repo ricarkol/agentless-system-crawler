@@ -106,8 +106,8 @@ module MTLumberjack
       
       @socket_mutex = Mutex.new
       
-      @sequence = 0
-      @last_ack = 0
+      #@sequence = 0
+      #@last_ack = 0
       
       connect
             
@@ -135,6 +135,9 @@ module MTLumberjack
     
     private
     def connect
+      @sequence = 0
+      @last_ack = 0
+            
       @socket_mutex.synchronize do
         
         @host = @opts[:address]
@@ -343,66 +346,41 @@ module MTLumberjack
     
     public 
     def write_events(events)
-      frames_bytes = ""
-      n_frames = 0
-      events.each do |event|
-        frames_bytes += to_frame(augment_hash(event), inc)
-        n_frames += 1
-      end
-      if n_frames > 0
-        begin
-#          MTLumberjack.get_logger().debug("Will send a total of #{n_frames} data frames in one compressed frame.", :host => @identification)
-#          compress = Zlib::Deflate.deflate(frames_bytes)
-#          bytes_sent = 0
-#          @socket_mutex.synchronize do
-#            ready = IO.select(nil, [@socket], [@socket], MTLumberjack::WRITE_TIMEOUT)
-#            if ready
-#              if ready[2][0]
-#                raise "Detected a network connection problem before sending data."
-#              elsif ready[1][0]
-#                # Send appropriate window size to server
-#                @socket.syswrite(["1", "W", n_frames].pack("AAN"))
-#                @socket.flush()
-#                      
-#                MTLumberjack.get_logger().debug("Sending a compressed frame; payload size = #{compress.length}", :host => @identification)
-#                bytes_sent = @socket.syswrite(["1","C",compress.length,compress].pack("AANA#{compress.length}"))
-#                @socket.flush()
-#              end
-#            else
-#              raise "Timed out while sending data!"
-#            end
-#          end
-#          MTLumberjack.get_logger().debug("Number of bytes actually sent (payload + header) = #{bytes_sent}", :host => @identification)
-#          MTLumberjack.get_logger().debug("sequence = #{@sequence}; last_ack = #{@last_ack}; n_frames = #{n_frames}", :host => @identification)
-          select_send_data(n_frames, frames_bytes)
-          ack(n_frames)
-          
-        rescue => e
-          MTLumberjack.get_logger().warn("Error while sending a compressed frame to the server. The connection was probably lost. Will reconnect and resend data",
-            :exception => e,
-            :backtrace => e.backtrace, 
-            :host => @identification
-          )
-          @socket_mutex.synchronize do
-              force_close()
-          end
-          
-          # The connection was probably lost. 
-          # We need to reconnect and make sure we send the events to the server.
-          begin
-            connect
-          rescue => e
-            MTLumberjack.get_logger().warn("Error reconnecting to the server while sending a compressed frame. Reconnecting...",
-              :exception => e,
-              :backtrace => e.backtrace,
-              :host => @identification
-            ) 
-            sleep(5)
-            retry
-          end
-          
-          retry
+      begin
+        frames_bytes = ""
+        n_frames = 0
+        events.each do |event|
+          frames_bytes += to_frame(augment_hash(event), inc)
+          n_frames += 1
         end
+        if n_frames > 0
+          select_send_data(n_frames, frames_bytes)
+          ack(n_frames)          
+        end
+      rescue => e
+        MTLumberjack.get_logger().warn("Error while sending a compressed frame to the server. The connection was probably lost. Will reconnect and resend data",
+          :exception => e,
+          :backtrace => e.backtrace, 
+          :host => @identification
+        )
+        @socket_mutex.synchronize do
+            force_close()
+        end
+        
+        # The connection was probably lost. 
+        # We need to reconnect and make sure we send the events to the server.
+        begin
+          connect
+        rescue => e
+          MTLumberjack.get_logger().warn("Error reconnecting to the server while sending a compressed frame. Reconnecting...",
+            :exception => e,
+            :backtrace => e.backtrace,
+            :host => @identification
+          ) 
+          sleep(5)
+          retry
+        end  
+        retry
       end
     end
     
@@ -539,17 +517,6 @@ module MTLumberjack
     def ack(last_n_frames)
       MTLumberjack.get_logger().debug("Waiting for ACK from server...", :host => @identification)
       @socket_mutex.synchronize do
-#        ready = IO.select([@socket], nil, nil, MTLumberjack::ACK_READ_TIMEOUT)
-#        if ready
-#          version = @socket.sysread(1)
-#          MTLumberjack.get_logger().debug("Read ACK version = #{version}", :host => @identification)
-#          type = @socket.sysread(1)
-#          MTLumberjack.get_logger().debug("Read ACK type = #{type}", :host => @identification)
-#          raise "Whoa we shouldn't get this frame: #{type}" if type != "A"
-#          @last_ack = @socket.sysread(4).unpack("N").first
-#        else
-#          raise "Timed out while reading ACK!"
-#        end
          select_read_ack()
       end
       MTLumberjack.get_logger().debug("Received ACK from server. last_ack = #{@last_ack}; last_n_frames = #{last_n_frames}", :host => @identification)
@@ -598,7 +565,7 @@ module MTLumberjack
       keys = []
       hash.each do |k,v|
         keys << "#{prefix}#{k}" if v.class == String or v.class == Array
-        keys << deep_keys(hash[k], "#{k}.") if v.class == Hash
+        keys << deep_keys(hash[k], "#{prefix}#{k}.") if v.class == Hash
       end
       keys.flatten
     end
