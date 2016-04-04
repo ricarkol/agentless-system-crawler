@@ -94,6 +94,7 @@ class KafkaInterface(object):
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
+                                 consumer_timeout_ms=1000,
                                  consumer_group=processor_group,
                                  auto_commit_enable=True,
                                  zookeeper_connect = self.zookeeper_url)
@@ -181,6 +182,8 @@ class KafkaInterface(object):
                 self.last_consumer_retry_count = 0
                 if message is not None:
                     yield message.value
+                else:
+                    self.logger.info("Consumer timed out, returned None.")
 
             except KafkaException as err:
                 if i == max_read_message_retries -1:
