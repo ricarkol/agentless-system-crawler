@@ -51,7 +51,7 @@ except:
 processor_group = 'registry-monitor'
 logger              = logging
 max_kafka_retries   = 600
-http_request_timeout= 600
+http_request_timeout= 1200
 iterator_sleep_time = 1 * 60 * 60 # 1 hour
 FULL_RESCAN_DAY     = 5 # Mon=0, Sun=6
 FULL_RESCAN_WINDOW_START = 2  # Full rescan time window must be > iterator_sleep_time
