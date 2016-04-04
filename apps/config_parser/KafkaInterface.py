@@ -66,7 +66,7 @@ class KafkaInterface(object):
         self.notifier = None
 
         # XXX replace the port in the broker url. This should be passed.
-        if self.kafka_url.find(':') != -1:
+        if ':' in self.kafka_url:
             self.zookeeper_url = self.kafka_url.rsplit(":", 1)[0] + ":%s" % self.kafka_zookeeper_port
         else:
             self.zookeeper_url = self.kafka_url + ":%s" % self.kafka_zookeeper_port
