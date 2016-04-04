@@ -723,7 +723,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             logger.exception(e)
             
         if rescan_all:
-            logger.info('Processed %d images in full rescan')
+            logger.info('Processed %d images in full rescan' % all_images)
         else:
             logger.info('Discovered %d new images' % new_images)
             logger.info('Skipped %d images that were not new') % not_new_images
