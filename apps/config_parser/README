@@ -1,0 +1,53 @@
+The config parser service parses system and application 
+configuration files emitted as 'config' features to the 
+CloudSight broker's 'Config' channel and extracts the configuration 
+parameters. Extracted configuration are emitted to one of three channels:
+'User' - for system user account info
+'Group' - for system group info
+'ConfigParam' - for all other configuration parameters
+
+The parser service relies on the Augeas configuration
+management library <http://augeas.net/> to perform the 
+extraction of configuration parameters. Augeas provides an
+extensible set of lenses that each parse configuration 
+files of specific applications or system components.
+
+Data Format:
+Features emitted by the parser meet the data format defined 
+for CloudSight: 
+  
+Feature = < namespace, type, resource, value >
+
+The namespace, is retained from the source data containing
+the configuration. 
+
+Type is either of 'configparam', 'user', or 'group'.
+
+Resource uniquely identifies the configuration parameter.
+For the 'configparam' feature type, it uses an XPath syntax
+consisting of the file path and the parameter path. For 'user'
+and 'group' features types the resource is represented by the 
+user or group name, respectively.
+
+For each feature type, the value consists of the following utf-8 string 
+attributes:
+
+user:
+user     - user name
+name     - full name
+shell    - path to user shell
+uid      - user id 
+gid      - group id  
+home     - path to user's home directory 
+password - password 
+
+group:
+group    - group name
+gid      - group id
+password - password
+user     - list of group users
+
+configparam:
+parameter - configuration parameter label
+file      - path of file containing configuration
+value     - string representation of configuration value

@@ -1,0 +1,122 @@
+# =================================================================
+# Licensed Materials - Property of IBM
+#
+# (c) Copyright IBM Corp. 2014 All Rights Reserved
+#
+# US Government Users Restricted Rights - Use, duplication or
+# disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+# =================================================================
+require 'yaml'
+require 'fileutils'
+require 'rake/packagetask'
+require 'bundler/gem_tasks'
+require 'rubocop/rake_task'
+require 'rspec/core/rake_task'
+require 'stamper'
+require 'sentinel/util'
+
+# Static code analysis
+task :rubocop do
+  RuboCop::RakeTask.new
+end
+
+# Set rspec flags
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.rspec_opts = '-f d -c'
+end
+
+# Packaging
+ROOT_DIR = File.dirname(__FILE__)
+
+gemspec = Gem::Specification.load("#{Dir.glob(ROOT_DIR + '/*.gemspec')[0]}")
+
+pkg = nil
+last_rev = File.exist?(File.join(ROOT_DIR, '.last_rev')) ? IO.read(File.join(ROOT_DIR, '.last_rev')) : 'dev'
+Rake::PackageTask.new(gemspec.name, gemspec.version.to_s) do |pkg_task|
+  pkg_task.need_tar_bz2 = pkg_task.need_zip = true
+  pkg_task.package_files = gemspec.files
+  pkg_task.version = "#{pkg_task.version}-#{last_rev}"
+  pkg = pkg_task
+end
+
+desc 'Build a self-contained package that only requires ruby to run for the current platform'
+task standalone_package: [:clobber, :package] do
+  # Install dependencies in exploded package directory
+  Sentinel::Util.with_clean_env do
+    puts cmd =
+      'bundle install'\
+      " --path #{pkg.package_dir}/#{pkg.package_name}/vendor/bundle"\
+      ' --standalone --without=development'
+    IO.popen(cmd).each_line { |line| puts line }
+  end
+
+  sh "git checkout .bundle"
+
+  # Fix environment setup file to load the correct lib path
+  setup_rb_path = "#{pkg.package_dir}/#{pkg.package_name}/vendor/bundle/bundler/setup.rb"
+  setup_rb = IO.readlines(setup_rb_path)[0...-1].join('')
+  setup_rb += "$:.unshift File.expand_path(\"\#{path}/../../../lib\")"
+  IO.write(setup_rb_path, setup_rb)
+
+  # Tar up the directory
+  sh "cd #{pkg.package_dir} && tar"\
+     " --exclude='*.java'"\
+     " --exclude='*.c'"\
+     " --exclude='*.h'"\
+     " --exclude='*/test/*'"\
+     " --exclude='*/spec/*'"\
+     " -cjf #{pkg.package_name}.#{RUBY_PLATFORM}.tar.bz2 #{pkg.package_name}"
+
+  # Zip up the directory
+  sh "cd #{pkg.package_dir} && zip -r9 #{pkg.package_name}.#{RUBY_PLATFORM}.zip #{pkg.package_name}"\
+     ' -x \*.java \*.c \*.h "*/test/*" "*/spec/*"'
+end
+
+desc 'Delete all the known policies from our database'
+task :drop_policies do
+  sh "curl -XDELETE 'http://localhost:9200/sentinel/policy'"
+end
+
+desc 'Drop the whole database. It will be recreated when the application starts.'
+task :drop_index do
+  require 'sentinel/configuration'
+  Sentinel::Store.indices.delete index: Sentinel::Config.db.index_name
+  Sentinel::Log.info("Index '#{Sentinel::Config.db.index_name}' was deleted.")
+end
+
+desc 'Show dependencies that are yet to be approved'
+task :deps do
+  sh "license_finder"
+  puts "\nDependencies with license information was generated under doc/"
+end
+
+desc 'Stamp all relevant files with our copyright/license terms'
+task :stamp do
+  Stamper.stamp(
+    stamp: IO.read(File.join(ROOT_DIR, 'LICENSE.txt')),
+    files: gemspec.files,
+    includes: [
+      '.*\.rb$',
+      '\.?.*\.yml$',
+      '.*\.gemspec$',
+      '^[A-Z].*file$'
+    ],
+    excludes: ['pkg/', 'vendor/', 'doc/']
+  )
+end
+
+desc 'Show all TODO notes'
+task :todo do
+  sh 'grep --color=always -RIn "T\OD\O:" --exclude "*/vendor/*" --exclude "*/doc/*" --exclude "*/tmp/*" ./*'
+end
+
+# task default: [:rubocop, :spec, :package]
+task default: [:spec, :package]
+
+target_platform = "x86_64-linux"
+desc 'Publish our all-inclusive package to artifactory'
+task publish: ["pkg/#{pkg.package_name}.#{target_platform}.tar.bz2"] do
+  cmd = "curl -i -u `cat #{ENV['HOME']}/.artifactory_credentials` -T pkg/#{pkg.package_name}.#{target_platform}.tar.bz2 -X PUT -H 'Content-Type: application/bzip2' https://artifactory.mms.ibmcloud.com/artifactory/ext-snapshot-local/amm-security-compliance-service/sentinel/#{gemspec.name}-%s.#{target_platform}.tar.bz2"
+  sh cmd % pkg.version
+  sh cmd % "#{gemspec.version.to_s}-latest"
+end

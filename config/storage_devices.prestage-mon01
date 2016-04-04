@@ -1,0 +1,51 @@
+#!/bin/bash
+
+#
+# (c) IBM Research 2015
+# Vulnerability Advisor storage devices
+#
+
+declare -A DOCKER_DEVICES=(
+  [$ANNOTATOR1]="/dev/xvdc"
+  [$ANNOTATOR2]="/dev/xvdc"
+  [$ANNOTATOR3]="/dev/xvdc" 
+  [$INDEXER1]="/dev/xvdc" 
+  [$INDEXER2]="/dev/xvdc" 
+  [$INDEXER3]="/dev/xvdc" 
+  [$SEARCH1]="/dev/xvdc" 
+  [$POLICY1]="/dev/xvdc" 
+  [$ES1]="/dev/xvdc"
+  [$ES2]="/dev/xvdc" 
+  [$ES3]="/dev/xvdc" 
+  [$ES4]="/dev/xvdc" 
+  [$ES5]="/dev/xvdc" 
+  [$KAFKA1]="/dev/xvdc" 
+  [$KAFKA2]="/dev/xvdc"
+  [$KAFKA3]="/dev/xvdc"
+  )
+DOCKER_PARTITION_START=1MB
+DOCKER_PARTITION_END=100GB
+DOCKER_PARTITION_FSTYPE=btrfs
+DOCKER_PARTITION_MOUNTPOINT=/var/lib/docker
+
+declare -A DOCKER_DEVICES_LARGE=(
+  [$REGCRAWL1]="/dev/xvdc"
+  [$REGCRAWL2]="/dev/xvdc"
+  [$REGCRAWL3]="/dev/xvdc" 
+  )
+DOCKER_PARTITION_LARGE_END=-1
+
+DATA_PARTITION_START=100GB
+DATA_PARTITION_END=-1
+DATA_PARTITION_FSTYPE=ext4
+DATA_PARTITION_MOUNTPOINT=/mnt/data
+declare -A DATA_DEVICES=(
+  [$ES1]="/dev/xvdc"
+  [$ES2]="/dev/xvdc" 
+  [$ES3]="/dev/xvdc" 
+  [$ES4]="/dev/xvdc" 
+  [$ES5]="/dev/xvdc" 
+  [$KAFKA1]="/dev/xvdc" 
+  [$KAFKA2]="/dev/xvdc" 
+  [$KAFKA3]="/dev/xvdc"
+  )

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+ANNOTATOR1="{host1}"
+ES1="{host2}"
+INDEXER1="{host3}"
+KAFKA1="{host4}"
+REGCRAWL1="{host5}"
+POLICY1="{host6}"
+
+CONSUL_SERVER1="{cs-host1}"
+CONSUL_SERVER2="{cs-host2}"
+CONSUL_SERVER3="{cs-host3}"
+
+CONSUL_SERVER_CLUSTER=($CONSUL_SERVER1 $CONSUL_SERVER2 $CONSUL_SERVER3)
+KAFKA_CLUSTER=($KAFKA1)
+
+HOSTS=($ANNOTATOR1, $ES1, $INDEXER1, $KAFKA1, $REGCRAWL1, $POLICY1)
+
+DEPLOYMENT_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
+CUSTOMER_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
+CUSTOMER_REGISTRY_PROTOCOL=http
+REGISTRY_USER=
+REGISTRY_PW=
+REGISTRY_EMAIL=
+
+SSH_USER=root
+
+#Logstash env config
+ENABLE_LOGSTASH_FORWARDER=false
+LSF_TARGET="logs.stage1.opvis.bluemix.net:9091"
+LSF_TENANT_ID="{insert tenantID}"
+LSF_PASSWORD="{insert password}"
+LSF_GROUP_ID="cloudsightgrp" 
+
+#VA metrics crawler env config
+ENABLE_VA_CRAWLER=false
+CONFIG_AND_METRICS_CRAWLER_SPACE_ID="{insert tenantID}"
+CONFIG_AND_METRICS_CRAWLER_EMIT_URL="mtgraphite://metrics.stage1.opvis.bluemix.net:9095/Crawler:{insert password}"

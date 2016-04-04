@@ -1,0 +1,17 @@
+
+To run the container in daemon mode do the following:
+
+currently setup to crawl every six hours
+
+docker run --name usncrawler -v /root/usncrawler/usnrepo:/opt/usncrawler/usnrepo -d usncrawler \
+    --elastic-search http://demo3.sl.cloud9.ibm.com:9200 --repo-dir /opt/usncrawler/usnrepo --sleeptime 21600
+
+For single host deployment in demo3 the elastic search url is:
+
+demo3.sl.cloud9.ibm.com
+The repodir is /root/usncrawler/usnrepo
+
+For cloudsight distributed deployment:
+elastic search url is elastic2-cs.sl.cloud9.ibm.com
+
+repordir is /root/usncrawler/usnrepo

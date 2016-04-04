@@ -1,0 +1,32 @@
+CloudSight is a Cloud-native application monitoring and analytics service.
+
+Please raise any issues in the alchemy-va/problems repository.
+
+Build and deploy instructions are in docs/INSTALL.
+
+Directory structure:
+--------------------
+
+/services           Kafka and Elasticsearch services
+
+/collector          Data collectors written by the Cloudsight team
+   
+/apps               Applications, annotators and analytics
+
+/build              Build scripts
+
+/config             Configuration files
+
+/deployment         Deployment scripts
+
+/indexers           Data indexers
+
+/packaging          Packaged binaries
+
+/docs               Documentation
+
+/test               Tests
+
+README              This file
+
+

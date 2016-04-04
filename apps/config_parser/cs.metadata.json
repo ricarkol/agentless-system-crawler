@@ -1,0 +1,11 @@
+{
+  "image_name": "cloudsight/config-parser",
+  "run": [
+    {
+      "command": "--broker-url http://172.17.42.1:8081/broker/v0 --schema-url http://172.17.42.1:8082/schema/v0 --start-offset=-2", 
+      "name": "config-parser",
+      "namespace":"/cloudsight/config-parser",
+      "requires": ["broker=/cloudsight/broker/api/0", "schema=/cloudsight/schema"]
+    }
+  ]
+}

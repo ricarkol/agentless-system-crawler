@@ -1,0 +1,43 @@
+#!/bin/bash
+
+ANNOTATOR1=csdev.sl.cloud9.ibm.com
+ANNOTATOR2=csdev.sl.cloud9.ibm.com
+ANNOTATOR3=csdev.sl.cloud9.ibm.com
+ES1=csdev.sl.cloud9.ibm.com
+ES2=csdev.sl.cloud9.ibm.com
+ES3=csdev.sl.cloud9.ibm.com
+ES4=csdev.sl.cloud9.ibm.com
+ES5=csdev.sl.cloud9.ibm.com
+INDEXER1=csdev.sl.cloud9.ibm.com
+INDEXER2=csdev.sl.cloud9.ibm.com
+INDEXER3=csdev.sl.cloud9.ibm.com
+KAFKA1=csdev.sl.cloud9.ibm.com
+KAFKA2=csdev.sl.cloud9.ibm.com
+SEARCH1=csdev.sl.cloud9.ibm.com
+REGCRAWL1=csdev.sl.cloud9.ibm.com
+REGCRAWL2=csdev.sl.cloud9.ibm.com
+REGCRAWL3=csdev.sl.cloud9.ibm.com
+POLICY1=csdev.sl.cloud9.ibm.com
+
+HOSTS=( $ES1 )
+
+DEPLOYMENT_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
+CUSTOMER_REGISTRY=secreg2.sl.cloud9.ibm.com:5000
+CUSTOMER_REGISTRY_PROTOCOL=http
+REGISTRY_USER=
+REGISTRY_PW=
+REGISTRY_EMAIL=
+
+SSH_USER=root
+
+#VA metrics crawler env config
+ENABLE_VA_CRAWLER=false
+VA_CRAWLER_SPACE_ID="{insert userID}"
+VA_CRAWLER_EMIT_URL="mtgraphite://metrics.stage1.opvis.bluemix.net:9095/{insert tenantID}:{insert password}"
+
+#Logstash env config
+ENABLE_LOGSTASH_FORWARDER=false
+LSF_TARGET="logs.stage1.opvis.bluemix.net:9091"
+LSF_TENANT_ID="{insert tenantID}"
+LSF_PASSWORD="{insert password}"
+LSF_GROUP_ID="cloudsightgrp" 

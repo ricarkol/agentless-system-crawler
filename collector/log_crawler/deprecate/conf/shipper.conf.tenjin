@@ -1,0 +1,66 @@
+<?py type_dict = {}?>
+input {
+ <?py for log_file_info in crawler_config['log_files']: ?>
+ file {
+   path => '{==log_file_info['path']==}'
+   <?py if log_file_info['type']:?>
+   type => '{==log_file_info['type']==}'
+       <?py type_dict[log_file_info['type']] = '' ?>
+       <?py if log_file_info['namespace_system_suffix']:?>
+           <?py type_dict[log_file_info['type']] = log_file_info['namespace_system_suffix']?>
+       <?py #endif ?>
+   <?py #endif ?>
+   <?py if 'replay' in crawler_config['log_crawler']:?>
+      	<?py if crawler_config['log_crawler']['replay']:?>
+   start_position => 'beginning'
+       <?py #endif ?>
+   <?py #endif ?>
+ }
+ <?py #endfor ?>
+}
+
+output {
+<?py types = type_dict.keys() ?>
+  if [type] == '{==types[0]==}' {
+    cloudsight {
+      type => '{==types[0]==}'
+      host => '{==crawler_config['cloudsight']['broker_host']==}'
+      port => {==crawler_config['cloudsight']['broker_port']==}
+      namespace => '/{==crawler_config['namespace_prefix']['system_prefix']==}{==type_dict[types[0]]==}/{==types[0]==}/%{path}' 
+      <?py if crawler_config['log_crawler']['format']: ?>
+      format => '{==crawler_config['log_crawler']['format']==}'
+      <?py #endif ?>
+      <?py if crawler_config['log_crawler']['batch']: ?>
+      batch => true
+          <?py if crawler_config['log_crawler']['batch_events']: ?>
+      batch_events => {==crawler_config['log_crawler']['batch_events']==}
+          <?py #endif ?>
+          <?py if crawler_config['log_crawler']['batch_timeout']: ?>
+      batch_timeout => {==crawler_config['log_crawler']['batch_timeout']==}
+          <?py #endif ?>
+      <?py #endif ?>
+   }
+  }
+  <?py for type in types[1:len(types)]: ?>
+  else if [type] == '{==type==}' {
+    cloudsight {
+      type => '{==type==}'
+      host => '{==crawler_config['cloudsight']['broker_host']==}'
+      port => {==crawler_config['cloudsight']['broker_port']==}
+      namespace => '/{==crawler_config['namespace_prefix']['system_prefix']==}{==type_dict[type]==}/{==type==}/%{path}'
+      <?py if crawler_config['log_crawler']['format']: ?>
+      format => '{==crawler_config['log_crawler']['format']==}'
+      <?py #endif ?>
+      <?py if crawler_config['log_crawler']['batch']: ?>
+      batch => true
+          <?py if crawler_config['log_crawler']['batch_events']: ?>
+      batch_events => {==crawler_config['log_crawler']['batch_events']==}
+          <?py #endif ?>
+          <?py if crawler_config['log_crawler']['batch_timeout']: ?>
+      batch_timeout => {==crawler_config['log_crawler']['batch_timeout']==}
+          <?py #endif ?>
+      <?py #endif ?>
+   }
+  }
+  <?py #endfor ?>
+}

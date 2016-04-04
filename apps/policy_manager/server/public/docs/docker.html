@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security and Compliance APIs for Docker Cloud</title>
+    <!--[if lt IE 9]>
+    <script type="text/javascript">
+    window.location = "https://mms.ibmcloud.com/static/web/old.html";
+    </script>
+    <![endif]-->
+    <link rel="shortcut icon" href="https://c05a.https.cdn.softlayer.net/80C05A/origin.marketplace.ibmcloud.com/wicket/resource/com.appdirect.wicket.resources.Resource/themes/ibm/images/favicon-ver-D8BA35521DFC638F134CF3A64D1A6875.ico" type="image/x-icon">
+
+    <link href="css/magic-bootstrap.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
+    <link href='css/all.min.css' media='screen' rel='stylesheet' type='text/css'/>
+    <link href='css/all.min.css' media='print' rel='stylesheet' type='text/css'/>
+
+    <link href="css/overrides.css" rel="stylesheet">
+
+    <script type="text/javascript">
+    var _xhr_open = XMLHttpRequest.prototype.open;
+    var _prefix = location.pathname.substring(0, location.pathname.indexOf('/web/docs'));
+
+    // proxy ALL methods/properties
+    XMLHttpRequest.prototype.open = function() {
+        var url = arguments[1], idx;
+
+        if (_prefix && url && url.indexOf(_prefix) === -1) {
+            idx = url.indexOf('/api/');
+            arguments[1] = url.slice(0, idx) + _prefix + url.slice(idx);
+        }
+
+        return _xhr_open.apply(this, arguments);
+    }
+    </script>
+
+    <script type="text/javascript" src="lib/shred.bundle.js"></script>
+    <script src='all.min.js' type='text/javascript'></script>
+
+    <script type="text/javascript">
+    $(function () {
+      window.swaggerUi = new SwaggerUi({
+      url: (location.protocol || "http:") + "//" + (location.hostname || "localhost") + (location.port ? ":" + location.port : "") + _prefix + "/api/docs",
+      dom_id: "swagger-ui-container",
+      supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+      onComplete: function(swaggerApi, swaggerUi){
+        log("Loaded SwaggerUI");
+
+        $('pre code').each(function(i, e) {
+          hljs.highlightBlock(e)
+        });
+      },
+      onFailure: function(data) {
+        log("Unable to Load SwaggerUI");
+      },
+      docExpansion: "none"
+    });
+
+    $('#input_apiKey').change(function() {
+      var key = $('#input_apiKey')[0].value;
+      log("key: " + key);
+      if(key && key.trim() != "") {
+        log("added key " + key);
+        window.authorizations.add("key", new ApiKeyAuthorization("api_key", key, "query"));
+      }
+    })
+    window.swaggerUi.load();
+    });
+    </script>
+</head>
+
+<body class="swagger-section">
+
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="centered-wrapper">
+        <div class="navbar-header">
+            <a class="navbar-brand ibm-sm-logo" href="http://www.ibm.com/us/en/" tabindex="0">IBM  ®</a>
+            <a class="navbar-brand hidden-xs" href="docker.html"><span class="service-brand hidden-xs">Security &amp; Compliance APIs for Docker Cloud</span></a>
+        </div>
+        <!-- /.navbar-header -->
+
+        <ul class="nav navbar-top-links navbar-right">
+            <li class="active"><a href="#">API</a></li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    Support  <i class="fa fa-caret-down"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-life-ring fa-fw"></i> Help
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-envelope-o fa-fw"></i> Contact us
+                        </a>
+                    </li>
+                </ul>
+                <!-- /.dropdown-user -->
+            </li>
+        </ul>
+        </div>
+    </nav>
+
+<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>

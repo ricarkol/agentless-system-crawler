@@ -1,0 +1,88 @@
+<html>
+<head>
+<style type='text/css'>
+    .myTable { background-color:#FFFFFF;border-collapse:collapse; }
+    .myTable th { background-color:#6B7De7;color:white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; }
+    .myTable td,
+    .myTable th { padding:5px;border:1px solid #111111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 13px; }
+</style>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script>
+  $(function() {
+    $( document ).tooltip();
+  });
+</script>
+</head>
+<body>
+
+<h2>Operational Analytics Squad: Compliance and Vulnerability Scanning Report</h2>
+<font face="verdana" size=2>The most recent entry appears at the top of the table.</font></br>
+
+
+<table class=myTable>
+<tr><th align=center rowspan=2><b>Owner Namespace</b></th><th align=center rowspan=2><b>Namespace</b></th><th align=center rowspan=2><b>Crawl Time (UTC)</b></th><th align=center rowspan=2><b>Vulnerability</b></th><th align=center rowspan=2><b>Compliance</b></th><th align=center colspan=19><b>ITCS104 Compliance</b>&nbsp;<font size=1><a href="http://w3-03.ibm.com/transform/sas/as-web.nsf/ContentDocsByTitle/Linux+Appendix" target="_blank">(link)</a></font></th></tr>
+<tr><th align=center title="UID must be used only once" width=34px><b>1-1-a</b></th><th align=center title="Maximum password age" width=34px><b>2-1-b</b></th><th align=center title="Minimum password length" width=34px><b>2-1-c</b></th><th align=center title="Minimum days before password change" width=34px><b>2-1-d</b></th><th align=center title="Read/write access of ~root/.rhosts only by root" width=34px><b>5-1-a</b></th><th align=center title="Read/write access of ~root/.netrc only by root" width=34px><b>5-1-b</b></th><th align=center title="Permission check of /usr" width=34px><b>5-1-d</b></th><th align=center title="Permission check of /etc" width=34px><b>5-1-e</b></th><th align=center title="Permission check of /etc/security/opasswd" width=34px><b>5-1-f</b></th><th align=center title="Permission check of /var" width=34px><b>5-1-j</b></th><th align=center title="Permission check of /var/tmp" width=34px><b>5-1-k</b></th><th align=center title="Permission check of /var/log" width=34px><b>5-1-l</b></th><th align=center title="Permission check of /var/log/faillog" width=34px><b>5-1-m</b></th><th align=center title="Permission check of /var/log/tallylog" width=34px><b>5-1-n</b></th><th align=center title="Permission check of snmpd.conf" width=34px><b>5-1-s</b></th><th align=center title="wtmp file checking" width=34px><b>6-1-d</b></th><th align=center title="faillog file checking" width=34px><b>6-1-e</b></th><th align=center title="tallylog file checking" width=34px><b>6-1-f</b></th><th align=center title="no_hosts_equiv must be present" width=34px><b>8-0-o</b></th></tr>
+
+
+<tr><td align=center>devops00</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/devops00/update-server:34</td>
+<td align=center>2015-05-28 15:06:44-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-1bcd0f8b7f44498689bddfc3efaee05d.html"><b><font color=#ff3333>3/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>devopsc</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/devopsc/update-engine:63</td>
+<td align=center>2015-05-28 15:04:06-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-4651e2a090a14f7993994943df5b7ed8.html"><b><font color=#ff3333>3/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>pszeto</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/pszeto/cnc_compose_nodered:latest</td>
+<td align=center>2015-05-28 15:03:42-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-1de6a32ac4fd4123a06c62eeb6a82224.html"><b><font color=#ff3333>6/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>devops00</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/devops00/update-engine:63</td>
+<td align=center>2015-05-28 14:42:14-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-486c0cd74238486fa00119622974d357.html"><b><font color=#ff3333>3/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>0000000</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/0000000/update-engine:62</td>
+<td align=center>2015-05-28 14:39:22-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-847888ff0b0744b0a498a4d1ca57b576.html"><b><font color=#ff3333>3/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>pszeto</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/pszeto/cnc_compose_nodered:latest</td>
+<td align=center>2015-05-28 14:38:54-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-c87a8ff38767444e91ad904a3b50be3c.html"><b><font color=#ff3333>6/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>jenkinstest</td>
+<td align=center>registry-ice.stage1.ng.bluemix.net/jenkinstest/jenkins-container:latest</td>
+<td align=center>2015-05-22 12:16:39-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-5e0e759062ca40c7b9bfbefafdf3104e.html"><b><font color=#ff3333>1/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+<tr><td align=center>btak</td>
+<td align=center>hello-world-999</td>
+<td align=center>2015-05-22 12:08:17-0500</td>
+<td align=center style="background-color:#ffcccc"><a href="vulnerability_reports/vulnerability-report-bfb887782dd44b45ac802161f1220c18.html"><b><font color=#ff3333>4/76</font></b></a></td>
+<td align=center style="background-color:#ffcccc"><b><font color=#ff3333>FAIL</font></b></td>
+<td align=center>Pass</td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center style="background-color:#ffcccc"><b><font color="#ff3333">Fail</b></td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td><td align=center>Pass</td></tr>
+
+
+</table></body></html>
