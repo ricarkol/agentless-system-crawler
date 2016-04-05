@@ -597,6 +597,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
 
     while iterate:
         new_images = 0
+        not_new_images = 0
         csv_additions = []
         now = datetime.datetime.now()
 
@@ -701,8 +702,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
                         new_images += 1
                 
                 else:
-                    logger.info('Image is not new: %s/%s:%s (%s)' % \
-                                (registry_host, image_name, tag, image_id))
+                    not_new_images += 1
             
         except (requests.exceptions.ConnectionError, RegistryError), e:
             logger.info('Registry failure: %s' % str(e))
@@ -721,6 +721,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             logger.exception(e)
             
         logger.info('Discovered %d new images' % new_images)
+        logger.info('Skipped %d images that were not new') % not_new_images
         try:
             save_known_images(csv_additions)
         except (IOError, OSError), e:
