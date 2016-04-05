@@ -55,6 +55,7 @@ case $1 in
              "--log-opt max-size=50m --log-opt max-file=5" \
              "-v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR}" \
              "-v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR}" \
+             "-v ${HOST_BLACKLIST_DIR}:${CONTAINER_BLACKLIST_DIR}" \
              "--name $CONTAINER_NAME $REGISTRY_MONITOR_IMG --user $REGISTRY_USER" \
              "--password xxxxx --email $REGISTRY_EMAIL --org $BLUEMIX_ORG" \
              "--space $BLUEMIX_SPACE --single-run $REGISTRY_MONITOR_SINGLE_RUN" \
@@ -68,6 +69,9 @@ case $1 in
                    --log-opt max-size=50m --log-opt max-file=5 \
                    -v ${REGCRAWL_HOST_DATA_DIR}:${REGCRAWL_GUEST_DATA_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \
+                   -v ${HOST_BLACKLIST_DIR}:${CONTAINER_BLACKLIST_DIR} \
+                   -e BLACKLIST_DIR=${CONTAINER_BLACKLIST_DIR} \
+                   -e BLACKLIST_FILENAME=${BLACKLIST_FILENAME} \
                    --name "$CONTAINER_NAME" \
                    "$REGISTRY_MONITOR_IMG" --user "$REGISTRY_USER" --password "$REGISTRY_PASSWORD" \
                    --email "$REGISTRY_EMAIL" --org "$BLUEMIX_ORG" --space "$BLUEMIX_SPACE" \
