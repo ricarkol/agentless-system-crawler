@@ -89,9 +89,6 @@ CONTAINER_KAFKA_LOG_DIR=/opt/kafka/logs
 CLOUDSIGHT_DIR='cloudsight'
 SUPERVISOR_DIR='supervisor'
 
-#Logstash setup
-LOGSTASH_DEB_FILE="mt-logstash-forwarder_0.3.2.20150617191910_all.deb"
-
 #Timemachine Port
 TIMEMACHINE_PORT=8600
 
