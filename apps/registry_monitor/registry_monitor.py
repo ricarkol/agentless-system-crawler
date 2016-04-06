@@ -32,7 +32,7 @@ except:
     import json
 
 log_file = "/var/log/cloudsight/registry-monitor.log"
-blacklist_file = os.path.join(os.getenv['BLACKLIST_DIR'], os.getenv['BLACKLIST_FILENAME'])
+blacklist_file = os.path.join(os.getenv('BLACKLIST_DIR'), os.getenv('BLACKLIST_FILENAME'))
 
 try:
     ice_config = os.path.join(os.getenv('HOME'), '.cf/config.json')
