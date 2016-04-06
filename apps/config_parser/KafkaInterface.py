@@ -3,6 +3,7 @@ import json
 import pykafka
 import sys
 import signal
+import random
 try:
     from cStringIO import StringIO
 except:
@@ -10,10 +11,10 @@ except:
 
 from functools import wraps
 from pykafka.exceptions import KafkaException
+from pykafka.common import OffsetType
 import kafka as kafka_python
 import os
 import errno
-from retry import retry
 import time
 import datetime
 max_kafka_retries     = 600
@@ -50,17 +51,13 @@ def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
     return decorator
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, test=False):
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
         self.logger        = logger
         self.kafka_url     = kafka_url
         self.kafka_zookeeper_port = kafka_zookeeper_port
         self.receive_topic = receive_topic
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
-        self.test = test
-        self.consumer_test_complete = False
-        self.consumer_retry_count = 0
-        self.last_consumer_retry_count = 0
         self.consumer = None
         self.producer = None
         self.notifier = None
@@ -71,8 +68,6 @@ class KafkaInterface(object):
         else:
             self.zookeeper_url = self.kafka_url + ":%s" % self.kafka_zookeeper_port
 
-
-        # Monkey patching the logger file of cluster, so that we get the output to our logs
         self.connect_to_kafka()
 
     def connect_to_kafka(self):
@@ -94,10 +89,12 @@ class KafkaInterface(object):
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
-                                 consumer_timeout_ms=1000,
+                                 consumer_timeout_ms=random.randint(600000,900000),
                                  consumer_group=processor_group,
+                                 queued_max_messages=10,
                                  auto_commit_enable=True,
-                                 zookeeper_connect = self.zookeeper_url)
+                                 zookeeper_connect=self.zookeeper_url,
+                                 auto_offset_reset=OffsetType.LATEST)
 
     def connect_producer(self):
         kafka_python_client = self.get_kafka_python_client()
@@ -146,49 +143,26 @@ class KafkaInterface(object):
 
     def next_frame(self):
         message = None
-        for i in range(max_read_message_retries):
-            sleep_duration = i * 0.1
-            if sleep_duration > 2.0:
-                sleep_duration = 2
-            time.sleep(sleep_duration)
-            try:
-                try:
-                    #### TEST BLOCK ####
-                    if self.test and not self.consumer_test_complete:
-                        self.logger.info("TEST --------- Testing that consumer is running.")
+        try:
+            self.logger.info("Attempting to consume")
+            if self.consumer._running is False:
+                time.sleep(2)
 
-                        assert self.consumer._running is True
-                        self.logger.info("TEST --------- Consumer is running, skipping attempt to consume, will restart kafka connection.")
-                        self.consumer_test_complete = True
-                        raise TestException("Test")
-                    #### TEST BLOCK END ####
-                    self.logger.info("Attempting to consume")
-                    message = self.consumer.consume()
-                except KafkaException as e:
-                    self.consumer_retry_count += 1
-                    self.logger.error('Failed to get new message from kafka: %s' % repr(e))
-                    self.logger.error('Retry attempt: {}'.format(self.consumer_retry_count))
-                    if self.consumer._running is True:
-                        self.logger.info("Consumer running, stopping Kafka Clients")
-                        self.stop_consumer()
-                        time.sleep(1)
-                    self.connect_consumer()
-                    time.sleep(1)
-                    self.logger.error("Kafka restart attempted {}".format(self.kafka_url))
-                    raise KafkaException("Kafka restart attempted {}".format(self.kafka_url))
+            assert self.consumer._running is True
 
+            message = self.consumer.consume()
+
+            if message is not None:
                 self.logger.info("Consumed successfully")
-                self.consumer_retry_count = 0
-                self.last_consumer_retry_count = 0
-                if message is not None:
-                    yield message.value
-                else:
-                    self.logger.info("Consumer timed out, returned None.")
+                yield message.value
+            else:
+                self.logger.info("Consumer timed out after 500s without consume")
+                raise KafkaException("Consumer timed out.")
 
-            except KafkaException as err:
-                if i == max_read_message_retries -1:
-                    raise err
-
+        except KafkaException as e:
+            time.sleep(2)
+            self.logger.error('Failed to get new message from kafka: %s'.format(repr(e)))
+            raise e
 
     @timeout(kafka_send_timeout)
     def send_message(self, producer, msg):
