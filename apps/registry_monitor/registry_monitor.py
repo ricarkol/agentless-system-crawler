@@ -348,7 +348,7 @@ def load_blacklisted_users():
             for user in bf:
                 blacklisted_users.append(user) 
     except IOError, e:
-        logger.warn('Blacklist file %s does not exist or cannot be accessed')
+        logger.warn('Blacklist file %s does not exist or cannot be accessed' % blacklist_file)
 
     logger.info('Loaded %d blacklisted users' % len(blacklisted_users))
     return blacklisted_users
@@ -726,7 +726,7 @@ def monitor_registry_images(registry, kafka_service, single_run, notification_to
             logger.info('Processed %d images in full rescan' % all_images)
         else:
             logger.info('Discovered %d new images' % new_images)
-            logger.info('Skipped %d images that were not new') % not_new_images
+            logger.info('Skipped %d images that were not new' % not_new_images)
         try:
             save_known_images(csv_additions)
         except (IOError, OSError), e:
