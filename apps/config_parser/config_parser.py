@@ -60,7 +60,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
     while True:
         try:
             client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
-                                    publish_topic, notification_topic, True)
+                                    publish_topic, notification_topic)
             break
         except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
@@ -172,7 +172,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                             
                 logger.info("%s: Finished processing request %s" % (request_id, namespace))
         except Exception as e:
-            logger.error("Uncaught exception: %s" % e)
+            logger.error("Exiting with exception: %s" % e)
             raise
 
 
