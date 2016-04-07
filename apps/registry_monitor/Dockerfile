@@ -5,6 +5,7 @@ WORKDIR /vagrant/apps/registry_monitor
 RUN apt-get update --fix-missing
 RUN apt-get install -y --fix-missing python-pip
 RUN pip install simplejson pykafka==1.1.1 kafka-python
+ADD va-blacklist.txt /etc/cloudsight/va-blacklist.txt
 ADD registry_monitor.py /vagrant/apps/registry_monitor/
 RUN chmod u+x registry_monitor.py
 ENTRYPOINT [ "./registry_monitor.py"]
