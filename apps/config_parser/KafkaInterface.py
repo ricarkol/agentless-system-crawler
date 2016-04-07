@@ -148,6 +148,7 @@ class KafkaInterface(object):
             if self.consumer._running is False:
                 time.sleep(2)
 
+            # We want this to exit if the assertion is false, no caught exception
             assert self.consumer._running is True
 
             message = self.consumer.consume()
@@ -156,7 +157,7 @@ class KafkaInterface(object):
                 self.logger.info("Consumed successfully")
                 yield message.value
             else:
-                self.logger.info("Consumer timed out after 500s without consume")
+                self.logger.info("Consumer timed out without consume")
                 raise KafkaException("Consumer timed out.")
 
         except KafkaException as e:
