@@ -285,10 +285,6 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                             echo ""
                             echo "SHUTTING DOWN $container IN $host"
                             config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
-                            #To deal with legacy issues
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service mt-logstash-forwarder "stop"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r mt-logstash-forwarder
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg --purge mt-logstash-forwarder
 
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
