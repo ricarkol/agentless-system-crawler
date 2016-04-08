@@ -8,7 +8,7 @@ from StringIO import StringIO
 from mock import patch
 import mock
 from pykafka.exceptions import ProduceFailureError
-from apps.compliance_annotator.src import compliance_scanner
+from apps.compliance_annotator import compliance_scanner
 import time
 
 log = logging.basicConfig()
