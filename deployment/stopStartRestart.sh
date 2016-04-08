@@ -102,6 +102,15 @@ for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
         fi
     done
 
+for (( i=${#CONTAINER_INDIVIDUAL_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
+    do
+        container=${CONTAINER_INDIVIDUAL_STARTUP_ORDER[i]}
+        if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
+            then
+            CONTAINER_KNOWN="true"
+        fi
+    done
+
 if [ -z "$CONTAINER_KNOWN" ]
     then
     echo "Containers of type $CONTAINER_NAME unknown"
@@ -182,11 +191,21 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $MASTER_METRICS_SERVER_CONT)
+        $UPTIME_SERVER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
                 echo
                 echo "Processing $OPERATION $container $count IN $host"
+                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
+                STAT=$?
+                exit_code=$((exit_code + STAT))
+            fi
+        ;;
+        $CONSUL_CONT_1 | $CONSUL_CONT_2 | $CONSUL_CONT_3 | $ES_CONT_1 | $ES_CONT_2 | $ES_CONT_3 | $ES_CONT_4 | $ES_CONT_5 | $KAFKA_CONT_1 | $KAFKA_CONT_2 | $KAFKA_CONT_3 | $INDEXER_CONT_1 | $INDEXER_CONT_2 | $COMPLIANCE_INDEXER_CONT_1 | $COMPLIANCE_INDEXER_CONT_2 | $VULNERABILITY_INDEXER_CONT_1 | $VULNERABILITY_INDEXER_CONT_2 | $NOTIFICATION_INDEXER_CONT_1 | $NOTIFICATION_INDEXER_CONT_2 | $COMPLIANCE_ANNOTATOR_CONT_1 | $COMPLIANCE_ANNOTATOR_CONT_2 | $VULNERABILITY_ANNOTATOR_CONT_1 | $VULNERABILITY_ANNOTATOR_CONT_2 | $CONFIG_PARSER_CONT_1 | $CONFIG_PARSER_CONT_2 | $CONFIG_PARSER_CONT_3 | $PASSWORD_ANNOTATOR_CONT_1 | $PASSWORD_ANNOTATOR_CONT_2 | $REGCRAWLER | $REGISTRY_UPDATE_CONT_1 | $REGISTRY_UPDATE_CONT_2 | $REGISTRY_UPDATE_CONT_3 | $REGISTRY_MONITOR_CONT_1 | $SEARCH_CONT_1)
+            if [ "$PROCESS_UTILS" = "true" ] || [ "$PROCESS_VA" = "true" ] || [ "$PROCESS_ES" = "true" ]
+                then
+                echo
+                echo "Processing $OPERATION $container IN $host"
                 $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
                 STAT=$?
                 exit_code=$((exit_code + STAT))
@@ -232,7 +251,7 @@ if [ "$FUNCTION" = "stop" ] || [ "$FUNCTION" = "restart" ]
     for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}
-#        echo "$CONTAINER_NAME $container"
+        echo "$CONTAINER_NAME $container"
         if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
             then
             doit "stop"
