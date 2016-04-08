@@ -39,7 +39,6 @@ import timeout
 import kafka as kafka_python
 import pykafka
 
-import frame_annotator
 from compliance_utils import *
 
 logger_file = "/var/log/cloudsight/compliance-annotator.log"
