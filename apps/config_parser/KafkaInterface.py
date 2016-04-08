@@ -76,7 +76,7 @@ class KafkaInterface(object):
         to create one.
         '''
         self.connect_consumer()
-        self.connect_producer()
+        self.connect_publisher()
         self.connect_notifier()
         self.logger.info('Connected to kafka brokers at %s' % self.kafka_url)
 
@@ -96,7 +96,7 @@ class KafkaInterface(object):
                                  zookeeper_connect=self.zookeeper_url,
                                  auto_offset_reset=OffsetType.LATEST)
 
-    def connect_producer(self):
+    def connect_notifier(self):
         kafka_python_client = self.get_kafka_python_client()
         kafka_python_client.ensure_topic_exists(self.notify_topic)
 
@@ -104,7 +104,7 @@ class KafkaInterface(object):
         self.notify_topic_object = pykafka_client.topics[self.notify_topic]
         self.notifier = self.notify_topic_object.get_sync_producer()
 
-    def connect_notifier(self):
+    def connect_publisher(self):
         kafka_python_client = self.get_kafka_python_client()
         kafka_python_client.ensure_topic_exists(self.publish_topic)
 
