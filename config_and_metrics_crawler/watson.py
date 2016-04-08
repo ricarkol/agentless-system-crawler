@@ -13,26 +13,13 @@ def get_namespace(long_id, options):
     assert 'host_namespace' in options
     assert 'root_fs' in options
 
-    def _is_valid_prefix(prefix, lines):
-        parts = prefix.split(':')
-        for part in parts:
-            if part[0] != '$':
-                logger.error('CRAWLER_METRIC_PREFIX value is missing $. value={}, container id={}'.format(prefix,
-                      long_id));
-                return False
-            if part[1:] not in lines or lines[part[1:]] =='' :
-                logger.error('undefined property:{} /etc/csf_env.properties, container id={}'.format(part[1:],
-                      long_id));
-                return False
-        return True
-                 
     try:
         with open(os.path.join(options['root_fs'],'etc/csf_env.properties'),'r') as rp:
             namespace = None
             lines = {}
             for line in rp.readlines():
-                # strip preceeding export if exists
                 line = line.strip()
+                # strip preceeding export if exists
                 if line.startswith('export'):
                     line = line[6:].strip() # len(export)=6
                 parts = line.split('=')
@@ -45,13 +32,10 @@ def get_namespace(long_id, options):
                 return
 
             prefix = lines['CRAWLER_METRIC_PREFIX']
-            if not _is_valid_prefix(prefix, lines):
+            if prefix == '':
                 return
 
-            namespace = ".".join([lines[p[1:]].strip('\'') for p in prefix.split(':')])
-            if namespace:
-                namespace = options['host_namespace']+ "." +namespace + '.' + long_id[:12]
-            return namespace
+            return options['host_namespace'].replace('/','.') + "." + prefix + '.' + long_id[:12]
     except IOError:
         logger.error('/etc/csf_env.properties not found in container with id:' +
                       long_id);

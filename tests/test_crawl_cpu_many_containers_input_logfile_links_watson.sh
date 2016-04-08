@@ -23,7 +23,7 @@ do
                                 echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
                                 echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
                                 echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
-                                echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
+                                echo CRAWLER_METRIC_PREFIX=watson_test.service_1.service_v003  >>/etc/csf_env.properties; \
                                 sleep 6000" 2> /dev/null > /dev/null
 	DOCKER_ID=`docker inspect -f '{{ .Id }}' test_crawl_cpu_many_containers_$i`
 

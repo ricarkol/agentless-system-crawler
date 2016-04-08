@@ -6,12 +6,12 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# checks logs files specified in /etc/logfile are linked in proper locations
-# /var/log/crawler_container_logs/<watson-prefix>.<container-short-id>/docker.log
+# the namespace specified on the command line contains /. For example,
+# dev/test. The  container namespace should start with dev.test
 # Returns 1 if success, 0 otherwise
 
 NAME=test_watson_log_file_list
-HOST_NAMESPACE=dev-test
+HOST_NAMESPACE=dev/test
 # Cleanup
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 docker rm -f $NAME 2> /dev/null > /dev/null
@@ -42,7 +42,7 @@ ID1=`docker ps | grep $NAME | awk '{print $1}'`
 sleep 5
 
 # By now the log should be there
-test_log_fc=`find /var/log/crawler_container_logs/${HOST_NAMESPACE}.watson_test.service_1.service_v003.$ID1/* | grep -c "test..log"`
+test_log_fc=`find /var/log/crawler_container_logs/dev.test.watson_test.service_1.service_v003.$ID1/* | grep -c "test..log"`
 
 if [ $test_log_fc == 2 ];
 then
@@ -52,4 +52,4 @@ else
 fi
 
 docker rm -f $NAME > /dev/null
-rm -rf /var/log/crawler_container_logs/${HOST_NAMESPACE}.*
+rm -rf /var/log/crawler_container_logs/dev.test.*

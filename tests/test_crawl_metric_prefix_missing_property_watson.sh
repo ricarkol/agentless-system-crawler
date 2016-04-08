@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Tests the watson environment.  The env properties file exists 
-# CRAWLER_METRIC_PREFIX value specifies a property not defined 
+# missing CRAWLER_METRIC_PREFIX 
 # in the csf_env.properties file
 # This should lead to a failure
 # Returns 1 if success, 0 otherwise
@@ -20,7 +20,6 @@ docker run -d --name $CONTAINER_NAME_1 ubuntu bash -c "\
     echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
     echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
     echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
-    echo CRAWLER_METRIC_PREFIX=#MY_CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
     sleep 600" 2> /dev/null > /dev/null
 
 DOCKER_ID_1=`docker inspect -f '{{ .Id }}' ${CONTAINER_NAME_1}`

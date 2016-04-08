@@ -15,7 +15,7 @@ HOST_NAMESPACE=dev-test
 rm -rf /var/log/crawler_container_logs/watson_test.service_1.service_v003.*/
 docker rm -f $NAME 2> /dev/null > /dev/null
 
-timeout 10 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
+timeout 5 python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--features=nofeatures --url file:///tmp/`uuid` \
     --environment watson \
 	--linkContainerLogFiles --frequency 1 --numprocesses 1 \
@@ -29,14 +29,14 @@ docker run -d --name $NAME ubuntu bash -c "\
     echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
     echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
     echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
-    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
+    echo CRAWLER_METRIC_PREFIX=watson_test.service_1.service_v003  >>/etc/csf_env.properties; \
     echo $MSG > /var/log/test1.log; \
     echo $MSG > /var/log/test2.log; \
     sleep 6000" 2> /dev/null > /dev/null
 
 ID1=`docker ps | grep $NAME | awk '{print $1}'`
 
-sleep 2
+sleep 5
 
 # By now the log should be there
 test_log_fc=`find /var/log/crawler_container_logs/${HOST_NAMESPACE}.watson_test.service_1.service_v003.$ID1 | grep -c "test..log"`

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Tests the watson environment.  The env properties file exists 
-# but CRAWLER_METRIC_PREFIX value does not have $ in front of
-# key names so crawler skips this container
+# but CRAWLER_METRIC_PREFIX is not defined
 # Returns 1 if success, 0 otherwise
 
 if [[ $EUID -ne 0 ]]; then
@@ -18,7 +17,7 @@ docker run -d --name $CONTAINER_NAME_1 ubuntu bash -c "\
     echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
     echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
     echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
-    echo CRAWLER_METRIC_PREFIX=CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
+    echo CRAWLER_METRIC_PREFIX=  >>/etc/csf_env.properties; \
     sleep 600" 2> /dev/null > /dev/null
 
 DOCKER_ID_1=`docker inspect -f '{{ .Id }}' ${CONTAINER_NAME_1}`

@@ -36,7 +36,7 @@ docker run -d --name $CONTAINER_NAME ubuntu bash -c "\
     echo CLOUD_APP=\'service_1\' >>/etc/csf_env.properties; \
     echo CLOUD_TENANT=\'public\' >>/etc/csf_env.properties; \
     echo CLOUD_AUTO_SCALE_GROUP=\'service_v003\' >>/etc/csf_env.properties; \
-    echo CRAWLER_METRIC_PREFIX=#CLOUD_APP_GROUP:#CLOUD_APP:#CLOUD_AUTO_SCALE_GROUP | sed 's/#/\$/g'  >>/etc/csf_env.properties; \
+    echo CRAWLER_METRIC_PREFIX=watson_test.service_1.service_v003  >>/etc/csf_env.properties; \
     echo /var/log/test1.log >> /etc/logfiles; \
     echo /var/log/test2.log >> /etc/logfiles; \
     echo $CONTAINER_NAME >> /var/log/test1.log; \
