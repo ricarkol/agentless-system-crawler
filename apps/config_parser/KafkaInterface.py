@@ -59,7 +59,7 @@ class KafkaInterface(object):
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
         self.consumer = None
-        self.producer = None
+        self.publisher = None
         self.notifier = None
 
         # XXX replace the port in the broker url. This should be passed.
@@ -110,7 +110,7 @@ class KafkaInterface(object):
 
         pykafka_client = self.get_pykafka_client()
         self.publish_topic_object = pykafka_client.topics[self.publish_topic]
-        self.producer = self.publish_topic_object.get_sync_producer()
+        self.publisher = self.publish_topic_object.get_sync_producer()
 
 
     def get_pykafka_client(self):
@@ -127,7 +127,7 @@ class KafkaInterface(object):
 
     def stop_producer(self):
         if hasattr(self, 'producer'):
-            self.producer.stop()
+            self.publisher.stop()
         self.logger.info('Stopped kafka producer on %s' % self.kafka_url)
 
     def stop_notifier(self):
@@ -206,7 +206,7 @@ class KafkaInterface(object):
         ret = None
         msg = stream.getvalue()
 
-        self.post_to_kafka(self.producer, msg, request_id)
+        self.post_to_kafka(self.publisher, msg, request_id)
 
         stream.close()
 
