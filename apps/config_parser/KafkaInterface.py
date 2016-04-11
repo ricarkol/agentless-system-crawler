@@ -89,7 +89,6 @@ class KafkaInterface(object):
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
-                                 consumer_timeout_ms=random.randint(600000,900000),
                                  consumer_group=processor_group,
                                  queued_max_messages=10,
                                  auto_commit_enable=True,
