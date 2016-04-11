@@ -12,6 +12,7 @@ def get_namespace(long_id, options):
     assert type(long_id) is str or unicode, "long_id is not a string"
     assert 'host_namespace' in options
     assert 'root_fs' in options
+    logger.info('HOST_NAMESPACE ' + options['host_namespace'])
 
     try:
         with open(os.path.join(options['root_fs'],'etc/csf_env.properties'),'r') as rp:
@@ -35,7 +36,10 @@ def get_namespace(long_id, options):
             if prefix == '':
                 return
 
-            return options['host_namespace'].replace('/','.') + "." + prefix + '.' + long_id[:12]
+            nspace = options['host_namespace'].replace('/','.') + "." + prefix + '.' + long_id[:12]
+            nspace = nspace.replace('\'', '')
+            nspace = nspace.replace('\"', '')
+            return nspace
     except IOError:
         logger.error('/etc/csf_env.properties not found in container with id:' +
                       long_id);
