@@ -94,7 +94,7 @@ class KafkaInterface(object):
                                  queued_max_messages=10,
                                  auto_commit_enable=True,
                                  zookeeper_connect=self.zookeeper_url,
-                                 auto_offset_reset=OffsetType.LATEST)
+                                 auto_offset_reset=OffsetType.EARLIEST)
 
     def connect_notifier(self):
         kafka_python_client = self.get_kafka_python_client()
