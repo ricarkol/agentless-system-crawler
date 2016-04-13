@@ -432,8 +432,9 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 logger.info(metadata_uuid+" 05 DOCKER_IMAGE_LONG_NAME :"+ metadata_param['docker_image_long_name'])
                 logger.info(metadata_uuid+" 06 DOCKER_IMAGE_SHORT_NAME:"+ metadata_param['docker_image_short_name'])
                 logger.info(metadata_uuid+" 07 DOCKER_IMAGE_TAG       :"+ metadata_param['docker_image_tag'])
-
-                client.notify(json.dumps(notification_msg), metadata_uuid, namespace)
+                notify_msg_string = json.dumps(notification_msg)
+                logger.info(notify_msg_string)
+                client.notify(json.dumps(notify_msg_string), metadata_uuid, namespace)
 
                 prefix = UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
 
@@ -544,8 +545,9 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 # For some reason, combining this to one big output didn't work. It only worked when I called client.publish separately.
                 msg_buf.write(last_output)
                 msg_buf.write('\n')
-
-                client.publish(json.dumps(msg_buf.getvalue()), metadata_uuid, namespace)
+                publish_message_string = json.dumps(msg_buf.getvalue())
+                logger.info(publish_message_string)
+                client.publish(publish_message_string, metadata_uuid, namespace)
 
                 logger.info(metadata_uuid+" 11 Compliance verdict posted for "+namespace+" "+timestamp+" verdict:"+verdict_word)
 
@@ -556,16 +558,18 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 notification_msg['status'] = 'completed'
                 notification_msg['timestamp'] = datetime.datetime.utcnow().isoformat()+'Z'
                 notification_msg['timestamp_ms'] = int(time.time())*1000
-
-                client.notify(json.dumps(notification_msg),metadata_uuid, namespace)
+                notify_msg_string = json.dumps(notification_msg)
+                logger.info(notify_msg_string)
+                client.notify(notify_msg_string,metadata_uuid, namespace)
 
         except ProduceFailureError as error:
             logger.error("CANNOT PUBLISH TO KAFKA - COMPONENT DOWN")
+            raise
             #component_down("/var/log/cloudsight/test",  "Could not publish to Kafka")
 
         except Exception as e:
             logger.exception(e)
-            logger.error("Uncaught exception: %s" % e)
+            logger.error("Exiting with exception: %s" % e)
             raise
 
 def component_down(test_file_location, message):
