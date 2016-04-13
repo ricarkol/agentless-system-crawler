@@ -30,85 +30,20 @@ from cStringIO import StringIO
 
 from pykafka.exceptions import ProduceFailureError
 
-try:
-    import simplejson as json
-except:
-    import json
+
+import json
     
 import timeout
 import kafka as kafka_python
 import pykafka
+import datetime
+
+from va_python_base.KafkaInterface import KafkaInterface
 
 from compliance_utils import *
 
 logger_file = "/var/log/cloudsight/compliance-annotator.log"
 PROCESSOR_GROUP = "compliance_annotator"
-
-class KafkaInterface(object):
-    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
-
-        '''
-        XXX autocreate topic doesn't work in pykafka, so let's use kafka-python
-        to create one.
-        '''
-        try_num = 1
-        while True:
-            try:
-                kafka_python_client = kafka_python.KafkaClient(kafka_url)
-                kafka_python_client.ensure_topic_exists(receive_topic)
-                kafka_python_client.ensure_topic_exists(publish_topic)
-                kafka_python_client.ensure_topic_exists(notify_topic)
-                break
-            except Exception as e:
-                logger.info('try_num={}, error connecting to {} , reason={}'.format(try_num, kafka_url, str(e)))
-                time.sleep(60)
-                try_num = try_num + 1
-
-        self.logger = logger
-        self.kafka_url = kafka_url
-        kafka = pykafka.KafkaClient(hosts=kafka_url)
-        self.receive_topic_object = kafka.topics[receive_topic]
-        self.publish_topic_object = kafka.topics[publish_topic]
-        self.notify_topic_object = kafka.topics[notify_topic]
-
-        # XXX replace the port in the broker url. This should be passed.
-        zk_url = kafka_url.split(":")[0] + ":" + kafka_zookeeper_port
-        self.consumer = self.receive_topic_object.get_balanced_consumer(
-                                 reset_offset_on_start=True,
-                                 fetch_message_max_bytes=512*1024*1024,
-                                 consumer_group=PROCESSOR_GROUP,
-                                 auto_commit_enable=True,
-                                 zookeeper_connect = zk_url)
-        self.producer = self.publish_topic_object.get_producer()
-        self.notifier = self.notify_topic_object.get_producer()
-
-    def next_frame(self):
-        messages = [self.consumer.consume() for i in xrange(1)]
-        for message in messages:
-            if message is not None:
-                yield message.value
-
-    @timeout.timeout(3)
-    def publish(self, data, uuid):
-        trial_num=0
-        while True:
-            try:
-                self.producer.produce([data])
-                break
-            except timeout.TimeoutError, e:
-                self.logger.warn('Could not send data to {0}, uuid={1}, trial={2} reason={3}, data={4}'.format(self.kafka_url, uuid, trial_num, e, data))
-                trial_num = trial_num + 1
-
-    @timeout.timeout(3)
-    def notify(self, data, uuid):
-        trial_num=0
-        while True:
-            try:
-                self.notifier.produce([data])
-                break
-            except timeout.TimeoutError, e:
-                self.logger.warn('Could not send data to {0}, uuid={1}, trial={2} reason={3}, data={4}'.format(self.kafka_url, uuid, trial_num, e, data))
-                trial_num = trial_num + 1
 
 
 def sigterm_handler(signum=None, frame=None):
@@ -333,7 +268,7 @@ def annotation_worker(param):
 
 def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, instance_id):
 
-    client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic)
+    client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, PROCESSOR_GROUP)
 
     while True:
         try:
@@ -498,7 +433,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 logger.info(metadata_uuid+" 06 DOCKER_IMAGE_SHORT_NAME:"+ metadata_param['docker_image_short_name'])
                 logger.info(metadata_uuid+" 07 DOCKER_IMAGE_TAG       :"+ metadata_param['docker_image_tag'])
 
-                send_notification(client, notification_msg, metadata_uuid, logger)
+                client.notify(json.dumps(notification_msg), metadata_uuid, namespace)
 
                 prefix = UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
 
@@ -610,7 +545,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 msg_buf.write(last_output)
                 msg_buf.write('\n')
 
-                send_publish(client, msg_buf, metadata_uuid, logger)
+                client.publish(json.dumps(msg_buf.getvalue()), metadata_uuid, namespace)
 
                 logger.info(metadata_uuid+" 11 Compliance verdict posted for "+namespace+" "+timestamp+" verdict:"+verdict_word)
 
@@ -622,7 +557,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 notification_msg['timestamp'] = datetime.datetime.utcnow().isoformat()+'Z'
                 notification_msg['timestamp_ms'] = int(time.time())*1000
 
-                send_notification(client, notification_msg, metadata_uuid, logger)
+                client.notify(json.dumps(notification_msg),metadata_uuid, namespace)
 
         except ProduceFailureError as error:
             logger.error("CANNOT PUBLISH TO KAFKA - COMPONENT DOWN")
@@ -637,39 +572,7 @@ def component_down(test_file_location, message):
     with open(test_file_location, "a") as file:
         file.write("DOWN {} {}".format(time.time(), message))
 
-def send_notification(client, notification_msg, metadata_uuid, logger):
-    msg = json.dumps(notification_msg)
-    # This block will retry 50 times, then throw a ProduceFailureError
-    for retry in range(50):
-        try:
-            client.notify(msg,metadata_uuid)
-        except ProduceFailureError as error:
-            if retry == 49:
-                logger.error("Retry count exhausted (client notify) - component down")
-                ## Raises the previous error
-                raise
-            else:
-                logger.debug("Attempting retry of client notify {}".format(retry))
-                time.sleep(1)
-                continue
-        break
-    logger.info(msg)
 
-def send_publish(client, msg_buf, metadata_uuid, logger):
-    # This block will retry 50 times, then throw a ProduceFailureError
-    for retry in range(50):
-        try:
-            client.publish(msg_buf.getvalue(),metadata_uuid)
-        except ProduceFailureError as error:
-            if retry == 49:
-                logger.error("Retry count exhausted (client publish) - component down")
-                ## Raises the previous error
-                raise
-            else:
-                logger.error("Attempting retry of client publish {}".format(retry))
-                time.sleep(1)
-                continue
-        break
 
 if __name__ == '__main__':
     log_dir = os.path.dirname(logger_file)
