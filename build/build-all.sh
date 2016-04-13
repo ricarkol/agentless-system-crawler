@@ -42,6 +42,7 @@ declare -A IMG_TO_DIR=(
   [$METRICS_SERVER_IMG]="../metrics-server"
   [$UPTIME_SERVER_IMG]="../uptime-server"
   [$MT_LOGSTASH_FORWARDER_IMG]="../mt-logstash-forwarder"
+  [$VA_PYTHON_BASE_IMG]="../va_python_base"
 )
 
 docker pull ubuntu:trusty 
