@@ -713,6 +713,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CONSUL_IMG=$CONSUL_IMG" >>$config_file
                     echo "CONSUL_CONT=$CONSUL_CONT" >>$config_file
                     echo "CONSUL_SERVER_CLUSTER=(${CONSUL_SERVER_CLUSTER[@]})" >>$config_file
+                    echo "DATACENTER_NAME=$DATACENTER_NAME" >>$config_file
                     echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
