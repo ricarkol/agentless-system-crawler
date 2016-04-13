@@ -160,8 +160,8 @@ class KafkaInterface(object):
                 self.logger.info("Consumed successfully")
                 yield message.value
             else:
-                self.logger.info("Consumer timed out after 500s without consume")
-                raise KafkaException("Consumer timed out.")
+                self.logger.info("Consumer received no message")
+                raise KafkaException("Consumer received no message")
 
         except KafkaException as e:
             time.sleep(2)
