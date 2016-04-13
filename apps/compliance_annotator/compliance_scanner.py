@@ -545,7 +545,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 # For some reason, combining this to one big output didn't work. It only worked when I called client.publish separately.
                 msg_buf.write(last_output)
                 msg_buf.write('\n')
-                publish_message_string = json.dumps(msg_buf.getvalue())
+                publish_message_string = msg_buf.getvalue()
                 logger.info(publish_message_string)
                 client.publish(publish_message_string, metadata_uuid, namespace)
 
