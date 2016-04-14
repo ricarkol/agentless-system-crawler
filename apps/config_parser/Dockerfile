@@ -1,13 +1,12 @@
 #Comment out next line and uncomment the following for protobuf support
-FROM ubuntu:trusty 
-#FROM cloudsight/base-proto
-MAINTAINER Nilton Bila <nilton@us.ibm.com>
+FROM alchemyregistry.hursley.ibm.com:5000/va_python_base:latest
+MAINTAINER Peter Meckiffe <pmeckif1@uk.ibm.com>
 
 ADD . /vagrant/apps/config_parser
 WORKDIR /vagrant/apps/config_parser
-RUN apt-get update --fix-missing
+RUN apt-get update
 RUN apt-get -y install --fix-missing pkg-config libreadline-dev libxml2-dev python-dev python-pip wget
-RUN pip install requests pykafka==2.3.0 pytz pydoubles kafka-python retry
+RUN pip install pydoubles
 RUN make
 ENV LD_LIBRARY_PATH lib
 ENV LIBRARY_PATH lib
