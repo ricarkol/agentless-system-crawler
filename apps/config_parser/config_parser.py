@@ -81,7 +81,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
 
     while True:
         try:
-            client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notification_topic)
+            client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notification_topic, processor_group)
             break
         except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
