@@ -159,7 +159,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                     metadata['features'] = 'user,group,configparam'
                     csv_writer.writerow(('metadata', json.dumps('metadata'), json.dumps(metadata)))
 
-                    for ftype, fkey, fvalue in data:
+                    for ftype, fkey, fvalue in annotations:
                         csv_writer.writerow((ftype, json.dumps(fkey), json.dumps(fvalue)))
 
                     msg = stream.getvalue()
