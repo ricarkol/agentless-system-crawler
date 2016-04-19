@@ -1,65 +1,52 @@
-import csv
-import json
-import pykafka
-import sys
-import signal
-import random
-try:
-    from cStringIO import StringIO
-except:
-    from StringIO import StringIO
 
-from functools import wraps
-from pykafka.exceptions import KafkaException
-from pykafka.common import OffsetType
 import kafka as kafka_python
-import os
-import errno
+import pykafka
+from kafka.common import KafkaError
+from pykafka.exceptions import KafkaException
 import time
-import datetime
-max_kafka_retries     = 600
-max_read_message_retries = 60
+from va_python_base.timeout import TimeoutError
+from va_python_base.timeout import timeout
+from pykafka.common import OffsetType
+import random
+import sys
+
 kafka_reconnect_after = 60
 kafka_send_timeout    = 60
-processor_group       = "config-parser"
-
-class TimeoutError(Exception):
-    pass
-
-class KafkaError(Exception):
-    pass
+max_read_message_retries = 60
+max_kafka_retries     = 600
 
 class TestException(KafkaException):
     pass
 
-def timeout(seconds=60, msg=os.strerror(errno.ETIMEDOUT)):
-    def decorator(func):
-        def timeout_handler(sig, frame):
-            raise TimeoutError(msg)
+# May find a use for these in the near future
+class ConsumerConnectException(KafkaException):
+    pass
 
-        def wrapper(*args, **kwargs):
-            signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(seconds)
-            try:
-                ret = func(*args, **kwargs)
-            finally:
-                signal.alarm(0)
-            return ret
+# May find a use for these in the near future
+class ConsumerReadException(KafkaException):
+    pass
 
-        return wraps(func)(wrapper)
+class ProducerConnectException(KafkaException):
+    pass
 
-    return decorator
+class NotifierConnectException(KafkaException):
+    pass
 
 class KafkaInterface(object):
-    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic):
+
+    def __init__(self, kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, processor_group):
+        logger.info("===============================")
+        logger.info("NEW KAFKA INTERFACE STARTED")
+        logger.info("===============================")
         self.logger        = logger
         self.kafka_url     = kafka_url
         self.kafka_zookeeper_port = kafka_zookeeper_port
         self.receive_topic = receive_topic
         self.publish_topic = publish_topic
         self.notify_topic  = notify_topic
+        self.processor_group = processor_group
         self.consumer = None
-        self.producer = None
+        self.publisher = None
         self.notifier = None
 
         # XXX replace the port in the broker url. This should be passed.
@@ -68,7 +55,24 @@ class KafkaInterface(object):
         else:
             self.zookeeper_url = self.kafka_url + ":%s" % self.kafka_zookeeper_port
 
-        self.connect_to_kafka()
+        logger.info("Kafka URL: "+self.kafka_url)
+        logger.info("Zookeeper URL: "+self.zookeeper_url)
+        logger.info("Processor Group: "+self.processor_group)
+        logger.info("Publish topic: "+self.publish_topic)
+        logger.info("Notify topic: "+self.notify_topic)
+        logger.info("Receive topic: "+self.receive_topic)
+        logger.info("===============================")
+
+        try:
+            time.sleep(2)
+            self.connect_to_kafka()
+            time.sleep(2)
+        except KafkaError as error:
+            logger.error("Failed to connect to kafka in KafkaInterface init.")
+            raise error
+        except KafkaException as error:
+            logger.error("Failed to connect to kafka in KafkaInterface init.")
+            raise error
 
     def connect_to_kafka(self):
         '''
@@ -76,7 +80,7 @@ class KafkaInterface(object):
         to create one.
         '''
         self.connect_consumer()
-        self.connect_producer()
+        self.connect_publisher()
         self.connect_notifier()
         self.logger.info('Connected to kafka brokers at %s' % self.kafka_url)
 
@@ -89,14 +93,12 @@ class KafkaInterface(object):
         self.consumer = self.receive_topic_object.get_balanced_consumer(
                                  reset_offset_on_start=True,
                                  fetch_message_max_bytes=512*1024*1024,
-                                 consumer_timeout_ms=random.randint(600000,900000),
-                                 consumer_group=processor_group,
-                                 queued_max_messages=10,
+                                 consumer_group=self.processor_group,
                                  auto_commit_enable=True,
                                  zookeeper_connect=self.zookeeper_url,
                                  auto_offset_reset=OffsetType.LATEST)
 
-    def connect_producer(self):
+    def connect_notifier(self):
         kafka_python_client = self.get_kafka_python_client()
         kafka_python_client.ensure_topic_exists(self.notify_topic)
 
@@ -104,21 +106,19 @@ class KafkaInterface(object):
         self.notify_topic_object = pykafka_client.topics[self.notify_topic]
         self.notifier = self.notify_topic_object.get_sync_producer()
 
-    def connect_notifier(self):
+    def connect_publisher(self):
         kafka_python_client = self.get_kafka_python_client()
         kafka_python_client.ensure_topic_exists(self.publish_topic)
 
         pykafka_client = self.get_pykafka_client()
         self.publish_topic_object = pykafka_client.topics[self.publish_topic]
-        self.producer = self.publish_topic_object.get_sync_producer()
-
-
-    def get_pykafka_client(self):
-        return pykafka.KafkaClient(hosts=self.kafka_url)
+        self.publisher = self.publish_topic_object.get_sync_producer()
 
     def get_kafka_python_client(self):
         return kafka_python.SimpleClient(self.kafka_url)
 
+    def get_pykafka_client(self):
+        return pykafka.KafkaClient(hosts=self.kafka_url)
 
     def stop_consumer(self):
         if hasattr(self, 'consumer'):
@@ -127,7 +127,7 @@ class KafkaInterface(object):
 
     def stop_producer(self):
         if hasattr(self, 'producer'):
-            self.producer.stop()
+            self.publisher.stop()
         self.logger.info('Stopped kafka producer on %s' % self.kafka_url)
 
     def stop_notifier(self):
@@ -144,21 +144,24 @@ class KafkaInterface(object):
     def next_frame(self):
         message = None
         try:
-            self.logger.info("Attempting to consume")
+            self.logger.info("Checking consumer is running")
             if self.consumer._running is False:
-                time.sleep(2)
+                self.logger.info("Consumer is not running - trying again")
+                time.sleep(5)
 
-            # We want this to exit if the assertion is false, no caught exception
-            assert self.consumer._running is True
+            if self.consumer._running is False:
+                self.logger.info("Consumer is not running - exiting")
+                sys.exit(1)
 
+            self.logger.info("Attempting to consume")
             message = self.consumer.consume()
 
             if message is not None:
                 self.logger.info("Consumed successfully")
                 yield message.value
             else:
-                self.logger.info("Consumer timed out without consume")
-                raise KafkaException("Consumer timed out.")
+                self.logger.info("Consumer received no message")
+                raise KafkaException("Consumer received no message")
 
         except KafkaException as e:
             time.sleep(2)
@@ -185,54 +188,27 @@ class KafkaInterface(object):
 
             if i > kafka_reconnect_after:
                 try:
-                     self.stop_kafka_clients()
-                     self.connect_to_kafka()
-                except Exception as e:
+                     self.stop_producer()
+                     self.connect_publisher()
+                     self.stop_notifier()
+                     self.connect_notifier()
+
+                except KafkaException as e:
                      self.logger.error('%s: Failed to reconnect to kafka at %s (error=%s)' % (request_id, self.kafka_url, repr(e)))
 
         if not message_posted:
             raise KafkaError('Failed to publish message to Kafka after %d retries: %s' % (max_kafka_retries, msg))
 
-    def publish(self, data, metadata, request_id):
-        stream = StringIO()
-        csv.field_size_limit(sys.maxsize) # required to handle large value strings
-        csv_writer = csv.writer(stream, delimiter='\t', quotechar="'")
-
-        metadata['features'] = 'user,group,configparam'
-        csv_writer.writerow(('metadata', json.dumps('metadata'), json.dumps(metadata)))
-
-        for ftype, fkey, fvalue in data:
-            csv_writer.writerow((ftype, json.dumps(fkey), json.dumps(fvalue)))
-
-        ret = None
-        msg = stream.getvalue()
-
-        self.post_to_kafka(self.producer, msg, request_id)
-
-        stream.close()
-
-
-    def notify(self, request_id, metadata, event="start", processor="unknown", instance_id="unknown", text="normal operation"):
-
-        timestamp                 = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        timestamp_ms              = int(time.time() * 1e3)
-
-        message                       = {}
-        message["status"]             = event
-        message["timestamp"]          = timestamp
-        message["timestamp_ms"]       = timestamp_ms
-        message["uuid"]               = "unknown"
-        message["processor"]          = processor
-        message["instance-id"]        = instance_id
-        message["text"]               = text
+    def publish(self, data, uuid, namespace):
         try:
-            message["namespace"]      = metadata['namespace']
-            message["crawl_timestamp"]= metadata['timestamp']
-            message["uuid"]           = metadata['uuid']
-        except Exception as e:
-            self.logger.warn('%s: Missing metadata in kafka notification: %s' % \
-                             (request_id, repr(e)))
+            self.post_to_kafka(self.publisher, data, uuid)
+        except KafkaError as e:
+            self.logger.error('%s: Failed to send publish to kafka for namespace %s: %s' % \
+                          (uuid, namespace, repr(e)))
 
-        msg = json.dumps(message)
-        self.post_to_kafka(self.notifier, msg, request_id)
-        self.logger.info(msg)
+    def notify(self, data, uuid, namespace):
+        try:
+            self.post_to_kafka(self.notifier,data,uuid)
+        except KafkaError as e:
+            self.logger.error('%s: Failed to send notification to kafka for namespace %s: %s' % \
+                          (uuid, namespace, repr(e)))
