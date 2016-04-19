@@ -41,7 +41,6 @@ search_service_ip_port="cloudsight.sl.cloud9.ibm.com:8885"
 kafka_ip_port="kafka-cs.sl.cloud9.ibm.com:9092"
 elasticsearch_ip_port="elastic2-cs.sl.cloud9.ibm.com:9200"
 temporary_directory="/tmp"
-annotator_home="/var/www/html/kafka-compliance-cloudsight"
 
 # watson environment
 #search_service_ip_port="10.26.77.191:8885"

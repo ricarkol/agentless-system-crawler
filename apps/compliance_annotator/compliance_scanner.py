@@ -44,6 +44,7 @@ from compliance_utils import *
 
 logger_file = "/var/log/cloudsight/compliance-annotator.log"
 PROCESSOR_GROUP = "compliance_annotator"
+annotator_home = "/opt/compliance_annotator/"
 
 
 def sigterm_handler(signum=None, frame=None):
@@ -603,14 +604,12 @@ if __name__ == '__main__':
         parser.add_argument('--notification-topic', type=str, required=True, help='topic to send process notification')
         parser.add_argument('--annotation-topic', type=str, required=True, help='topic to send annotations')
         parser.add_argument('--elasticsearch-url',  type=str, required=True, help='elasticsearch url: host:port')
-        parser.add_argument('--annotator-home', type=str, required=True, help='full path of annotator')
         parser.add_argument('--instance-id',  type=str, required=True, help='instance id')
 
         args = parser.parse_args()
         elasticsearch_ip_port = args.elasticsearch_url
         kafka_ip_port = args.kafka_url
         kafka_zookeeper_port = args.kafka_zookeeper_port
-        annotator_home = args.annotator_home
         process_message(args.kafka_url, kafka_zookeeper_port, logger, args.receive_topic, args.annotation_topic, args.notification_topic, args.instance_id)
     except Exception, e:
         print('Error: %s' % str(e))
