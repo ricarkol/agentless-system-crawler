@@ -41,6 +41,7 @@ search_service_ip_port="cloudsight.sl.cloud9.ibm.com:8885"
 kafka_ip_port="kafka-cs.sl.cloud9.ibm.com:9092"
 elasticsearch_ip_port="elastic2-cs.sl.cloud9.ibm.com:9200"
 temporary_directory="/tmp"
+annotator_home="/var/www/html/kafka-compliance-cloudsight"
 
 # watson environment
 #search_service_ip_port="10.26.77.191:8885"
@@ -436,6 +437,7 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
         outstr = outstr + "\"description\":\""+DescriptionDict[comp_id]+"\","
         current_command = "./comp."+comp_id+".sh "+prefix
 
+        logger.info("pwd: %s" % os.getcwd())
         p = subprocess.Popen(current_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in p.stdout.readlines():
             outstr = outstr + line.strip()
@@ -458,6 +460,7 @@ def CheckCompliance(prefix, comp_id, nmspace, crawltm, req_id, estatus):
 
     # If status is not 0, there was something wrong in previous step. So, don't execute script.
     if estatus==0:
+        logger.info("pwd: %s" % os.getcwd())
         p = subprocess.Popen(current_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in p.stdout.readlines():
             output = output + line.strip()+"\n"
