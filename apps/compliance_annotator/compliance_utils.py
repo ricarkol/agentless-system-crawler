@@ -435,9 +435,8 @@ def DoComplianceChecking(prefix, comp_id, nmspace, crawltm, req_id, logger):
         outstr = "{"
         outstr = outstr + "\"compliance_id\":\""+comp_id+"\","
         outstr = outstr + "\"description\":\""+DescriptionDict[comp_id]+"\","
-        current_command = "./comp."+comp_id+".sh "+prefix
+        current_command = "/opt/compliance_annotator/comp."+comp_id+".sh "+prefix
 
-        logger.info("pwd: %s" % os.getcwd())
         p = subprocess.Popen(current_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in p.stdout.readlines():
             outstr = outstr + line.strip()
@@ -456,11 +455,10 @@ def CheckCompliance(prefix, comp_id, nmspace, crawltm, req_id, estatus):
     output = "{\n"
     output = output + "\"compliance_id\":\""+comp_id+"\",\n"
     output = output + "\"description\":\""+DescriptionDict[comp_id]+"\",\n"
-    current_command = "./comp."+comp_id+".sh "+prefix
+    current_command = "/opt/compliance_annotator/comp."+comp_id+".sh "+prefix
 
     # If status is not 0, there was something wrong in previous step. So, don't execute script.
     if estatus==0:
-        logger.info("pwd: %s" % os.getcwd())
         p = subprocess.Popen(current_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         for line in p.stdout.readlines():
             output = output + line.strip()+"\n"
