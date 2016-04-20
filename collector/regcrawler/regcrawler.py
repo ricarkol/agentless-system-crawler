@@ -408,7 +408,7 @@ def crawl_images(registry, kafka_host, kafka_zookeeper_port, config_topic, notif
                 else:
                     raise CrawlerError('Crawler returned error code=%s for image %s:%s' % (str(ret), repository, tag))
                         
-                logger.info('Finished processing request %s on namespace %s with stats:\n %s' % (request_uuid, namespace, json.dumps(stats, sort_keys=True)))
+                logger.info('Finished processing request %s on namespace %s with stats: %s' % (request_uuid, namespace, json.dumps(stats, sort_keys=True)))
                 
                 
                 image_crawled = True
