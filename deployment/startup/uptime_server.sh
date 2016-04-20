@@ -46,6 +46,7 @@ case $1 in
 			-it $UPTIME_SERVER_IMG \
 			--hosts ${CLOUDSIGHT_HOSTS[@]} \
 			--host ${UPTIME_SERVER_NODE_NAME} \
+            --elasticsearch-url $ES_HOST:$ES_PORT \
 			2>> ${CONTAINER_CLOUDSIGHT_LOG_DIR}/metrics_server_error.log
 
         STAT=$?

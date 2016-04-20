@@ -391,6 +391,10 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
 
                 ;;
                 $UPTIME_SERVER_CONT)
+                    balanced_cluster_node ${WRITABLE_CLUSTER_NODES[$ES_CONT]} $count
+                    ES_ENDPOINT=$(eval "echo \$ES$target_node")
+                    echo "Connecting to ES $ES_ENDPOINT"
+
                     config_file_name=${UPTIME_SERVER_CONT}.sh
                     config_file=${config_dir}${config_file_name}
 
@@ -404,6 +408,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "CLOUDSIGHT_HOSTS=( ${HOSTS[@]} )" >>$config_file
+                    echo "ES_HOST=$ES_ENDPOINT" >>$config_file
+                    echo "ES_PORT=$ES_PORT" >>$config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/uptime_server.sh ${SSH_USER}@$host:uptime_server.sh
                         STAT=$?
