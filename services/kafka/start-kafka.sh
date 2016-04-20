@@ -59,6 +59,7 @@ default.replication.factor=${server_num}
 # Only need 1 kafka instance to be operational for publish to succeed
 min.insync.replicas=1
 auto.create.topics.enable=true
+delete.topic.enable=true
 
 # Log retention of 2 days
 log.retention.hours=48

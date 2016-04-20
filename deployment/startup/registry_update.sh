@@ -46,6 +46,7 @@ case $1 in
             docker tag -f $REGISTRY/$REGISTRY_UPDATE_IMG:$IMAGE_TAG $REGISTRY_UPDATE_IMG 
             set +x
         fi
+
         # Start registry-update
         exit_code=0
         set -x
@@ -53,6 +54,8 @@ case $1 in
                    --log-opt max-size=50m --log-opt max-file=5 \
                    -d --restart=always -p "$REGISTRY_UPDATE_PORT:$REGISTRY_UPDATE_PORT" \
                    -e KAFKA_SERVICE=${KAFKA_SERVICE} \
+                   -e BLACKLIST_DIR=${BLACKLIST_DIR} \
+                   -e BLACKLIST_FILENAME=${BLACKLIST_FILENAME} \
                    -e INSTANCE_ID=${INSTANCE_ID} \
                    -e LOG_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR} \
                    -v ${HOST_CLOUDSIGHT_LOG_DIR}:${CONTAINER_CLOUDSIGHT_LOG_DIR} \

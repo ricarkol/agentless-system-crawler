@@ -15,7 +15,7 @@ ES_LOGS_VOLUME=/mnt/data/elasticsearch/logs
 
 # Elasticsearch heap size. This should not exceed half the 
 # host's memory (leaving the other half to Lucene)
-ES_HEAP_SIZE=16g
+ES_HEAP_SIZE=24g
 
 # Heap size to be used by Logstash
 LS_HEAP_SIZE=5000m
@@ -58,7 +58,7 @@ REGCRAWL_HOST_DATA_DIR="/mnt/data/regcrawler"
 REGCRAWL_GUEST_DATA_DIR="/mnt/data/regcrawler"
 REGISTRY_ICE_API=False
 
-REGCRAWLER_DEB_FILE="regcrawler_0.12-alchemy_amd64.deb"
+REGCRAWLER_DEB_FILE="regcrawler_0.13-alchemy_amd64.deb"
 
 # CONFIG_AND_METRICS_CRAWLER CONFIG
 CONFIG_AND_METRICS_CRAWLER_DEB_FILE=vacrawler_1.2-va-crawler_amd64.deb
@@ -81,12 +81,12 @@ CONTAINER_CLOUDSIGHT_LOG_DIR=/var/log/cloudsight
 HOST_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=${HOST_CONTAINER_LOG_DIR}/snapshots
 CONTAINER_CONFIG_AND_METRICS_CRAWLER_SNAPSHOTS_DIR=${CONTAINER_CLOUDSIGHT_LOG_DIR}/snapshots
 
+BLACKLIST_DIR=/etc/cloudsight
+BLACKLIST_FILENAME="va-blacklist.txt"
+
 CONTAINER_KAFKA_LOG_DIR=/opt/kafka/logs
 CLOUDSIGHT_DIR='cloudsight'
 SUPERVISOR_DIR='supervisor'
-
-#Logstash setup
-LOGSTASH_DEB_FILE="mt-logstash-forwarder_0.3.2.20150617191910_all.deb"
 
 #Timemachine Port
 TIMEMACHINE_PORT=8600

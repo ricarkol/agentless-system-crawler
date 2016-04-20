@@ -4,6 +4,7 @@
 @author: Nilton Bila
 (c) IBM Research 2015
 '''
+import datetime
 
 """
 This app parses system and application configuration file content emitted 
@@ -29,8 +30,8 @@ except:
     from StringIO import StringIO
 
 import json
-from KafkaInterface import KafkaInterface
-from KafkaInterface import KafkaError
+from va_python_base.KafkaInterface import KafkaInterface
+from va_python_base.KafkaInterface import KafkaError
 
 allowed_messages = ['ConfigParam', 'User', 'Group']
 feature2channel     = {
@@ -49,6 +50,27 @@ def sigterm_handler(signum=None, frame=None):
     print 'Received SIGTERM signal. Goodbye!'
     sys.exit(0)
 signal.signal(signal.SIGTERM, sigterm_handler)
+
+def create_notification_message(request_id, metadata, event="start", processor="unknown", instance_id="unknown", text="normal operation"):
+    timestamp                 = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    timestamp_ms              = int(time.time() * 1e3)
+
+    message                       = {}
+    message["status"]             = event
+    message["timestamp"]          = timestamp
+    message["timestamp_ms"]       = timestamp_ms
+    message["uuid"]               = "unknown"
+    message["processor"]          = processor
+    message["instance-id"]        = instance_id
+    message["text"]               = text
+    try:
+        message["namespace"]      = metadata['namespace']
+        message["crawl_timestamp"]= metadata['timestamp']
+        message["uuid"]           = metadata['uuid']
+    except Exception as e:
+        logger.warn('%s: Missing metadata in kafka notification: %s' % \
+                         (request_id, repr(e)))
+    return message
     
 def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
                   publish_topic, notification_topic, 
@@ -59,8 +81,7 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
 
     while True:
         try:
-            client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, 
-                                    publish_topic, notification_topic, True)
+            client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notification_topic, processor_group)
             break
         except Exception as e:
             logger.error('Failed to establish connection to kafka broker at %s: %s' % \
@@ -102,30 +123,22 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                 logger.info("%s: Processing request %s" % \
                             (request_id, namespace))
         
-                try:
-                    client.notify(request_id=request_id, 
-                                  metadata=metadata, 
-                                  event="start",
-                                  processor=processor_group, 
-                                  instance_id=instance_id)
-                except KafkaError as e:
-                    logger.error('%s: Failed to send notification to kafka for namespace %s: %s' % \
-                                  (request_id, namespace, repr(e)))
+                message = create_notification_message(request_id, metadata, "start", processor_group, instance_id, "normal operation")
+                msg = json.dumps(message)
+                logger.info(msg)
+                client.notify(msg, request_id,namespace)
+
                             
                 try:
                     annotations = parser.parse_update(frame, known_config_files, request_id, namespace)
                 except Exception as e:
                     logger.error("%s: Failed to parse frame for namespace %s: %s" % \
                                     (request_id, namespace, repr(e)))
-                    try:
-                        client.notify(request_id=request_id, 
-                                      metadata=metadata, 
-                                      event="error",
-                                      processor=processor_group, 
-                                      instance_id=instance_id, text=repr(e))
-                    except KafkaError as e:
-                        logger.error('%s: Filed to send notification to kafka for namespace %s, %s' % \
-                                     (request_id, namespace, repr(e)))
+                    message = create_notification_message(request_id, metadata, "error", processor_group, instance_id, repr(e))
+                    msg = json.dumps(message)
+                    logger.info(msg)
+                    client.notify(msg, request_id,namespace)
+
                     continue
                
                 annotations.append(('configparam', 
@@ -139,40 +152,31 @@ def config_parser(kafka_url, kafka_zookeeper_port, logger, receive_topic,
                     logger.info("%s: Parsed %d annotations for %s" % \
                                 (request_id, (len(annotations) - 1), namespace))
                     
-                    try:
-                        client.publish(annotations, metadata, request_id)
-                    except Exception as e:
-                        logger.error('%s: Failed to send annotations to kafka for %s, %s' % \
-                                     (request_id, namespace, repr(e)))
-                        try:
-                            client.notify(request_id=request_id, 
-                                          metadata=metadata, 
-                                          event="error", 
-                                          processor=processor_group, 
-                                          instance_id=instance_id, text=repr(e))
-                        except KafkaError as e:
-                            logger.error('%s: Failed to send notification to kafka for %s: %s' % \
-                                         (request_id, namespace, repr(e)))
-                        continue
+                    stream = StringIO()
+                    csv.field_size_limit(sys.maxsize) # required to handle large value strings
+                    csv_writer = csv.writer(stream, delimiter='\t', quotechar="'")
+
+                    metadata['features'] = 'user,group,configparam'
+                    csv_writer.writerow(('metadata', json.dumps('metadata'), json.dumps(metadata)))
+
+                    for ftype, fkey, fvalue in annotations:
+                        csv_writer.writerow((ftype, json.dumps(fkey), json.dumps(fvalue)))
+
+                    msg = stream.getvalue()
+                    client.publish(msg,request_id,namespace)
 
                 else:
                     logger.info("%s: No annotations found in frame for %s" % \
                                 (request_id, namespace))
                     
-                try:
-                    client.notify(request_id=request_id,
-                                  metadata=metadata, 
-                                  event="completed", 
-                                  processor=processor_group, 
-                                  instance_id=instance_id, 
-                                  text="produced %d annotations" % (len(annotations) - 1))
-                except KafkaError as e:
-                    logger.error('%s: Failed to send notification to kafka for %s: %s' % \
-                                  (request_id, namespace, repr(e)))
+                message = create_notification_message(request_id, metadata, "completed", processor_group, instance_id, "produced %d annotations" % (len(annotations) - 1))
+                msg = json.dumps(message)
+                logger.info(msg)
+                client.notify(msg, request_id,namespace)
                             
                 logger.info("%s: Finished processing request %s" % (request_id, namespace))
         except Exception as e:
-            logger.error("Uncaught exception: %s" % e)
+            logger.error("Exiting with exception: %s" % e)
             raise
 
 

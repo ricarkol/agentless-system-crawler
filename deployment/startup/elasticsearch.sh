@@ -59,6 +59,7 @@ case $1 in
               -e ES_HEAP_SIZE=$ES_HEAP_SIZE -e ES_CLUSTER_NAME=$ES_CLUSTER_NAME \
               -e ES_NODE_NAME=$HOSTNAME -e ES_PUBLISH_HOST=$PUBLISH_HOST \
               -e ES_UNICAST_HOSTS=$ES_UNICAST_HOSTS \
+              -v /var/log/elasticsearch -v /var/log/elasticsearch \
               -v $ES_DATA_VOLUME:/opt/elasticsearch/data -v $ES_LOGS_VOLUME:/opt/elasticsearch/logs \
               -v $HOST_SUPERVISOR_LOG_DIR:$CONTAINER_SUPERVISOR_LOG_DIR \
               --name $CONTAINER_NAME $ES_IMG

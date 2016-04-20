@@ -59,7 +59,7 @@ case $1 in
             --kafka-zookeeper-port ${KAFKA_ZOOKEEPER_PORT} \
             --receive-topic config --annotation-topic compliance \
             --notification-topic notification --elasticsearch-url $ELASTIC_HOST_1:$ES_PORT \
-            --annotator-home /var/www/html --instance-id $INSTANCE_ID
+            --instance-id $INSTANCE_ID
 
         STAT=$?
         set +x

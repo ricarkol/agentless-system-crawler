@@ -285,10 +285,6 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                             echo ""
                             echo "SHUTTING DOWN $container IN $host"
                             config_file_name=${MT_LOGSTASH_FORWARDER_CONT}.sh
-                            #To deal with legacy issues
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service mt-logstash-forwarder "stop"
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r mt-logstash-forwarder
-                            $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg --purge mt-logstash-forwarder
 
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "stop"
                             $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/mt_logstash_forwarder.sh "delete"
@@ -1481,6 +1477,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                    echo "BLACKLIST_DIR=$BLACKLIST_DIR" >>$config_file
+                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
@@ -1547,6 +1545,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CONTAINER_SUPERVISOR_LOG_DIR=$CONTAINER_SUPERVISOR_LOG_DIR" >>$config_file
                     echo "CONTAINER_CLOUDSIGHT_LOG_DIR=$CONTAINER_CLOUDSIGHT_LOG_DIR" >>$config_file
                     echo "HOST_CONTAINER_LOG_DIR=$HOST_CONTAINER_LOG_DIR" >>$config_file
+                    echo "BLACKLIST_DIR=$BLACKLIST_DIR" >>$config_file
+                    echo "BLACKLIST_FILENAME=$BLACKLIST_FILENAME" >>$config_file
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 

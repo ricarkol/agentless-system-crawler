@@ -52,16 +52,16 @@ timeout 10 python2.7 ${CRAWLER_CODE} --crawlmode OUTCONTAINER \
 cat /tmp/alchemy_all_test* > /tmp/alchemy_all_test
 
 # Example data in graphite format:
-#f75ec4e7-eb9d-463a-a90f-f8226572fbcc_0000_4f768e88-a05a-11e5-9ac0-06427acb060b.cpu-0.cpu-idle 100.000000 1449874547
-#f75ec4e7-eb9d-463a-a90f-f8226572fbcc_0000_4f768e88-a05a-11e5-9ac0-06427acb060b.memory.memory-free 308715520.000000 1449874547
-#f75ec4e7-eb9d-463a-a90f-f8226572fbcc_0000_4f768e88-a05a-11e5-9ac0-06427acb060b.interface-lo.if_octets.tx 0.000000 1449874547
+#f75ec4e7-eb9d-463a-a90f-f8226572fbcc.0000.4f768e88-a05a-11e5-9ac0-06427acb060b.cpu-0.cpu-idle 100.000000 1449874547
+#f75ec4e7-eb9d-463a-a90f-f8226572fbcc.0000.4f768e88-a05a-11e5-9ac0-06427acb060b.memory.memory-free 308715520.000000 1449874547
+#f75ec4e7-eb9d-463a-a90f-f8226572fbcc.0000.4f768e88-a05a-11e5-9ac0-06427acb060b.interface-lo.if_octets.tx 0.000000 1449874547
 
 COUNT_CPU=0
 COUNT_MEM=0
 COUNT_INTERFACE=0
 for i in `seq 1 $COUNT`
 do
-	NAMESPACE=${SPACE_ID[$i]}_0000_${CONTAINER_ID[$i]}
+	NAMESPACE=${SPACE_ID[$i]}.0000.${CONTAINER_ID[$i]}
 	TMP_COUNT_CPU[$i]=`grep -c ${NAMESPACE}.cpu-0.cpu-idle /tmp/alchemy_all_test`
 	TMP_COUNT_MEM[$i]=`grep -c ${NAMESPACE}.memory.memory-free /tmp/alchemy_all_test`
 	TMP_COUNT_INTERFACE[$i]=`grep -c ${NAMESPACE}.interface-eth0.if_octets.tx /tmp/alchemy_all_test`

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+mkdir -p /var/log/elasticsearch
+export ES_USE_GC_LOGGING=true
+
 ES_HOSTS=`echo $ES_UNICAST_HOSTS | sed -e 's/,/","/' | sed -e 's/^/\["/' | sed -e 's/$/"\]/'`
 sed -i s"/cluster.name:.*/cluster.name: $ES_CLUSTER_NAME/"  /opt/elasticsearch/config/elasticsearch.yml
 sed -i s"/node.name:.*/node.name: $ES_NODE_NAME/" /opt/elasticsearch/config/elasticsearch.yml
