@@ -35,7 +35,7 @@ timeout $COUNT python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OU
 cat /tmp/test_crawl_cpu_container_for_10_secs_alchemy* > /tmp/test_crawl_cpu_container_for_10_secs_alchemy
 
 COUNT_CPU=`grep -c cpu-0 /tmp/test_crawl_cpu_container_for_10_secs_alchemy`
-COUNT_METADATA=`grep -c f75ec4e7-eb9d-463a-a90f-f8226572fbcc_dd28638d-7c10-4e26-9059-6e0baba7f64d_${CONTAINER_ID} /tmp/test_crawl_cpu_container_for_10_secs_alchemy`
+COUNT_METADATA=`grep -c f75ec4e7-eb9d-463a-a90f-f8226572fbcc.dd28638d-7c10-4e26-9059-6e0baba7f64d.${CONTAINER_ID} /tmp/test_crawl_cpu_container_for_10_secs_alchemy`
 
 docker rm -f test_crawl_cpu_container_1 > /dev/null
 
