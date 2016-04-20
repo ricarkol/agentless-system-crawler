@@ -56,7 +56,7 @@ function send_empty_frame {
          'container_name':'$CONTAINER_NAME', 'namespace':'$NAMESPACE', \
          'uuid':'$REQUEST_UUID'}"
     python2.7 -c "import json; import datetime; print('%s\t%s\t%s') %\
-         ('metadata', 'metadata', json.dumps($JSON))" > /tmp/msg
+         ('metadata', json.dumps('metadata'), json.dumps($JSON))" > /tmp/msg
     python2.7 ${KAFKA_PRODUCER_PY} /tmp/msg ${URL} config 2>&1 || \
         { echo "$REQUEST_UUID Failed to send an empty frame." ; exit 1; }
 }
