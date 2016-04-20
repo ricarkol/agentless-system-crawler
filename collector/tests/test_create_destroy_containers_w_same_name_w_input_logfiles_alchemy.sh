@@ -14,7 +14,7 @@ EOF
 HOST_IP=`python2.7 -c "$GET_HOST_IP_PY" 2> /dev/null`
 NAME=test_create_destroy_containers_w_same_name_w_input_logfiles_alchemy
 CONTAINER_ID=`uuid`
-NAMESPACE=f75ec4e7-eb9d-463a-a90f-f8226572fbcc_dd28638d-7c10-4e26-9059-6e0baba7f64d_${CONTAINER_ID}
+NAMESPACE=f75ec4e7-eb9d-463a-a90f-f8226572fbcc.dd28638d-7c10-4e26-9059-6e0baba7f64d.${CONTAINER_ID}
 LOG_PATH="/var/log/crawler_container_logs/f75ec4e7-eb9d-463a-a90f-f8226572fbcc/dd28638d-7c10-4e26-9059-6e0baba7f64d/${CONTAINER_ID}"
 
 # Cleanup

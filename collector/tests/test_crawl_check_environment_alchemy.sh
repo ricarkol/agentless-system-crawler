@@ -58,7 +58,7 @@ python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAINER \
 	--environment alchemy > /tmp/check_metadata_frame
 
 NAMESPACE_1=${HOST_IP}/${CONTAINER_NAME_1}
-NAMESPACE_1_ALCHEMY_FORMAT=${SPACE_ID_1}_0000_${CONTAINER_ID_1}
+NAMESPACE_1_ALCHEMY_FORMAT=${SPACE_ID_1}.0000.${CONTAINER_ID_1}
 NAMESPACE_2=${HOST_IP}/${CONTAINER_NAME_2}
 
 N1=`grep -c cpu-0 /tmp/check_metadata_frame`
