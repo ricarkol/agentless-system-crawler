@@ -407,6 +407,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
                     echo "LSF_SPACE_ID=$LSF_TENANT_ID" >> $config_file
                     echo "STATSD_ENDPOINT=$STATSD_ENDPOINT" >> $config_file
+                    echo "LSF_TENANT_ID=$LSF_TENANT_ID" >> $config_file
                     echo "LSF_PASSWORD=$LSF_PASSWORD" >> $config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/statsd.sh ${SSH_USER}@$host:statsd.sh

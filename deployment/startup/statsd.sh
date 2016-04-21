@@ -41,7 +41,7 @@ case $1 in
         docker run -d \
             --restart=always \
             --log-opt max-size=50m --log-opt max-file=5 \
-            -p 8586:8586 \
+            -p 8125:8125/udp \
             --name ${CONTAINER_NAME} \
             -it $STATSD_IMG \
             -hostname `hostname` \
