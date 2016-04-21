@@ -74,7 +74,7 @@ ES_HOSTS=""
 for count in `seq ${CONTAINER_COUNTS[$ES_CONT]}`
 do
     host=${CONTAINER_HOSTS[$ES_CONT.$count]}
-    if [ -z "$ES_HOSTS" ] 
+    if [ -z "$ES_HOSTS" ]
         then
         ES_HOSTS=$host
     else
@@ -96,15 +96,6 @@ Component_STAT=$?
 for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}
-        if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
-            then
-            CONTAINER_KNOWN="true"
-        fi
-    done
-
-for (( i=${#CONTAINER_INDIVIDUAL_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
-    do
-        container=${CONTAINER_INDIVIDUAL_STARTUP_ORDER[i]}
         if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
             then
             CONTAINER_KNOWN="true"
@@ -201,16 +192,6 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $CONSUL_CONT_1 | $CONSUL_CONT_2 | $CONSUL_CONT_3 | $ES_CONT_1 | $ES_CONT_2 | $ES_CONT_3 | $ES_CONT_4 | $ES_CONT_5 | $KAFKA_CONT_1 | $KAFKA_CONT_2 | $KAFKA_CONT_3 | $INDEXER_CONT_1 | $INDEXER_CONT_2 | $COMPLIANCE_INDEXER_CONT_1 | $COMPLIANCE_INDEXER_CONT_2 | $VULNERABILITY_INDEXER_CONT_1 | $VULNERABILITY_INDEXER_CONT_2 | $NOTIFICATION_INDEXER_CONT_1 | $NOTIFICATION_INDEXER_CONT_2 | $COMPLIANCE_ANNOTATOR_CONT_1 | $COMPLIANCE_ANNOTATOR_CONT_2 | $VULNERABILITY_ANNOTATOR_CONT_1 | $VULNERABILITY_ANNOTATOR_CONT_2 | $CONFIG_PARSER_CONT_1 | $CONFIG_PARSER_CONT_2 | $CONFIG_PARSER_CONT_3 | $PASSWORD_ANNOTATOR_CONT_1 | $PASSWORD_ANNOTATOR_CONT_2 | $REGCRAWLER | $REGISTRY_UPDATE_CONT_1 | $REGISTRY_UPDATE_CONT_2 | $REGISTRY_UPDATE_CONT_3 | $REGISTRY_MONITOR_CONT_1 | $SEARCH_CONT_1)
-            if [ "$PROCESS_UTILS" = "true" ] || [ "$PROCESS_VA" = "true" ] || [ "$PROCESS_ES" = "true" ]
-                then
-                echo
-                echo "Processing $OPERATION $container IN $host"
-                $SSH ${SSH_USER}@$host /usr/bin/sudo docker $OPERATION ${container}
-                STAT=$?
-                exit_code=$((exit_code + STAT))
-            fi
-        ;;
         $METRICS_SERVER_CONT | $CONFIG_AND_METRICS_CRAWLER_CONT | $MT_LOGSTASH_FORWARDER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
@@ -251,7 +232,7 @@ if [ "$FUNCTION" = "stop" ] || [ "$FUNCTION" = "restart" ]
     for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}
-        echo "$CONTAINER_NAME $container"
+        # echo "$CONTAINER_NAME $container"
         if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
             then
             doit "stop"
