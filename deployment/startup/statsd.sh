@@ -47,7 +47,7 @@ case $1 in
             -hostname `hostname` \
             -graphite-host $STATSD_ENDPOINT \
             -graphite-port 9095 \
-            -graphite-prefix ${LSF_TENANT_ID}.`hostname`. \
+            -graphite-prefix ${LSF_TENANT_ID}.{$LSF_REGION}.vulnerabilty_advisor \
             -graphite-tenant-id $LSF_TENANT_ID \
             -graphite-logging-password $LSF_PASSWORD \
             -type statsd
