@@ -52,7 +52,7 @@ METRICS_SERVER_CONT="cloudsight-metrics-server"
 UPTIME_SERVER_CONT="cloudsight-uptime-server"
 IMAGE_RESCANNER_CONT="cloudsight-image-rescanner"
 MT_LOGSTASH_FORWARDER_CONT="cloudsight-mt-logstash-forwarder"
-STATSD_CONT="cloudsight-statsd"
+STATSD_CONT="cloudsight-containers-statsd-forwarder"
 
 CONTAINERS=($ES_CONT $KAFKA_CONT \
         $INDEXER_CONT $LOG_INDEXER_CONT \
