@@ -46,7 +46,6 @@ declare -A IMG_TO_DIR=(
   [$IMAGE_RESCANNER_IMG]="../apps/image_rescanner"
   [$MT_LOGSTASH_FORWARDER_IMG]="../mt-logstash-forwarder"
   [$VA_PYTHON_BASE_IMG]="../va_python_base"
-  [$STATSD_IMG]="../statsd"
 )
 
 # Get the kelk-base image if required - only useful for Jenkins builds
