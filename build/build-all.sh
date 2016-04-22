@@ -14,7 +14,7 @@ if [ -z "$TAG" ] ; then
    TAG="latest"
 fi
 
-if [ "$CONTAINER_NAME" -eq "containers-statsd-forwarder" ] ; then
+if [ "$CONTAINER_NAME" = "containers-statsd-forwarder" ] ; then
     exit 0
 fi
 
