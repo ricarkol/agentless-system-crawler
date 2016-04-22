@@ -245,6 +245,11 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/uptime_server.sh "stop"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/uptime_server.sh "delete"
                 ;;
+                $STATSD_CONT)
+                    config_file_name=${STATSD_CONT}.sh
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/statsd.sh "stop"
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/statsd.sh "delete"
+                ;;
                 $METRICS_SERVER_CONT)
                     # The container count doesn't really apply here as we want it on every host, so I create my own.
                     # Count through hosts and stop the config and metrics crawler on every host.
@@ -388,6 +393,52 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                         fi
                         echo "Config and Metrics Crawler Deployed"
                     done
+
+                ;;
+                $STATSD_CONT)
+                    config_file_name=${STATSD_CONT}.sh
+                    config_file=${config_dir}${config_file_name}
+
+                    #create config file
+                    echo "#!/bin/bash" >$config_file
+                    echo "STATSD_IMG=$STATSD_IMG" >>$config_file
+                    echo "STATSD_CONT=$STATSD_CONT" >>$config_file
+                    echo "IMAGE_TAG=$IMAGE_TAG" >>$config_file
+                    echo "REGISTRY=$DEPLOYMENT_REGISTRY" >>$config_file
+                    echo "LSF_SPACE_ID=$LSF_TENANT_ID" >> $config_file
+                    echo "STATSD_ENDPOINT=$STATSD_ENDPOINT" >> $config_file
+                    echo "LSF_TENANT_ID=$LSF_TENANT_ID" >> $config_file
+                    echo "LSF_PASSWORD=$LSF_PASSWORD" >> $config_file
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
+                    $SCP startup/statsd.sh ${SSH_USER}@$host:statsd.sh
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv statsd.sh $cloudsight_scripts_dir/statsd.sh
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod u+x $cloudsight_scripts_dir/statsd.sh
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    $SCP $config_file ${SSH_USER}@$host:$config_file_name
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mv $config_file_name $cloudsight_scripts_dir/config/$config_file_name
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo CONFIG_FILE=$cloudsight_scripts_dir/config/$config_file_name $cloudsight_scripts_dir/statsd.sh "start"
+                        STAT=$?
+                        exit_code=$((exit_code + STAT))
+
+                    if [ $STAT -ne 0 ]
+                        then
+                        echo "Failed to start $container.$count in $host"
+                    fi
+                    echo "statsd Deployed"
 
                 ;;
                 $UPTIME_SERVER_CONT)
