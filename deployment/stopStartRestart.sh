@@ -74,7 +74,7 @@ ES_HOSTS=""
 for count in `seq ${CONTAINER_COUNTS[$ES_CONT]}`
 do
     host=${CONTAINER_HOSTS[$ES_CONT.$count]}
-    if [ -z "$ES_HOSTS" ] 
+    if [ -z "$ES_HOSTS" ]
         then
         ES_HOSTS=$host
     else
@@ -182,7 +182,7 @@ doit() {
                 exit_code=$((exit_code + STAT))
             fi
         ;;
-        $MASTER_METRICS_SERVER_CONT)
+        $UPTIME_SERVER_CONT)
             if [ "$PROCESS_UTILS" = "true" ]
                 then
                 echo
@@ -232,7 +232,7 @@ if [ "$FUNCTION" = "stop" ] || [ "$FUNCTION" = "restart" ]
     for (( i=${#CONTAINER_STARTUP_ORDER[@]}-1 ; i>=0 ; i-- ))
     do
         container=${CONTAINER_STARTUP_ORDER[i]}
-#        echo "$CONTAINER_NAME $container"
+        # echo "$CONTAINER_NAME $container"
         if [ -z "$CONTAINER_NAME" ] || [ "$CONTAINER_NAME" = $container ]
             then
             doit "stop"

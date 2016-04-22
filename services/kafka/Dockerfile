@@ -14,10 +14,9 @@ RUN \
   mv kafka_$SCALA_VERSION-$KAFKA_VERSION kafka
 
 COPY start-kafka.sh /opt/start-kafka.sh
+COPY vakcoc /opt/vakcoc
 RUN chmod a+x /opt/start-kafka.sh
 COPY vaKafkaServer.jks /opt/vaKafkaServer.jks
 
 # Configure supervisord
 COPY startup-services.conf /etc/supervisor/conf.d/startup-services.conf
-
-EXPOSE 9092 2181

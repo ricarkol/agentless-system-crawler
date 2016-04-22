@@ -9,8 +9,9 @@ fi
 # Kafka properties
 sed -i s"/#advertised\.host\.name=.*/advertised\.host\.name=$HOST_IP/" /opt/kafka/config/server.properties
 sed -i s"/socket.request.max.bytes=.*/socket.request.max.bytes=$KAFKA_MAX_MSG_SIZE/" /opt/kafka/config/server.properties
-sed -i s"/num.partitions=.*/num.partitions=10/" /opt/kafka/config/server.properties
-sed -i s"/num.network.threads=.*/num.network.threads=10/" /opt/kafka/config/server.properties
+sed -i s"/num.partitions=.*/num.partitions=12/" /opt/kafka/config/server.properties
+sed -i s"/num.network.threads=.*/num.network.threads=12/" /opt/kafka/config/server.properties
+sed -i s"/num.io.threads=.*/num.io.threads=12/" /opt/kafka/config/server.properties
 sed -i s"/broker.id=.*/broker.id=$PROC_ID/" /opt/kafka/config/server.properties
 sed -i s"/zookeeper.connect=.*/zookeeper.connect=$ZOOKEEPER_CLUSTER/" /opt/kafka/config/server.properties
 sed -i s"/^port=.*/port=${PROC_ID}$KAFKA_PORT/" /opt/kafka/config/server.properties
@@ -59,6 +60,7 @@ default.replication.factor=${server_num}
 # Only need 1 kafka instance to be operational for publish to succeed
 min.insync.replicas=1
 auto.create.topics.enable=true
+delete.topic.enable=true
 
 # Log retention of 2 days
 log.retention.hours=48

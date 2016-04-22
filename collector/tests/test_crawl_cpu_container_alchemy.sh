@@ -29,7 +29,7 @@ OUTPUT=`python2.7 ../config_and_metrics_crawler/crawler.py --crawlmode OUTCONTAI
 	--environment alchemy`
 
 COUNT_CPU=`echo $OUTPUT | grep -c cpu-0`
-COUNT_METADATA=`echo $OUTPUT | grep -c f75ec4e7-eb9d-463a-a90f-f8226572fbcc_dd28638d-7c10-4e26-9059-6e0baba7f64d_${CONTAINER_ID}`
+COUNT_METADATA=`echo $OUTPUT | grep -c f75ec4e7-eb9d-463a-a90f-f8226572fbcc.dd28638d-7c10-4e26-9059-6e0baba7f64d.${CONTAINER_ID}`
 
 docker rm -f test_crawl_cpu_container_1 > /dev/null
 

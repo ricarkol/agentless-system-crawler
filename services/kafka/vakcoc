@@ -1,0 +1,12 @@
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group regcrawler
+echo
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group compliance_annotator
+echo
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group vuln_annotator
+echo
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group config-parser
+echo
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group password_annotator
+echo
+/opt/kafka/bin/kafka-consumer-offset-checker.sh --zookeeper localhost:2181 --group notification_processor
+echo
