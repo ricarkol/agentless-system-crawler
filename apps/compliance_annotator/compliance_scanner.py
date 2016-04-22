@@ -79,9 +79,7 @@ def UncrawlNamespaceFromKafkaFrame(in_metadata_param, files, configs, packages, 
                 f_onm = metadata_dict['owner_namespace'] # owner_namespace == tenant
 
                 if f_nm==in_namespace and f_tm==in_tm:
-                    print "Uncrawled data found!", in_namespace, in_tm
-                    print "Directory path:", subdir
-                    return 0
+                    raise ValueError('Uncrawled frame data found in %s for %s %s' % (subdir, in_namespace, in_tm))
 
     logger.info(in_metadata_param['uuid']+" Uncrawling for "+in_namespace+" "+in_tm)
 
@@ -269,6 +267,10 @@ def annotation_worker(param):
 
 def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, instance_id):
 
+    logger.info("===========================================================")
+    logger.info("            Starting compliance-annotator service")
+    logger.info("===========================================================")
+
     client = KafkaInterface(kafka_url, kafka_zookeeper_port, logger, receive_topic, publish_topic, notify_topic, PROCESSOR_GROUP)
 
     while True:
@@ -283,6 +285,7 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 stream = StringIO(data)
                 csv.field_size_limit(sys.maxsize) # required to handle large value strings
                 csv_reader = csv.reader(stream, delimiter='\t', quotechar="'")
+                debug_data = stream.getvalue()
                 metadata = None
                 for ftype, fkey, fvalue in csv_reader:
                     if ftype == 'file':
@@ -437,7 +440,11 @@ def process_message(kafka_url, kafka_zookeeper_port, logger, receive_topic, publ
                 logger.info(notify_msg_string)
                 client.notify(json.dumps(notify_msg_string), metadata_uuid, namespace)
 
-                prefix = UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
+                try:
+                    prefix = UncrawlNamespaceFromKafkaFrame(metadata_param, files, configs, packages, logger)
+                except ValueError as e:
+                    logger.error('Skipping duplicate frame data: %s' % repr(debug_data))
+                    continue
 
                 ####
                 ### this code is used to get the list of rules to run from scserver
