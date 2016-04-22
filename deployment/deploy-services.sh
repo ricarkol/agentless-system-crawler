@@ -709,8 +709,6 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "CLOUDSIGHT_DIR=$CLOUDSIGHT_DIR" >>$config_file
                     echo "SUPERVISOR_DIR=$SUPERVISOR_DIR" >>$config_file
 
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p "$KAFKA_DATA_VOLUME"
-                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo chmod 755 -R "$KAFKA_DATA_VOLUME"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config                      
                     $SCP startup/kafka.sh ${SSH_USER}@$host:kafka.sh
                         STAT=$?
