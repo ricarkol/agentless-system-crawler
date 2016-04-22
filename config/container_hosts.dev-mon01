@@ -77,7 +77,7 @@ declare -A CONTAINER_HOSTS=(
         ["$CONSUL_CONT.3"]=$REGCRAWL3
         ["$UPTIME_SERVER_CONT.1"]=$POLICY1
         ["$IMAGE_RESCANNER_CONT.1"]=$POLICY1
-        ["$STATSD_CONT.1"]=$POLICY1 \
+        ["$STATSD_CONT.1"]=$POLICY1
         )
 
 declare -A WRITABLE_CLUSTER_NODES=(
