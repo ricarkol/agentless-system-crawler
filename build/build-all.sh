@@ -14,6 +14,10 @@ if [ -z "$TAG" ] ; then
    TAG="latest"
 fi
 
+if [ "$CONTAINER_NAME" -eq "containers-statsd-forwarder" ] ; then
+    exit 0
+fi
+
 #install prereqs
 apt-get update --fix-missing
 apt-get install -y --fix-missing python-setuptools python-pip
