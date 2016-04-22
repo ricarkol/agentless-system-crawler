@@ -237,6 +237,7 @@ if [ "$DEPLOY_POLICY" != "deploy" ]
                 $REGCRAWLER)
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/service regcrawler "stop"
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -r regcrawler
+                    $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /usr/bin/dpkg -P regcrawler
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm -r /opt/cloudsight/collector 
                     #$SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo /bin/rm /var/log/regcrawler.log /var/log/upstart/regcrawler.log
                 ;;
