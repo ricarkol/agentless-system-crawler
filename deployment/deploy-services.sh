@@ -400,6 +400,8 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     config_file_name=${STATSD_CONT}.sh
                     config_file=${config_dir}${config_file_name}
 
+                    LSF_REGION=${ENV##*-}
+
                     #create config file
                     echo "#!/bin/bash" >$config_file
                     echo "STATSD_IMG=$STATSD_IMG" >>$config_file
@@ -410,6 +412,7 @@ if [ "$DEPLOY_POLICY" != "shutdown" ]
                     echo "STATSD_ENDPOINT=$STATSD_ENDPOINT" >> $config_file
                     echo "LSF_TENANT_ID=$LSF_TENANT_ID" >> $config_file
                     echo "LSF_PASSWORD=$LSF_PASSWORD" >> $config_file
+                    echo "LSF_REGION=$LSF_REGION" >> $config_file
                     $SSH ${SSH_USER}@$host HOST=$host /usr/bin/sudo mkdir -p $cloudsight_scripts_dir/config
                     $SCP startup/statsd.sh ${SSH_USER}@$host:statsd.sh
                         STAT=$?
