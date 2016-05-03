@@ -1,4 +1,0 @@
-include DESCRIPTION.rst
-include VERSION
-global-include static/*/* templates/*
-exclude .gitignore .project .pydevproject 

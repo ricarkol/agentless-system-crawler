@@ -1,6 +1,0 @@
-#! /bin/bash
-mkdir -p /etc/sentinel
-cp ./client.pem  /etc/sentinel
-chmod 600 /etc/sentinel/client.pem
-./bootstrap_script
-

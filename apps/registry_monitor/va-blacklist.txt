@@ -1,7 +1,0 @@
-galaxydev
-galaxy_dev
-cosmosdev
-cosmos_dev
-svt_cosmos_dev
-xnamespace002
-mytestspace01
