@@ -1,1 +1,0 @@
-from va_python_base import KafkaInterface

@@ -1,9 +1,0 @@
-
-table.ibm-data-table tbody td:nth-child(4) {
-    cursor: pointer; 
-}
-
-
-table.ibm-data-table tbody td:nth-child(4):hover {
-    color: #008abf;
-}
