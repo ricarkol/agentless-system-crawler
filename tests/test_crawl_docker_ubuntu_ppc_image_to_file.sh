@@ -20,9 +20,10 @@ INSTANCE_ID=regcrawler-`uuid`
 OUTPUT=/tmp/crawl_docker_image.out
 TMP_OUT=/tmp/`uuid`
 
-
+SOURCE_IMAGE="ppc64le/ubuntu:latest"
+docker pull ${SOURCE_IMAGE} 2> /dev/null > /dev/null
 # Temporarily create an image that looks like a bluemix image
-docker tag ubuntu:latest $IMAGE
+docker tag ${SOURCE_IMAGE} $IMAGE
 
 (cd ../config_and_metrics_crawler/.
 bash crawl_docker_image.sh \
@@ -54,8 +55,9 @@ grep ^metadata ${FRAME}.* | grep '"uuid":"'$REQUEST_ID'"' \
 			| grep -c metadata > $TMP_OUT
 
 COUNT4=`head -n 1 $TMP_OUT`
+COUNT5=`grep ^package $FRAME* | wc -l`
 
-if [ $COUNT1 == "1" ] && [ $COUNT2 == "1" ] && [ $COUNT3 == "1" ] && [ $COUNT4 == "1" ]
+if [ $COUNT1 == "1" ] && [ $COUNT2 == "1" ] && [ $COUNT3 == "1" ] && [ $COUNT4 == "1" ] && [ $COUNT5 -gt 50 ]
 then
 	echo 1
 else
