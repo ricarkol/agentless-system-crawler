@@ -23,7 +23,10 @@ NAMESPACE=$5
 OWNER_NAMESPACE=$6
 REQUEST_UUID=$7
 INSTANCE_ID=$8
-FEATURES=os,disk,file,package,config,dockerhistory,dockerinspect
+
+# Get REGCRAWLER_FEATURES and REGCRAWLER_OPTION_* settings
+source /opt/cloudsight/collector/crawler/va_crawler_options.sh
+
 if [ $# -ge 9 ]; then
   LOGFILE="--logfile $9"
 else
@@ -49,7 +52,7 @@ fi
 function send_empty_frame {
     TIMEFORMAT="%Y-%m-%dT%H:%M:%S.%fZ"
     JSON="{'since_timestamp':'0', 'container_long_id':None, \
-         'features':'$FEATURES', \
+         'features':'$REGCRAWLER_FEATURES', \
          'timestamp':datetime.datetime.utcnow().strftime('$TIMEFORMAT'), \
          'since':'EPOCH',\
          'compress':False, 'system_type':'container', \
@@ -161,42 +164,19 @@ echo "$REQUEST_UUID Running ${CRAWLER_PY}"
 printf "$REQUEST_UUID "
 python2.7 ${CRAWLER_PY} --crawlmode OUTCONTAINER --crawlContainers $CONTAINER_ID \
     --url $URL --since EPOCH \
-    --features $FEATURES --numprocesses 1 $LOGFILE \
+    --features $REGCRAWLER_FEATURES --numprocesses 1 $LOGFILE \
     --extraMetadataFile /tmp/crawler_metadata.json \
-    --frequency -1 --compress false --options "{\"connection\": {}, \
-	\"file\": {\"exclude_dirs\": [\"boot\", \"dev\", \"proc\", \
-	\"sys\", \"mnt\", \"tmp\", \"var/cache\", \"usr/share/man\", \
-	\"usr/share/doc\", \"usr/share/mime\"], \"root_dir\": \"/\"}, \
-	\"package\": {}, \"process\": {}, \"config\": {\"exclude_dirs\": \
-	[\"dev\", \"proc\", \"mnt\", \"tmp\", \"var/cache\", \"usr/share/man\",\
-	 \"usr/share/doc\", \"usr/share/mime\"], \"known_config_files\": \
-	[\"etc/login.defs\",\"etc/passwd\", \"etc/hosts\", \"etc/mtab\", \
-	\"etc/group\", \"vagrant/vagrantfile\", \"vagrant/Vagrantfile\", \
-	\"etc/motd\",\"etc/login.defs\",\"etc/shadow\",\"etc/login.defs\", \
-	\"etc/shadow\",\"etc/pam.d/system-auth\",\"etc/pam.d/common-password\", \
-	\"etc/pam.d/password-auth\",\"etc/pam.d/system-auth\",\"etc/pam.d/other\", \
-	\"etc/pam.d/common-auth\",\"etc/pam.d/common-account\", \
-	\"etc/pam.d/password-auth\",\"etc/pam.d/system-auth\", \
-	\"etc/pam.d/common-password\",\"etc/pam.d/password-auth\", \
-	\"etc/pam.d/system-auth\",\"etc/pam.d/common-auth\", \
-	\"etc/pam.d/common-account\",\"etc/cron.daily/logrotate\", \
-	\"etc/logrotate.conf\",\"etc/logrotate.d/*\",\"etc/sysctl.conf\", \
-	\"etc/rsyslog.conf\",\"etc/ssh/sshd_config\",\"etc/hosts.allow\", \
-	\"etc/hosts.deny\",\"etc/hosts.equiv\",\"etc/pam.d/rlogin\", \
-	\"etc/pam.d/rsh\",\"etc/pam.d/rexec\",\"etc/snmpd.conf\", \
-	\"etc/snmp/snmpd.conf\",\"etc/snmp/snmpd.local.conf\", \
-	\"usr/local/etc/snmp/snmpd.conf\",\"usr/local/etc/snmp/snmpd.local.conf\" \
-	,\"usr/local/share/snmp/snmpd.conf\",\"usr/local/share/snmp/snmpd.local.conf\" \
-	,\"usr/local/lib/snmp/snmpd.conf\",\"usr/local/lib/snmp/snmpd.local.conf\", \
-	\"usr/share/snmp/snmpd.conf\",\"usr/share/snmp/snmpd.local.conf\", \
-	\"usr/lib/snmp/snmpd.conf\",\"usr/lib/snmp/snmpd.local.conf\", \
-	\"etc/hosts\",\"etc/hostname\", \"etc/mtab\", \
-	\"usr/lib64/snmp/snmpd.conf\",\"usr/lib64/snmp/snmpd.local.conf\", \
-	\"etc/services\", \"etc/init/ssh.conf\"], \
-	\"discover_config_files\": false, \"root_dir\": \"/\"}, \"metric\": {}, \
-	\"disk\": {}, \"os\": {}, \
-	\"metadata\": {\"container_long_id_to_namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}}" 2>&1 \
-        && echo "Successfully crawled and frame emitted."
+    --frequency -1 --compress false --options "{
+        \"connection\": ${REGCRAWLER_OPTION_CONNECTION},
+        \"file\": ${REGCRAWLER_OPTION_FILE},
+        \"package\": ${REGCRAWLER_OPTION_PACKAGE},
+        \"process\": ${REGCRAWLER_OPTION_PACKAGE},
+        \"config\": ${REGCRAWLER_OPTION_CONFIG},
+        \"metric\": ${REGCRAWLER_OPTION_METRIC},
+        \"disk\": ${REGCRAWLER_OPTION_DISK},
+        \"os\": ${REGCRAWLER_OPTION_OS},
+        \"metadata\": {\"container_long_id_to_namespace_map\": {\"${CONTAINER_LONG_ID}\": \"${NAMESPACE}\"}}
+    }" 2>&1 && echo "Successfully crawled and frame emitted."
 
 RETVAL=$?
 [ $RETVAL -eq 0 ] && STATUS="completed"
