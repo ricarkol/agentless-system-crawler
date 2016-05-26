@@ -25,7 +25,12 @@ REQUEST_UUID=$7
 INSTANCE_ID=$8
 
 # Get REGCRAWLER_FEATURES and REGCRAWLER_OPTION_* settings
-source /opt/cloudsight/collector/crawler/va_crawler_options.sh
+if [ -f va_crawler_options.sh ]
+then
+    source va_crawler_options.sh
+else
+    source /opt/cloudsight/collector/crawler/va_crawler_options.sh
+fi
 
 if [ $# -ge 9 ]; then
   LOGFILE="--logfile $9"
