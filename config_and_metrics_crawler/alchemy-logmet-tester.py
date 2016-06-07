@@ -80,6 +80,13 @@ def test_send_non_stop(url, space_ids):
         seq = (seq + 1) % 1000
         hostname = socket.gethostname()
 
+        if 'dal09' in hostname:
+            location = 'dal09'
+        elif 'lon02' in hostname:
+            location = 'lon02'
+        else:
+            location = hostname
+
         for space_id in space_ids:
             # write the dummy log
             tmp_message = "%s: Crawler to logmet test message %d %d (1)\r\n" % (hostname, seq, timestamp)
@@ -91,10 +98,9 @@ def test_send_non_stop(url, space_ids):
             msgs = []
 
             # Create a list of metrics
-            msgs.append("%s.crawler.%s.ping %d %d\r\n" % (space_id, hostname, seq, timestamp))
-
-            msgs.append("%s.crawler.stats.%s.logcrawler.sincedb_size %s %d\r\n" % (space_id, hostname, sincedb_size, timestamp))
-            msgs.append("%s.crawler.stats.%s.logcrawler.real_size %s %d\r\n" % (space_id, hostname, real_size, timestamp))
+            msgs.append("%s.%s.crawler.%s.ping %d %d\r\n" % (space_id, location, hostname, timestamp, timestamp))
+            msgs.append("%s.%s.logcrawler.%s.sincedb_size %s %d\r\n" % (space_id, location, hostname, sincedb_size, timestamp))
+            msgs.append("%s.%s.logcrawler.%s.real_size %s %d\r\n" % (space_id, location, hostname, real_size, timestamp))
 
             # send the dummy metrics
             client.send_messages(msgs)
