@@ -79,13 +79,7 @@ def test_send_non_stop(url, space_ids):
         timestamp = int(time.time())
         seq = (seq + 1) % 1000
         hostname = socket.gethostname()
-
-        if 'dal09' in hostname:
-            location = 'dal09'
-        elif 'lon02' in hostname:
-            location = 'lon02'
-        else:
-            location = hostname
+        location = region
 
         for space_id in space_ids:
             # write the dummy log
@@ -111,15 +105,10 @@ def test_send_non_stop(url, space_ids):
 
 if __name__ == "__main__":
 
-    stage_url = "mtgraphite://metrics.stage1.opvis.bluemix.net:9095/Crawler:5KilGEQ9qExi"
-    prod_url = "mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:oLYMLA7ogscT"
-
-    sangita_space = 'bf8a1339-993f-4c92-a67b-a36effe15818' # sangita stage space id
-    prod_space = '1fb90c5d-84e6-452f-a131-9128c565a64f' # prod alchemy-test
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('--url', dest="url", type=str, default=prod_url, help='Logmet where to send the data to: defaults to mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:<XXX> where <XXX> is the Crawler supertenant password.')
-    parser.add_argument('--space', dest="space", type=str, default=prod_space, help='Logmet space ID to use')
+    parser.add_argument('--url', dest="url", type=str, required=True, help='Logmet where to send the data to: defaults to mtgraphite://metrics.opvis.bluemix.net:9095/Crawler:<XXX> where <XXX> is the Crawler supertenant password.')
+    parser.add_argument('--space', dest="space", type=str, required=True, help='Logmet space ID to use')
+    parser.add_argument('--region', dest='region', type=str, required=True, help='Region required for Executive Dashboard e.g. dal09')
     args  = parser.parse_args()
 
     if 'stage' in args.url:
