@@ -26,7 +26,7 @@ def setup_logger(logger_name, logfile='/var/log/alchemy-logmet-tester.log', proc
     _logger.addHandler(h)
 
 
-def test_send_non_stop(url, space_ids):
+def test_send_non_stop(url, space_ids, region):
     setup_logger("crawlutils")
 
     # Connect to mtgraphite to send logs
@@ -79,7 +79,7 @@ def test_send_non_stop(url, space_ids):
         timestamp = int(time.time())
         seq = (seq + 1) % 1000
         hostname = socket.gethostname()
-        location = region
+        location = args.region
 
         for space_id in space_ids:
             # write the dummy log
@@ -111,12 +111,9 @@ if __name__ == "__main__":
     parser.add_argument('--region', dest='region', type=str, required=True, help='Region required for Executive Dashboard e.g. dal09')
     args  = parser.parse_args()
 
-    if 'stage' in args.url:
-        spaces_list = [sangita_space, args.space]
-    else:
-        spaces_list = [args.space]
+    spaces_list = [args.space]
 
-    test_send_non_stop(args.url, spaces_list)
+    test_send_non_stop(args.url, spaces_list, args.region)
 
 #    # these spaces are: alchemy-test, Sangita's stage, and Ricardo's stage
 #    test_send_non_stop(args.url, ["1fb90c5d-84e6-452f-a131-9128c565a64f",
