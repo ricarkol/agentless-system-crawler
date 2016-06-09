@@ -79,7 +79,7 @@ def test_send_non_stop(url, space_ids, region):
         timestamp = int(time.time())
         seq = (seq + 1) % 1000
         hostname = socket.gethostname()
-        location = args.region
+        location = region
 
         for space_id in space_ids:
             # write the dummy log
