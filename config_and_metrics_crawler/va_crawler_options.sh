@@ -97,7 +97,12 @@ REGCRAWLER_OPTION_CONFIG="{
         \"usr/lib64/snmp/snmpd.conf\",
         \"usr/lib64/snmp/snmpd.local.conf\",
         \"etc/services\",
-        \"etc/init/ssh.conf\"
+        \"etc/init/ssh.conf\",
+        \"etc/nginx/nginx.conf\",
+        \"etc/mysql/my.cnf\",
+        \"etc/my.cnf\",
+        \"etc/httpd/httpd.conf\",
+        \"etc/apache2/apache.conf\"
     ],
     \"discover_config_files\": false,
     \"root_dir\": \"/\"
