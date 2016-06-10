@@ -102,7 +102,13 @@ REGCRAWLER_OPTION_CONFIG="{
         \"etc/mysql/my.cnf\",
         \"etc/my.cnf\",
         \"etc/httpd/httpd.conf\",
-        \"etc/apache2/apache.conf\"
+        \"etc/httpd/conf/httpd.conf\",
+        \"etc/httpd/conf.d/ssl.conf\",
+        \"etc/apache2/apache.conf\",
+        \"etc/apache2/mods-available/ssl.conf\",
+        \"etc/apache2/ports.conf\",
+        \"etc/apache2/sites-enabled/000-default.conf\",
+        \"etc/sysctl.conf\"
     ],
     \"discover_config_files\": false,
     \"root_dir\": \"/\"
