@@ -19,10 +19,8 @@ before_install:
     - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
 
 # command to install dependencies
-#install: "pip install -r requirements-test.txt; sudo pip install -r requirements-test.txt"
-install: "sudo pip install -r requirements-test.txt"
+install: "pip install -r requirements-test.txt; sudo pip install -r requirements-test.txt"
 
 # command to run tests
 script:
-- docker version
-- sudo -E `which py.test`
+- sudo `which py.test`
