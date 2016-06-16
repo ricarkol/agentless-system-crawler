@@ -8,8 +8,7 @@ import shutil
 import subprocess
 import sys
 
-#sys.path.append('/home/kollerr/research/cloudsight-container/collector')
-sys.path.append('../')
+sys.path.append('.')
 
 from crawler.emitter import Emitter
 

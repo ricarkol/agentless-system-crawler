@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 
-sys.path.append('..')
+sys.path.append('.')
 
 from crawler.emitter import Emitter
 from crawler.features_crawler import FeaturesCrawler

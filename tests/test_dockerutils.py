@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 
-sys.path.append('../')
+sys.path.append('.')
 
 from crawler.dockerutils import (
     exec_dockerps,

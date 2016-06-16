@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 
-sys.path.append('../')
+sys.path.append('.')
 
 from crawler.namespace import run_as_another_namespace
 from crawler.crawler_exceptions import CrawlTimeoutError, CrawlError
