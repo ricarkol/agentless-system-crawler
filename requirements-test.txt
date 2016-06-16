@@ -1,3 +1,2 @@
 -rcrawler/requirements.txt
 simplejson==3.8.2
-bottle==0.12.7
