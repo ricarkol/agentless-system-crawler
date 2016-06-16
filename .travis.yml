@@ -13,5 +13,10 @@ python:
   - "nightly" # currently points to 3.6-dev
 # command to install dependencies
 install: "pip install -r requirements-test.txt"
+
+before_install:
+- docker build -t test -f Dockerfile.test .
+- docker run --privileged -ti test py.test
+
 # command to run tests
 script: py.test
