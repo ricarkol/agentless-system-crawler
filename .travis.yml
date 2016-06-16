@@ -19,4 +19,6 @@ install: "pip install -r requirements-test.txt"
 #- docker run --privileged -ti test py.test
 
 # command to run tests
-script: sudo py.test
+script:
+	- docker version
+	- which py.test
