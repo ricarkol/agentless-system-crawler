@@ -18,7 +18,6 @@ COPY . /crawler
 RUN pip install -r crawler/requirements.txt
 RUN pip install -r tests/requirements.txt
 
-WORKDIR /crawler/tests
 CMD (docker daemon > ../docker.out 2>&1 &) && \
 	sleep 5 && \
 	py.test 
