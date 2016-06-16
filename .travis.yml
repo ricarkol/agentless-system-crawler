@@ -6,7 +6,6 @@ services:
 
 env:
   global:
-    #- CI_HOME=`pwd`
     - DOCKER_VERSION=1.10.1-0~trusty
 
 python:
@@ -20,7 +19,8 @@ before_install:
     - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
 
 # command to install dependencies
-install: "pip install -r requirements-test.txt; sudo pip install -r requirements-test.txt"
+#install: "pip install -r requirements-test.txt; sudo pip install -r requirements-test.txt"
+install: "sudo pip install -r requirements-test.txt"
 
 # command to run tests
 script:
