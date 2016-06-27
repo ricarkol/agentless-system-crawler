@@ -7,6 +7,7 @@ import subprocess
 import traceback
 import json
 import logging
+import copy
 
 logger = logging.getLogger('crawlutils')
 
@@ -118,7 +119,7 @@ def get_metadata_json(instance_identifier, type):
                                       config_drive_path, mountdir],
                                      stdout=subprocess.PIPE).communicate()
                     if os.path.exists(mountdir +
-                                      '/latest/meta_data.json'):
+                                      '/openstack/latest/meta_data.json'):
                         json_data = open(mountdir +
                                          '/openstack/latest/meta_data.json'
                                          ).read()
@@ -144,11 +145,14 @@ def get_metadata_json(instance_identifier, type):
     return json_data
 
 
-def get_namespace(instance_identifier, type):
-    metadata = get_metadata_json(instance_identifier, type)
+def get_namespace(instance_identifier, options):
+    assert 'type' in options
+    metadata = get_metadata_json(instance_identifier, options['type'])
 
+    # sastry: don't understand the comment ----
     # The container is not alchemy based XXX The logic of: not crawling if
     # there is no namespace should be more explicit
+
     if not metadata:
         return None
 
@@ -177,8 +181,10 @@ def get_namespace(instance_identifier, type):
 
 # XXX if we load the container object with this metadata info, we won't have
 # to read it again here.
-def get_logs_dir_on_host(instance_identifier, type):
-    metadata = get_metadata_json(instance_identifier, type)
+def get_container_log_prefix(instance_identifier, options):
+    assert 'type' in options
+
+    metadata = get_metadata_json(instance_identifier, options['type'])
     if metadata:
         metadata_json = json.loads(metadata)
         path = ''
@@ -208,3 +214,15 @@ def get_logs_dir_on_host(instance_identifier, type):
         path += '0000'
 
     return path
+
+def get_log_file_list(long_id, options):
+    assert 'container_logs' in options
+    container_logs = copy.deepcopy(options['container_logs'])
+    for log in container_logs:
+        name = log['name']
+        if not os.path.isabs(name) or '..' in name:
+            container_logs.remove(log)
+            logger.warning(
+                'User provided a log file path that is not absolute: %s' %
+                name)
+    return container_logs
