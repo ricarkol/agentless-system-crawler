@@ -74,14 +74,19 @@ def get_metadata_json(instance_identifier, type):
         return metadata_cache[instance_identifier]
 
     if type == 'docker':
+        if os.environ.get('OPENSTACK_BASE_DIRECTORY'):
+            OPENSTACK_BASE_DIRECTORY = os.environ.get('OPENSTACK_BASE_DIRECTORY')
+        else:
+            OPENSTACK_BASE_DIRECTORY = '/openstack'
 
         # instance_identifier is the full docker id
 
-        if os.path.exists('/openstack/nova/metadata/' +
+        logger.info(os.environ.get('OPENSTACK_BASE_DIRECTORY'))
+        if os.path.exists(OPENSTACK_BASE_DIRECTORY + '/nova/metadata/' +
                           instance_identifier + '.json'):
             logger.debug('Found Nova metadata for %s' %
                          instance_identifier)
-            json_data = open('/openstack/nova/metadata/' +
+            json_data = open(OPENSTACK_BASE_DIRECTORY + '/nova/metadata/' +
                              instance_identifier + '.json').read()
             found = True
         elif os.path.exists('/var/lib/nova/metadata/' +
@@ -113,7 +118,7 @@ def get_metadata_json(instance_identifier, type):
                                       config_drive_path, mountdir],
                                      stdout=subprocess.PIPE).communicate()
                     if os.path.exists(mountdir +
-                                      '/openstack/latest/meta_data.json'):
+                                      '/latest/meta_data.json'):
                         json_data = open(mountdir +
                                          '/openstack/latest/meta_data.json'
                                          ).read()
