@@ -5,7 +5,11 @@ import os
 import json
 import logging
 import copy
-from runtime_environment import IRuntimeEnvironment
+
+try:
+    from crawler.runtime_environment import IRuntimeEnvironment
+except ImportError:
+    from runtime_environment import IRuntimeEnvironment
 
 logger = logging.getLogger('crawlutils')
 
