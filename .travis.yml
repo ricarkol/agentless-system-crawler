@@ -42,7 +42,10 @@ before_install:
     - sudo apt-key update
     - sudo apt-get -qqy --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install docker-engine=${DOCKER_VERSION}
     - sudo cat /etc/default/docker
-    - echo 'DOCKER_OPTS="-s __DRIVER__"' | sudo tee /etc/default/docker > /dev/null
+    # DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock"
+    # DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock"
+    - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -storage-driver=__DRIVER__"' | sudo tee /etc/default/docker > /dev/null
+    - sudo cat /etc/default/docker
     - sudo sed -i s/__DRIVER__/${DRIVER}/g /etc/default/docker
     - sudo service docker restart
     - sleep 5
