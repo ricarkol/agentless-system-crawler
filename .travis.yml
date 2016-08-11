@@ -22,7 +22,12 @@ before_install:
     - sudo apt-get update
     - sudo apt-key update
     - sudo apt-get -qqy --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install docker-engine=${DOCKER_VERSION}
+
+    - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -s devicemapper"' | sudo tee /etc/default/docker > /dev/null
+    - sudo service docker restart
+    - sleep 5
     - docker -v
+    - docker info
     # might as well upgrade pip to support TLS and get rid of the warnings
     - sudo -H pip install --upgrade pip
     - sudo -H pip install codecov pytest-cov
