@@ -44,7 +44,8 @@ before_install:
     - sudo cat /etc/default/docker
     # DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock"
     # DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock"
-    - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -storage-driver=__DRIVER__"' | sudo tee /etc/default/docker > /dev/null
+    #- echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock -storage-driver=__DRIVER__"' | sudo tee /etc/default/docker > /dev/null
+    - echo 'DOCKER_OPTS="-H tcp://127.0.0.1:2375 -H unix:///var/run/docker.sock --storage-driver=__DRIVER__"' | sudo tee /etc/default/docker > /dev/null
     - sudo cat /etc/default/docker
     - sudo sed -i s/__DRIVER__/${DRIVER}/g /etc/default/docker
     - sudo service docker restart
