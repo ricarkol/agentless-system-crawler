@@ -28,7 +28,7 @@ before_install:
     - sudo apt-get -qqy --force-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install docker-engine=${DOCKER_VERSION}
     - sudo cat /etc/default/docker
     - echo 'DOCKER_OPTS="-s __DRIVER__"' | sudo tee /etc/default/docker > /dev/null
-    - sed -i s/__DRIVER__/${DRIVER}/g /etc/default/docker
+    - sudo sed -i s/__DRIVER__/${DRIVER}/g /etc/default/docker
     - sudo service docker restart
     - sleep 5
     - docker -v
