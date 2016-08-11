@@ -9,12 +9,27 @@ env:
     - DOCKER_VERSION=1.7.1-0~trusty DRIVER=devicemapper
     - DOCKER_VERSION=1.7.1-0~trusty DRIVER=vfs
     - DOCKER_VERSION=1.7.1-0~trusty DRIVER=aufs
+    - DOCKER_VERSION=1.7.1-0~trusty DRIVER=btrfs
+
+    - DOCKER_VERSION=1.8.1-0~trusty DRIVER=devicemapper
+    - DOCKER_VERSION=1.8.1-0~trusty DRIVER=vfs
     - DOCKER_VERSION=1.8.1-0~trusty DRIVER=aufs
+    - DOCKER_VERSION=1.8.1-0~trusty DRIVER=btrfs
+
+    - DOCKER_VERSION=1.9.1-0~trusty DRIVER=devicemapper
+    - DOCKER_VERSION=1.9.1-0~trusty DRIVER=vfs
     - DOCKER_VERSION=1.9.1-0~trusty DRIVER=aufs
+    - DOCKER_VERSION=1.9.1-0~trusty DRIVER=btrfs
+
+    - DOCKER_VERSION=1.10.1-0~trusty DRIVER=devicemapper
+    - DOCKER_VERSION=1.10.1-0~trusty DRIVER=vfs
     - DOCKER_VERSION=1.10.1-0~trusty DRIVER=aufs
+    - DOCKER_VERSION=1.10.1-0~trusty DRIVER=btrfs
+
     - DOCKER_VERSION=1.11.1-0~trusty DRIVER=devicemapper
     - DOCKER_VERSION=1.11.1-0~trusty DRIVER=vfs
     - DOCKER_VERSION=1.11.1-0~trusty DRIVER=aufs
+    - DOCKER_VERSION=1.11.1-0~trusty DRIVER=btrfs
 
 python:
   - "2.7"
