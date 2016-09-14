@@ -55,6 +55,12 @@ def _snapshot_single_frame(
 
     global should_exit
 
+    container_crawl_plugins = plugins_manager.get_container_crawl_plugins()
+
+    for plugin in container_crawl_plugins:
+        for (key, val) in plugin.crawl(container_id=crawler.container.long_id):
+            emitter.emit(key, val, 'os_plugin')
+
     for feature in features.split(','):
         feature_options = options.get(
             feature, defaults.DEFAULT_CRAWL_OPTIONS[feature])
@@ -320,10 +326,6 @@ def snapshot(
                                       environment=environment)
 
     plugins_manager.reload_container_crawl_plugins(plugin_places=plugin_places)
-    container_crawl_plugins = plugins_manager.get_container_crawl_plugins()
-
-    for plugin in container_crawl_plugins:
-        print plugin.crawl(container_id='a8549d47b09b')
 
     next_iteration_time = None
 

@@ -53,7 +53,7 @@ def get_runtime_env_plugin():
 
 def reload_container_crawl_plugins(plugin_places=[misc.execution_path('plugins')]):
     global container_crawl_plugins
-    container_crawl_plugins = _load_plugins(plugin_places, category_filter={"crawler": IContainerCrawler})
+    container_crawl_plugins = list(_load_plugins(plugin_places, category_filter={"crawler": IContainerCrawler}))
 
 
 def get_container_crawl_plugins():
