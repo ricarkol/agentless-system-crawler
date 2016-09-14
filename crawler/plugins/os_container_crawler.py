@@ -16,6 +16,7 @@ from icrawl_plugin import IContainerCrawler
 from features import OSFeature
 from namespace import run_as_another_namespace, ALL_NAMESPACES
 
+
 class OSContainerCrawler(IContainerCrawler):
 
     def crawl(self, container_id):
@@ -41,24 +42,24 @@ class OSContainerCrawler(IContainerCrawler):
             os_distro = 'unknown'
             os_version = 'unknown'
 
-	ips = misc.get_host_ip4_addresses()
+        ips = misc.get_host_ip4_addresses()
 
-	boot_time = psutil.boot_time()
-	uptime = int(time.time()) - boot_time
-	feature_attributes = OSFeature(
-	    boot_time,
-	    uptime,
-	    ips,
-	    os_distro,
-	    os_version,
-	    os_kernel,
-	    platform.machine()
-	)
+        boot_time = psutil.boot_time()
+        uptime = int(time.time()) - boot_time
+        feature_attributes = OSFeature(
+            boot_time,
+            uptime,
+            ips,
+            os_distro,
+            os_version,
+            os_kernel,
+            platform.machine()
+        )
 
         return [(feature_key, feature_attributes)]
 
     def _crawl_without_setns(self, container_id):
-	mountpoint = dockerutils.get_docker_container_rootfs_path(container_id)
+        mountpoint = dockerutils.get_docker_container_rootfs_path(container_id)
 
         result = osinfo.get_osinfo(mount_point=mountpoint)
         if result:
@@ -68,15 +69,15 @@ class OSContainerCrawler(IContainerCrawler):
             os_distro = 'unknown'
             os_version = 'unknown'
 
-	feature_key = 'linux'
-	feature_attributes = OSFeature(  # boot time unknown for img
-					 # live IP unknown for img
-	    'unsupported',
-	    'unsupported',
-	    '0.0.0.0',
-	    os_distro,
-	    os_version,
-	    'unknown',
-	    'unknown'
-	)
+        feature_key = 'linux'
+        feature_attributes = OSFeature(  # boot time unknown for img
+                                         # live IP unknown for img
+            'unsupported',
+            'unsupported',
+            '0.0.0.0',
+            os_distro,
+            os_version,
+            'unknown',
+            'unknown'
+        )
         return [(feature_key, feature_attributes)]
