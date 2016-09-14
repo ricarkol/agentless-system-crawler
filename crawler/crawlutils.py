@@ -319,6 +319,12 @@ def snapshot(
     plugins_manager.reload_env_plugin(plugin_places=plugin_places,
                                       environment=environment)
 
+    plugins_manager.reload_container_crawl_plugins(plugin_places=plugin_places)
+    container_crawl_plugins = plugins_manager.get_container_crawl_plugins()
+
+    for plugin in container_crawl_plugins:
+        print plugin.crawl(container_id='a8549d47b09b')
+
     next_iteration_time = None
 
     snapshot_num = first_snapshot_num
