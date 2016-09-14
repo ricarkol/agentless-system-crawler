@@ -56,7 +56,7 @@ class OSContainerCrawler(IContainerCrawler):
             platform.machine()
         )
 
-        return [(feature_key, feature_attributes)]
+        return [(feature_key, feature_attributes, 'os')]
 
     def _crawl_without_setns(self, container_id):
         mountpoint = dockerutils.get_docker_container_rootfs_path(container_id)
@@ -80,4 +80,4 @@ class OSContainerCrawler(IContainerCrawler):
             'unknown',
             'unknown'
         )
-        return [(feature_key, feature_attributes)]
+        return [(feature_key, feature_attributes, 'os')]
