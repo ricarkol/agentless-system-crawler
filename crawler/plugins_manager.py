@@ -49,6 +49,8 @@ def reload_env_plugin(plugin_places=[misc.execution_path('plugins')],
 
 def get_runtime_env_plugin():
     global runtime_env
+    if not runtime_env:
+        runtime_env = reload_env_plugin()
     return runtime_env
 
 
