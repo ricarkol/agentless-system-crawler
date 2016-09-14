@@ -11,7 +11,6 @@ container_crawl_plugins = []
 
 
 def _load_plugins(plugin_places=[misc.execution_path('plugins')],
-                  environment='cloudsight',
                   category_filter={},
                   filter_func=lambda *arg: True):
     pm = PluginManager(plugin_info_ext='plugin')
@@ -32,7 +31,7 @@ def _load_plugins(plugin_places=[misc.execution_path('plugins')],
 def reload_env_plugin(plugin_places=[misc.execution_path('plugins')],
                       environment='cloudsight'):
     global runtime_env
-    _plugins = _load_plugins(plugin_places, environment,
+    _plugins = _load_plugins(plugin_places,
                              category_filter={"env": IRuntimeEnvironment},
                              filter_func=lambda plugin:
                              plugin.get_environment_name() == environment)
