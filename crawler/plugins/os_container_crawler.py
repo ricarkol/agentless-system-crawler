@@ -10,4 +10,5 @@ except ImportError:
 class OSContainerCrawler(IContainerCrawler):
 
     def crawl(self, container_id):
+        print container_id
         return [OSFeature(1,2,3,4,5,6,7)]
