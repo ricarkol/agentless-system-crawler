@@ -329,7 +329,8 @@ def snapshot(
     plugins_manager.reload_env_plugin(plugin_places=plugin_places,
                                       environment=environment)
 
-    plugins_manager.reload_container_crawl_plugins(plugin_places=plugin_places)
+    plugins_manager.reload_container_crawl_plugins(plugin_places=plugin_places,
+                                                   features=features)
 
     next_iteration_time = None
 

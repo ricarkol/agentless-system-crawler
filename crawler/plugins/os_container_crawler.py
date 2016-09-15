@@ -19,6 +19,9 @@ from namespace import run_as_another_namespace, ALL_NAMESPACES
 
 class OSContainerCrawler(IContainerCrawler):
 
+    def get_feature(self):
+        return 'os'
+
     def crawl(self, container_id):
         inspect = dockerutils.exec_dockerinspect(container_id)
         state = inspect['State']

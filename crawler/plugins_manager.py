@@ -54,13 +54,19 @@ def get_runtime_env_plugin():
 
 
 def reload_container_crawl_plugins(
-        plugin_places=[misc.execution_path('plugins')]):
+        plugin_places=[misc.execution_path('plugins')],
+        features='os'):
     global container_crawl_plugins
     container_crawl_plugins = list(
         _load_plugins(
             plugin_places,
             category_filter={
-                "crawler": IContainerCrawler}))
+                "crawler": IContainerCrawler},
+            filter_func=lambda plugin:
+            plugin.get_feature() in features.split(',')))
+	    # Filtering of features is a temp fix.
+	    # TODO remove the filtering of features after we move all
+	    # features to be plugins.
 
 
 def get_container_crawl_plugins():
