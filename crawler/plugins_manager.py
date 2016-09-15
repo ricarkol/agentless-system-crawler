@@ -64,9 +64,9 @@ def reload_container_crawl_plugins(
                 "crawler": IContainerCrawler},
             filter_func=lambda plugin:
             plugin.get_feature() in features.split(',')))
-	    # Filtering of features is a temp fix.
-	    # TODO remove the filtering of features after we move all
-	    # features to be plugins.
+    # Filtering of features is a temp fix.
+    # TODO remove the filtering of features after we move all
+    # features to be plugins.
 
 
 def get_container_crawl_plugins():
