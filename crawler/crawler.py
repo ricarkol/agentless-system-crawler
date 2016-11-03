@@ -437,7 +437,7 @@ def main():
             sys.exit(1)
     options['link_container_log_files'] = args.linkContainerLogFiles
 
-    apply_user_args(options=options)
+    apply_user_args(options=options, params=params)
 
     start_autonomous_crawler(args.numprocesses, args.logfile, params, options)
 
