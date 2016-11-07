@@ -46,6 +46,6 @@ script:
   - sudo -H python setup.py test --addopts '--cov=.'
 
 after_success:
-  - flake8 --count --exit-zero --max-complexity=10 --statistics .
+  - flake8 --count --max-complexity=10 --statistics .
   - pylint crawler
   - codecov
