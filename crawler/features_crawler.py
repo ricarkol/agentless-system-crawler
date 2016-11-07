@@ -117,7 +117,7 @@ class FeaturesCrawler:
 
         self.funcdict = {
             # 'os': self.crawl_os,
-            'disk': self.crawl_disk_partitions,
+            #'disk': self.crawl_disk_partitions,
             'metric': self.crawl_metrics,
             # 'process': self.crawl_processes,
             'connection': self.crawl_connections,
