@@ -1,13 +1,18 @@
 try:
     import crawler.dockerutils as dockerutils
     from crawler.icrawl_plugin import IContainerCrawler
+    from crawler.dockercontainer import DockerContainer
     from crawler.namespace import run_as_another_namespace, ALL_NAMESPACES
+    from crawler.features import MemoryFeature
 except ImportError:
     import dockerutils
     from icrawl_plugin import IContainerCrawler
+    from dockercontainer import DockerContainer
     from namespace import run_as_another_namespace, ALL_NAMESPACES
+    from features import MemoryFeature
 
 import logging
+import psutil
 
 logger = logging.getLogger('crawlutils')
 
@@ -18,17 +23,33 @@ class MemoryContainerCrawler(IContainerCrawler):
         return 'memory'
 
     def crawl(self, container_id, avoid_setns=False, **kwargs):
-        inspect = dockerutils.exec_dockerinspect(container_id)
-        state = inspect['State']
-        pid = str(state['Pid'])
-        logger.debug(
-            'Crawling %s for container %s' %
-            (self.get_feature(), container_id))
+        container = DockerContainer(container_id)
 
-        if avoid_setns:
-            mp = dockerutils.get_docker_container_rootfs_path(container_id)
-            return crawl_memory(mp)
-        else:  # in all other cases, including wrong mode set
-            return run_as_another_namespace(pid,
-                                            ALL_NAMESPACES,
-                                            crawl_memory)
+        used = buffered = cached = free = 'unknown'
+        with open(container.get_memory_cgroup_path('memory.stat'
+                                                        ), 'r') as f:
+            for line in f:
+                (key, value) = line.strip().split(' ')
+                if key == 'total_cache':
+                    cached = int(value)
+                if key == 'total_active_file':
+                    buffered = int(value)
+
+        with open(container.get_memory_cgroup_path(
+                'memory.limit_in_bytes'), 'r') as f:
+            limit = int(f.readline().strip())
+
+        with open(container.get_memory_cgroup_path(
+                'memory.usage_in_bytes'), 'r') as f:
+            used = int(f.readline().strip())
+
+        host_free = psutil.virtual_memory().free
+        container_total = used + min(host_free, limit - used)
+        free = container_total - used
+
+        if 'unknown' not in [used, free] and (free + used) > 0:
+            util_percentage = float(used) / (free + used) * 100.0
+        else:
+            util_percentage = 'unknown'
+
+        return [('memory', MemoryFeature(used, buffered, cached, free, util_percentage), 'memory')]

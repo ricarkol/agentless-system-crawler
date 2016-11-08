@@ -24,6 +24,7 @@ from crawler.plugins.process_container_crawler import ProcessContainerCrawler
 from crawler.plugins.disk_container_crawler import DiskContainerCrawler
 from crawler.plugins.metric_container_crawler import MetricContainerCrawler
 from crawler.plugins.connection_container_crawler import ConnectionContainerCrawler
+from crawler.plugins.memory_container_crawler import MemoryContainerCrawler
 
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
@@ -33,11 +34,13 @@ from crawler.plugins.process_host_crawler import ProcessHostCrawler
 from crawler.plugins.disk_host_crawler import DiskHostCrawler
 from crawler.plugins.metric_host_crawler import MetricHostCrawler
 from crawler.plugins.connection_host_crawler import ConnectionHostCrawler
+from crawler.plugins.memory_host_crawler import MemoryHostCrawler
 
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
 from crawler.plugins.metric_vm_crawler import MetricVmCrawler
 from crawler.plugins.connection_vm_crawler import ConnectionVmCrawler
+from crawler.plugins.memory_vm_crawler import MemoryVmCrawler
 
 
 # for OUTVM psvmi
@@ -1284,3 +1287,70 @@ class PluginTests(unittest.TestCase):
             assert f.localport == '22'
             assert f.remoteport == '22'
         assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.memory_host_crawler.psutil.virtual_memory',
+                side_effect=lambda: psutils_memory(2, 2, 3, 4))
+    def test_crawl_memory_invm_mode(self, *args):
+        fc = MemoryHostCrawler()
+        for (k, f, t) in fc.crawl():
+            assert f == MemoryFeature(
+                memory_used=2,
+                memory_buffered=3,
+                memory_cached=4,
+                memory_free=2,
+                memory_util_percentage=50)
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.memory_host_crawler.psutil.virtual_memory',
+                side_effect=throw_os_error)
+    def test_crawl_memory_invm_mode_failure(self, *args):
+        fc = MemoryHostCrawler()
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl():
+                pass
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.memory_vm_crawler.psvmi.context_init',
+                side_effect=lambda dn1, dn2, kv, d, a: 1000)
+    @mock.patch('crawler.plugins.memory_vm_crawler.psvmi.system_memory_info',
+                side_effect=lambda vmc: psvmi_memory(10, 20, 30, 40))
+    def test_crawl_memory_outvm_mode(self, *args):
+        fc = MemoryVmCrawler()
+        for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
+            assert f == MemoryFeature(
+                memory_used=10,
+                memory_buffered=20,
+                memory_cached=30,
+                memory_free=40,
+                memory_util_percentage=20)
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.memory_container_crawler.psutil.virtual_memory',
+                side_effect=lambda: psutils_memory(10, 10, 3, 10))
+    @mock.patch('crawler.plugins.memory_container_crawler.open',
+                side_effect=mocked_memory_cgroup_open)
+    @mock.patch('crawler.plugins.memory_container_crawler.DockerContainer',
+        side_effect=lambda container_id: DummyContainer(container_id))
+    def test_crawl_memory_outcontainer_mode(self, *args):
+        fc = MemoryContainerCrawler()
+        for (k, f, t) in fc.crawl('123'):
+            assert f == MemoryFeature(
+                memory_used=2,
+                memory_buffered=200,
+                memory_cached=100,
+                memory_free=0,
+                memory_util_percentage=100)
+        assert args[1].call_count == 3  # 3 cgroup files
+
+    @mock.patch('crawler.plugins.memory_container_crawler.psutil.virtual_memory',
+                side_effect=lambda: psutils_memory(10, 10, 3, 10))
+    @mock.patch('crawler.plugins.memory_container_crawler.open',
+                side_effect=throw_os_error)
+    @mock.patch('crawler.plugins.memory_container_crawler.DockerContainer',
+        side_effect=lambda container_id: DummyContainer(container_id))
+    def test_crawl_memory_outcontainer_mode_failure(self, *args):
+        fc = MemoryContainerCrawler()
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl('123'):
+                pass
+        assert args[1].call_count == 1  # 1 cgroup files

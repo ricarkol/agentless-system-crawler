@@ -20,7 +20,7 @@ except ImportError:
 logger = logging.getLogger('crawlutils')
 
 
-class memory_vm_crawler(IVMCrawler):
+class MemoryVmCrawler(IVMCrawler):
 
     def get_feature(self):
         return 'memory'
@@ -35,12 +35,12 @@ class memory_vm_crawler(IVMCrawler):
             vm_context = psvmi.context_init(
                 domain_name, domain_name, kernel_version, distro, arch)
 
-            created_since = -1
-            for p in psvmi.memory_iter(vm_context):
-                create_time = (
-                    p.create_time() if hasattr(
-                        p.create_time,
-                        '__call__') else p.create_time)
-                if create_time <= created_since:
-                    continue
-                yield self._crawl_single_memory(p)
+            sysmem = psvmi.system_memory_info(vm_context)
+            feature_attributes = MemoryFeature(
+                sysmem.memory_used,
+                sysmem.memory_buffered,
+                sysmem.memory_cached,
+                sysmem.memory_free,
+                (sysmem.memory_used * 100 / (sysmem.memory_used +
+                                             sysmem.memory_free)))
+            return [('memory', feature_attributes, 'memory')]
