@@ -25,6 +25,7 @@ from crawler.plugins.disk_container_crawler import DiskContainerCrawler
 from crawler.plugins.metric_container_crawler import MetricContainerCrawler
 from crawler.plugins.connection_container_crawler import ConnectionContainerCrawler
 from crawler.plugins.memory_container_crawler import MemoryContainerCrawler
+from crawler.plugins.cpu_container_crawler import CpuContainerCrawler
 
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
@@ -35,6 +36,7 @@ from crawler.plugins.disk_host_crawler import DiskHostCrawler
 from crawler.plugins.metric_host_crawler import MetricHostCrawler
 from crawler.plugins.connection_host_crawler import ConnectionHostCrawler
 from crawler.plugins.memory_host_crawler import MemoryHostCrawler
+from crawler.plugins.cpu_host_crawler import CpuHostCrawler
 
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
@@ -1354,3 +1356,90 @@ class PluginTests(unittest.TestCase):
             for (k, f, t) in fc.crawl('123'):
                 pass
         assert args[1].call_count == 1  # 1 cgroup files
+
+    @mock.patch(
+        'crawler.plugins.cpu_host_crawler.psutil.cpu_times_percent',
+        side_effect=lambda percpu: [
+            psutils_cpu(
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                70)])
+    def test_crawl_cpu_invm_mode(self, *args):
+        fc = CpuHostCrawler()
+        for (k, f, t) in fc.crawl():
+            assert f == CpuFeature(
+                cpu_idle=10,
+                cpu_nice=20,
+                cpu_user=30,
+                cpu_wait=40,
+                cpu_system=50,
+                cpu_interrupt=60,
+                cpu_steal=70,
+                cpu_util=90)
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.cpu_host_crawler.psutil.cpu_times_percent',
+                side_effect=throw_os_error)
+    def test_crawl_cpu_invm_mode_failure(self, *args):
+        fc = CpuHostCrawler()
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl():
+                pass
+        assert args[0].call_count == 1
+
+    @mock.patch(
+        'crawler.features_crawler.psutil.cpu_times_percent',
+        side_effect=lambda percpu: [
+            psutils_cpu(
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                70)])
+    @mock.patch('crawler.plugins.cpu_container_crawler.time.sleep')
+    @mock.patch('crawler.plugins.cpu_container_crawler.open',
+                side_effect=mocked_cpu_cgroup_open)
+    @mock.patch('crawler.plugins.cpu_container_crawler.DockerContainer',
+        side_effect=lambda container_id: DummyContainer(container_id))
+    def test_crawl_cpu_outcontainer_mode(self, *args):
+        fc = CpuContainerCrawler()
+        for (k, f, t) in fc.crawl('123'):
+            assert f == CpuFeature(
+                cpu_idle=90.0,
+                cpu_nice=20,
+                cpu_user=5.0,
+                cpu_wait=40,
+                cpu_system=5.0,
+                cpu_interrupt=60,
+                cpu_steal=70,
+                cpu_util=10.0)
+        assert args[1].call_count == 3 # open for 3 cgroup files
+
+    @mock.patch(
+        'crawler.features_crawler.psutil.cpu_times_percent',
+        side_effect=lambda percpu: [
+            psutils_cpu(
+                10,
+                20,
+                30,
+                40,
+                50,
+                60,
+                70)])
+    @mock.patch('crawler.plugins.cpu_container_crawler.time.sleep')
+    @mock.patch('crawler.plugins.cpu_container_crawler.open',
+                side_effect=throw_os_error)
+    @mock.patch('crawler.plugins.cpu_container_crawler.DockerContainer',
+        side_effect=lambda container_id: DummyContainer(container_id))
+    def test_crawl_cpu_outcontainer_mode_failure(self, *args):
+        fc = CpuContainerCrawler()
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl('123'):
+                pass
+        assert args[0].call_count == 1

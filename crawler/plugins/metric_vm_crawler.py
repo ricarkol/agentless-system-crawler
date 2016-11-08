@@ -28,7 +28,7 @@ class MetricVmCrawler(IVMCrawler):
     """
 
     def __init__(self):
-        _cached_values = {}
+        self._cached_values = {}
 
     def _cache_put_value(self, key, value):
         self._cached_values[key] = (value, time.time())
