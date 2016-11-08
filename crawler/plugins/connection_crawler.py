@@ -27,10 +27,10 @@ def crawl_connections():
         if create_time <= created_since:
             continue
         for conn in p.get_connections():
-            yield _crawl_single_connection(conn, pid, name)
+            yield crawl_single_connection(conn, pid, name)
 
 
-def _crawl_single_connection(c, pid, name):
+def crawl_single_connection(c, pid, name):
     """Returns a ConnectionFeature"""
     try:
         (localipaddr, localport) = c.laddr[:]

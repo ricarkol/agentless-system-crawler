@@ -8,6 +8,7 @@ from crawler.features import (
     ConfigFeature,
     DiskFeature,
     PackageFeature,
+    ConnectionFeature,
     MemoryFeature,
     CpuFeature,
     InterfaceFeature,
@@ -15,7 +16,6 @@ from crawler.features import (
     DockerPSFeature)
 from crawler.container import Container
 from crawler.crawler_exceptions import CrawlError
-# from crawler.icrawl_plugin import IContainerCrawler
 from crawler.plugins.os_container_crawler import OSContainerCrawler
 from crawler.plugins.file_container_crawler import FileContainerCrawler
 from crawler.plugins.config_container_crawler import ConfigContainerCrawler
@@ -23,6 +23,7 @@ from crawler.plugins.package_container_crawler import PackageContainerCrawler
 from crawler.plugins.process_container_crawler import ProcessContainerCrawler
 from crawler.plugins.disk_container_crawler import DiskContainerCrawler
 from crawler.plugins.metric_container_crawler import MetricContainerCrawler
+from crawler.plugins.connection_container_crawler import ConnectionContainerCrawler
 
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
@@ -31,10 +32,12 @@ from crawler.plugins.package_host_crawler import PackageHostCrawler
 from crawler.plugins.process_host_crawler import ProcessHostCrawler
 from crawler.plugins.disk_host_crawler import DiskHostCrawler
 from crawler.plugins.metric_host_crawler import MetricHostCrawler
+from crawler.plugins.connection_host_crawler import ConnectionHostCrawler
 
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
 from crawler.plugins.metric_vm_crawler import MetricVmCrawler
+from crawler.plugins.connection_vm_crawler import ConnectionVmCrawler
 
 
 # for OUTVM psvmi
@@ -1236,4 +1239,48 @@ class PluginTests(unittest.TestCase):
             assert f.vms == 20
             assert f.read == 10
             assert f.write == 20
+        assert args[0].call_count == 1
+
+
+    @mock.patch('crawler.plugins.connection_crawler.psutil.process_iter',
+                side_effect=lambda: [Process('init')])
+    def test_crawl_connections_invm_mode(self, *args):
+        fc = ConnectionHostCrawler()
+        for (k, f, t) in fc.crawl():
+            assert f.localipaddr == '1.1.1.1'
+            assert f.remoteipaddr == '2.2.2.2'
+            assert f.localport == '22'
+            assert f.remoteport == '22'
+        assert args[0].call_count == 1
+
+
+    @mock.patch('crawler.plugins.connection_crawler.psutil.process_iter',
+                side_effect=lambda: [Process('init')])
+    @mock.patch('crawler.plugins.connection_container_crawler.run_as_another_namespace',
+                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        ("crawler.plugins.connection_container_crawler.dockerutils."
+         "exec_dockerinspect"),
+        side_effect=lambda long_id: {'State': {'Pid': 123}})
+    def test_crawl_connections_outcontainer_mode(self, *args):
+        fc = ConnectionContainerCrawler()
+        for (k, f, t) in fc.crawl('123'):
+            assert f.localipaddr == '1.1.1.1'
+            assert f.remoteipaddr == '2.2.2.2'
+            assert f.localport == '22'
+            assert f.remoteport == '22'
+        assert args[0].call_count == 1
+
+
+    @mock.patch('crawler.plugins.connection_vm_crawler.psvmi.context_init',
+                side_effect=lambda dn1, dn2, kv, d, a: 1000)
+    @mock.patch('crawler.plugins.connection_vm_crawler.psvmi.process_iter',
+                side_effect=lambda vmc: [Process('init')])
+    def test_crawl_connections_outvm_mode(self, *args):
+        fc = ConnectionVmCrawler()
+        for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
+            assert f.localipaddr == '1.1.1.1'
+            assert f.remoteipaddr == '2.2.2.2'
+            assert f.localport == '22'
+            assert f.remoteport == '22'
         assert args[0].call_count == 1

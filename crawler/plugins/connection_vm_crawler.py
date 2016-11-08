@@ -1,11 +1,11 @@
 try:
     from crawler.icrawl_plugin import IVMCrawler
     # XXX: make crawler agnostic of this
-    from crawler.features import ConnectionFeature
+    from crawler.plugins.connection_crawler import crawl_single_connection
 except ImportError:
     from icrawl_plugin import IVMCrawler
     # XXX: make crawler agnostic of this
-    from features import ConnectionFeature
+    from plugins.connection_crawler import crawl_single_connection
 import logging
 
 # External dependencies that must be pip install'ed separately
@@ -20,12 +20,14 @@ except ImportError:
 logger = logging.getLogger('crawlutils')
 
 
-class connection_vm_crawler(IVMCrawler):
+class ConnectionVmCrawler(IVMCrawler):
 
     def get_feature(self):
         return 'connection'
 
     def crawl(self, vm_desc, **kwargs):
+        created_since = -1
+
         if psvmi is None:
             raise NotImplementedError()
         else:
@@ -34,13 +36,22 @@ class connection_vm_crawler(IVMCrawler):
             # instead of once per plugin/feature
             vm_context = psvmi.context_init(
                 domain_name, domain_name, kernel_version, distro, arch)
+            proc_list = psvmi.process_iter(vm_context)
 
-            created_since = -1
-            for p in psvmi.connection_iter(vm_context):
-                create_time = (
-                    p.create_time() if hasattr(
-                        p.create_time,
-                        '__call__') else p.create_time)
-                if create_time <= created_since:
-                    continue
-                yield self._crawl_single_connection(p)
+        for p in proc_list:
+            pid = (p.pid() if hasattr(p.pid, '__call__') else p.pid)
+            status = (p.status() if hasattr(p.status, '__call__'
+                                            ) else p.status)
+            if status == psutil.STATUS_ZOMBIE:
+                continue
+
+            create_time = (
+                p.create_time() if hasattr(
+                    p.create_time,
+                    '__call__') else p.create_time)
+            name = (p.name() if hasattr(p.name, '__call__') else p.name)
+
+            if create_time <= created_since:
+                continue
+            for conn in p.get_connections():
+                yield crawl_single_connection(conn, pid, name)
