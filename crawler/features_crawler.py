@@ -126,7 +126,7 @@ class FeaturesCrawler:
             # 'config': self.crawl_config_files,
             # 'memory': self.crawl_memory,
             # 'cpu': self.crawl_cpu,
-            'interface': self.crawl_interface,
+            # 'interface': self.crawl_interface,
             'load': self.crawl_load,
             'dockerps': self.crawl_dockerps,
             'dockerhistory': self.crawl_dockerhistory,

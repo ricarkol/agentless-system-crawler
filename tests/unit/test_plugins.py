@@ -26,6 +26,8 @@ from crawler.plugins.metric_container_crawler import MetricContainerCrawler
 from crawler.plugins.connection_container_crawler import ConnectionContainerCrawler
 from crawler.plugins.memory_container_crawler import MemoryContainerCrawler
 from crawler.plugins.cpu_container_crawler import CpuContainerCrawler
+from crawler.plugins.interface_container_crawler import InterfaceContainerCrawler
+
 
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
@@ -37,12 +39,16 @@ from crawler.plugins.metric_host_crawler import MetricHostCrawler
 from crawler.plugins.connection_host_crawler import ConnectionHostCrawler
 from crawler.plugins.memory_host_crawler import MemoryHostCrawler
 from crawler.plugins.cpu_host_crawler import CpuHostCrawler
+from crawler.plugins.interface_host_crawler import InterfaceHostCrawler
+
 
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
 from crawler.plugins.metric_vm_crawler import MetricVmCrawler
 from crawler.plugins.connection_vm_crawler import ConnectionVmCrawler
 from crawler.plugins.memory_vm_crawler import MemoryVmCrawler
+from crawler.plugins.interface_vm_crawler import InterfaceVmCrawler
+
 
 
 # for OUTVM psvmi
@@ -1481,3 +1487,115 @@ class PluginTests(unittest.TestCase):
             for (k, f, t) in fc.crawl('123'):
                 pass
         assert args[0].call_count == 1
+
+
+    @mock.patch(
+        'crawler.plugins.interface_host_crawler.psutil.net_io_counters',
+        side_effect=lambda pernic: {'interface1-unit-tests':
+            psutils_net(
+                10,
+                20,
+                30,
+                40,
+                50,
+                60)})
+    def test_crawl_interface_invm_mode(self, *args):
+        fc = InterfaceHostCrawler()
+        for (k, f, t) in fc.crawl():
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+
+        for (k, f, t) in fc.crawl():
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+        assert args[0].call_count == 2
+
+
+    @mock.patch('crawler.plugins.interface_host_crawler.psutil.net_io_counters',
+                side_effect=throw_os_error)
+    def test_crawl_interface_invm_mode_failure(self, *args):
+        fc = InterfaceHostCrawler()
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl():
+                pass
+
+        # Each crawl in crawlutils.py instantiates a FeaturesCrawler object
+        with self.assertRaises(OSError):
+            for (k, f, t) in fc.crawl():
+                pass
+        assert args[0].call_count == 2
+
+
+    @mock.patch('crawler.plugins.interface_container_crawler.DockerContainer',
+                side_effect=lambda container_id: DummyContainer(container_id))
+    @mock.patch('crawler.plugins.interface_container_crawler.run_as_another_namespace',
+                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        'crawler.plugins.interface_container_crawler.psutil.net_io_counters',
+        side_effect=lambda pernic: {'eth0':
+            psutils_net(
+                10,
+                20,
+                30,
+                40,
+                50,
+                60)})
+    def test_crawl_interface_outcontainer_mode(self, *args):
+        fc = InterfaceContainerCrawler()
+        for (k, f, t) in fc.crawl('123'):
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+
+        for (k, f, t) in fc.crawl('123'):
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+        assert args[0].call_count == 2
+        assert args[1].call_count == 2
+
+
+    @mock.patch('crawler.plugins.interface_vm_crawler.psvmi.context_init',
+                side_effect=lambda dn1, dn2, kv, d, a: 1000)
+    @mock.patch('crawler.plugins.interface_vm_crawler.psvmi.interface_iter',
+                side_effect=lambda vmc: [psvmi_interface(
+                    'eth1', 10, 20, 30, 40, 50, 60)])
+    def test_crawl_interface_outvm_mode(self, *args):
+        fc = InterfaceVmCrawler()
+        for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+
+        for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
+            assert f == InterfaceFeature(
+                if_octets_tx=0,
+                if_octets_rx=0,
+                if_packets_tx=0,
+                if_packets_rx=0,
+                if_errors_tx=0,
+                if_errors_rx=0)
+        assert args[0].call_count == 2
+        assert args[1].call_count == 2
