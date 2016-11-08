@@ -1156,11 +1156,26 @@ class PluginTests(unittest.TestCase):
     def test_crawl_disk_partitions_invm_mode(self, *args):
         fc = DiskHostCrawler()
         disks = fc.crawl()
-        assert set(disks) == set([('/a', DiskFeature(partitionname='/dev/a', freepct=90.0, fstype='type', mountpt='/a', mountopts='opts', partitionsize=100), 'disk'),
-                         ('/b', DiskFeature(partitionname='/dev/b', freepct=90.0, fstype='type', mountpt='/b', mountopts='opts', partitionsize=100), 'disk')])
+        assert set(disks) == set([('/a',
+                                   DiskFeature(partitionname='/dev/a',
+                                               freepct=90.0,
+                                               fstype='type',
+                                               mountpt='/a',
+                                               mountopts='opts',
+                                               partitionsize=100),
+                                   'disk'),
+                                  ('/b',
+                                   DiskFeature(partitionname='/dev/b',
+                                               freepct=90.0,
+                                               fstype='type',
+                                               mountpt='/b',
+                                               mountopts='opts',
+                                               partitionsize=100),
+                                   'disk')])
 
-    @mock.patch('crawler.plugins.disk_container_crawler.run_as_another_namespace',
-                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        'crawler.plugins.disk_container_crawler.run_as_another_namespace',
+        side_effect=mocked_run_as_another_namespace)
     @mock.patch('crawler.plugins.disk_crawler.psutil.disk_partitions',
                 side_effect=mocked_disk_partitions)
     @mock.patch('crawler.plugins.disk_crawler.psutil.disk_usage',
@@ -1172,8 +1187,22 @@ class PluginTests(unittest.TestCase):
     def test_crawl_disk_partitions_outcontainer_mode(self, *args):
         fc = DiskContainerCrawler()
         disks = fc.crawl('123')
-        assert set(disks) == set([('/a', DiskFeature(partitionname='/dev/a', freepct=90.0, fstype='type', mountpt='/a', mountopts='opts', partitionsize=100), 'disk'),
-                         ('/b', DiskFeature(partitionname='/dev/b', freepct=90.0, fstype='type', mountpt='/b', mountopts='opts', partitionsize=100), 'disk')])
+        assert set(disks) == set([('/a',
+                                   DiskFeature(partitionname='/dev/a',
+                                               freepct=90.0,
+                                               fstype='type',
+                                               mountpt='/a',
+                                               mountopts='opts',
+                                               partitionsize=100),
+                                   'disk'),
+                                  ('/b',
+                                   DiskFeature(partitionname='/dev/b',
+                                               freepct=90.0,
+                                               fstype='type',
+                                               mountpt='/b',
+                                               mountopts='opts',
+                                               partitionsize=100),
+                                   'disk')])
 
     @mock.patch('crawler.plugins.metric_crawler.psutil.process_iter',
                 side_effect=lambda: [Process('init')])
@@ -1204,8 +1233,9 @@ class PluginTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.metric_crawler.psutil.process_iter',
                 side_effect=lambda: [Process('init')])
-    @mock.patch('crawler.plugins.metric_container_crawler.run_as_another_namespace',
-                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        'crawler.plugins.metric_container_crawler.run_as_another_namespace',
+        side_effect=mocked_run_as_another_namespace)
     @mock.patch(
         ("crawler.plugins.disk_container_crawler.dockerutils."
          "exec_dockerinspect"),
@@ -1246,7 +1276,6 @@ class PluginTests(unittest.TestCase):
             assert f.write == 20
         assert args[0].call_count == 1
 
-
     @mock.patch('crawler.plugins.connection_crawler.psutil.process_iter',
                 side_effect=lambda: [Process('init')])
     def test_crawl_connections_invm_mode(self, *args):
@@ -1258,11 +1287,11 @@ class PluginTests(unittest.TestCase):
             assert f.remoteport == '22'
         assert args[0].call_count == 1
 
-
     @mock.patch('crawler.plugins.connection_crawler.psutil.process_iter',
                 side_effect=lambda: [Process('init')])
-    @mock.patch('crawler.plugins.connection_container_crawler.run_as_another_namespace',
-                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        'crawler.plugins.connection_container_crawler.run_as_another_namespace',
+        side_effect=mocked_run_as_another_namespace)
     @mock.patch(
         ("crawler.plugins.connection_container_crawler.dockerutils."
          "exec_dockerinspect"),
@@ -1275,7 +1304,6 @@ class PluginTests(unittest.TestCase):
             assert f.localport == '22'
             assert f.remoteport == '22'
         assert args[0].call_count == 1
-
 
     @mock.patch('crawler.plugins.connection_vm_crawler.psvmi.context_init',
                 side_effect=lambda dn1, dn2, kv, d, a: 1000)
@@ -1327,12 +1355,17 @@ class PluginTests(unittest.TestCase):
                 memory_util_percentage=20)
         assert args[0].call_count == 1
 
-    @mock.patch('crawler.plugins.memory_container_crawler.psutil.virtual_memory',
-                side_effect=lambda: psutils_memory(10, 10, 3, 10))
+    @mock.patch(
+        'crawler.plugins.memory_container_crawler.psutil.virtual_memory',
+        side_effect=lambda: psutils_memory(
+            10,
+            10,
+            3,
+            10))
     @mock.patch('crawler.plugins.memory_container_crawler.open',
                 side_effect=mocked_memory_cgroup_open)
     @mock.patch('crawler.plugins.memory_container_crawler.DockerContainer',
-        side_effect=lambda container_id: DummyContainer(container_id))
+                side_effect=lambda container_id: DummyContainer(container_id))
     def test_crawl_memory_outcontainer_mode(self, *args):
         fc = MemoryContainerCrawler()
         for (k, f, t) in fc.crawl('123'):
@@ -1344,12 +1377,17 @@ class PluginTests(unittest.TestCase):
                 memory_util_percentage=100)
         assert args[1].call_count == 3  # 3 cgroup files
 
-    @mock.patch('crawler.plugins.memory_container_crawler.psutil.virtual_memory',
-                side_effect=lambda: psutils_memory(10, 10, 3, 10))
+    @mock.patch(
+        'crawler.plugins.memory_container_crawler.psutil.virtual_memory',
+        side_effect=lambda: psutils_memory(
+            10,
+            10,
+            3,
+            10))
     @mock.patch('crawler.plugins.memory_container_crawler.open',
                 side_effect=throw_os_error)
     @mock.patch('crawler.plugins.memory_container_crawler.DockerContainer',
-        side_effect=lambda container_id: DummyContainer(container_id))
+                side_effect=lambda container_id: DummyContainer(container_id))
     def test_crawl_memory_outcontainer_mode_failure(self, *args):
         fc = MemoryContainerCrawler()
         with self.assertRaises(OSError):
@@ -1406,7 +1444,7 @@ class PluginTests(unittest.TestCase):
     @mock.patch('crawler.plugins.cpu_container_crawler.open',
                 side_effect=mocked_cpu_cgroup_open)
     @mock.patch('crawler.plugins.cpu_container_crawler.DockerContainer',
-        side_effect=lambda container_id: DummyContainer(container_id))
+                side_effect=lambda container_id: DummyContainer(container_id))
     def test_crawl_cpu_outcontainer_mode(self, *args):
         fc = CpuContainerCrawler()
         for (k, f, t) in fc.crawl('123'):
@@ -1419,7 +1457,7 @@ class PluginTests(unittest.TestCase):
                 cpu_interrupt=60,
                 cpu_steal=70,
                 cpu_util=10.0)
-        assert args[1].call_count == 3 # open for 3 cgroup files
+        assert args[1].call_count == 3  # open for 3 cgroup files
 
     @mock.patch(
         'crawler.features_crawler.psutil.cpu_times_percent',
@@ -1436,7 +1474,7 @@ class PluginTests(unittest.TestCase):
     @mock.patch('crawler.plugins.cpu_container_crawler.open',
                 side_effect=throw_os_error)
     @mock.patch('crawler.plugins.cpu_container_crawler.DockerContainer',
-        side_effect=lambda container_id: DummyContainer(container_id))
+                side_effect=lambda container_id: DummyContainer(container_id))
     def test_crawl_cpu_outcontainer_mode_failure(self, *args):
         fc = CpuContainerCrawler()
         with self.assertRaises(OSError):

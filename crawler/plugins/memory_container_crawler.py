@@ -27,7 +27,7 @@ class MemoryContainerCrawler(IContainerCrawler):
 
         used = buffered = cached = free = 'unknown'
         with open(container.get_memory_cgroup_path('memory.stat'
-                                                        ), 'r') as f:
+                                                   ), 'r') as f:
             for line in f:
                 (key, value) = line.strip().split(' ')
                 if key == 'total_cache':
@@ -52,4 +52,6 @@ class MemoryContainerCrawler(IContainerCrawler):
         else:
             util_percentage = 'unknown'
 
-        return [('memory', MemoryFeature(used, buffered, cached, free, util_percentage), 'memory')]
+        return [('memory', MemoryFeature(used, buffered,
+                                         cached, free, util_percentage),
+                 'memory')]
