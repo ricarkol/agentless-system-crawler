@@ -1492,13 +1492,13 @@ class PluginTests(unittest.TestCase):
     @mock.patch(
         'crawler.plugins.interface_host_crawler.psutil.net_io_counters',
         side_effect=lambda pernic: {'interface1-unit-tests':
-            psutils_net(
-                10,
-                20,
-                30,
-                40,
-                50,
-                60)})
+                                    psutils_net(
+                                        10,
+                                        20,
+                                        30,
+                                        40,
+                                        50,
+                                        60)})
     def test_crawl_interface_invm_mode(self, *args):
         fc = InterfaceHostCrawler()
         for (k, f, t) in fc.crawl():
@@ -1543,13 +1543,13 @@ class PluginTests(unittest.TestCase):
     @mock.patch(
         'crawler.plugins.interface_container_crawler.psutil.net_io_counters',
         side_effect=lambda pernic: {'eth0':
-            psutils_net(
-                10,
-                20,
-                30,
-                40,
-                50,
-                60)})
+                                    psutils_net(
+                                        10,
+                                        20,
+                                        30,
+                                        40,
+                                        50,
+                                        60)})
     def test_crawl_interface_outcontainer_mode(self, *args):
         fc = InterfaceContainerCrawler()
         for (k, f, t) in fc.crawl('123'):
