@@ -22,12 +22,16 @@ from crawler.plugins.config_container_crawler import ConfigContainerCrawler
 from crawler.plugins.package_container_crawler import PackageContainerCrawler
 from crawler.plugins.process_container_crawler import ProcessContainerCrawler
 from crawler.plugins.disk_container_crawler import DiskContainerCrawler
+from crawler.plugins.metric_container_crawler import MetricContainerCrawler
+
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
 from crawler.plugins.config_host_crawler import ConfigHostCrawler
 from crawler.plugins.package_host_crawler import PackageHostCrawler
 from crawler.plugins.process_host_crawler import ProcessHostCrawler
 from crawler.plugins.disk_host_crawler import DiskHostCrawler
+from crawler.plugins.metric_host_crawler import MetricHostCrawler
+
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
 
@@ -1161,3 +1165,75 @@ class PluginTests(unittest.TestCase):
         disks = fc.crawl('123')
         assert set(disks) == set([('/a', DiskFeature(partitionname='/dev/a', freepct=90.0, fstype='type', mountpt='/a', mountopts='opts', partitionsize=100), 'disk'),
                          ('/b', DiskFeature(partitionname='/dev/b', freepct=90.0, fstype='type', mountpt='/b', mountopts='opts', partitionsize=100), 'disk')])
+
+    @mock.patch('crawler.plugins.metric_crawler.psutil.process_iter',
+                side_effect=lambda: [Process('init')])
+    def test_crawl_metrics_invm_mode(self, *args):
+        fc = MetricHostCrawler()
+        for (k, f, t) in fc.crawl():
+            assert f.cpupct == 30.0
+            assert f.mempct == 30.0
+            assert f.pname == 'init'
+            assert f.pid == 123
+            assert f.rss == 10
+            assert f.status == 'Running'
+            assert f.vms == 20
+            assert f.read == 10
+            assert f.write == 20
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.metric_crawler.psutil.process_iter',
+                side_effect=lambda: [Process('init')])
+    @mock.patch('crawler.plugins.metric_crawler.round',
+                side_effect=throw_os_error)
+    def test_crawl_metrics_invm_mode_failure(self, *args):
+        with self.assertRaises(OSError):
+            fc = MetricHostCrawler()
+            for ff in fc.crawl():
+                pass
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.metric_crawler.psutil.process_iter',
+                side_effect=lambda: [Process('init')])
+    @mock.patch('crawler.plugins.metric_container_crawler.run_as_another_namespace',
+                side_effect=mocked_run_as_another_namespace)
+    @mock.patch(
+        ("crawler.plugins.disk_container_crawler.dockerutils."
+         "exec_dockerinspect"),
+        side_effect=lambda long_id: {'State': {'Pid': 123}})
+    def test_crawl_metrics_outcontainer_mode(self, *args):
+        fc = MetricContainerCrawler()
+        for (k, f, t) in fc.crawl('123'):
+            assert f.cpupct == 30.0
+            assert f.mempct == 30.0
+            assert f.pname == 'init'
+            assert f.pid == 123
+            assert f.rss == 10
+            assert f.status == 'Running'
+            assert f.vms == 20
+            assert f.read == 10
+            assert f.write == 20
+        assert args[0].call_count == 1
+
+    @mock.patch('crawler.features_crawler.psvmi.context_init',
+                side_effect=lambda dn1, dn2, kv, d, a: 1000)
+    @mock.patch('crawler.features_crawler.psvmi.process_iter',
+                side_effect=lambda vmc: [Process('init')])
+    @mock.patch(
+        ("crawler.features_crawler.FeaturesCrawler."
+         "_crawl_metrics_cpu_percent"),
+        side_effect=lambda proc: 30.0)
+    def _test_crawl_metrics_outvm_mode(self, *args):
+        fc = FeaturesCrawler(crawl_mode=Modes.OUTVM,
+                             vm=('dn', '2.6', 'ubuntu', 'x86'))
+        for (k, f) in fc.crawl_metrics():
+            assert f.cpupct == 30.0
+            assert f.mempct == 30.0
+            assert f.pname == 'init'
+            assert f.pid == 123
+            assert f.rss == 10
+            assert f.status == 'Running'
+            assert f.vms == 20
+            assert f.read == 10
+            assert f.write == 20
+        assert args[0].call_count == 1

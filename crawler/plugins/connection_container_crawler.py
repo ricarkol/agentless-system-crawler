@@ -2,10 +2,14 @@ try:
     import crawler.dockerutils as dockerutils
     from crawler.icrawl_plugin import IContainerCrawler
     from crawler.namespace import run_as_another_namespace, ALL_NAMESPACES
+    from crawler.features import ConnectionFeature
+    from crawler.plugins.connection_crawler import crawl_connections
 except ImportError:
     import dockerutils
     from icrawl_plugin import IContainerCrawler
     from namespace import run_as_another_namespace, ALL_NAMESPACES
+    from features import ConnectionFeature
+    from plugins.connection_crawler import crawl_connections
 
 import logging
 
@@ -24,9 +28,8 @@ class ConnectionContainerCrawler(IContainerCrawler):
         logger.debug('Crawling %s for container %s' % (self.get_feature(), container_id))
 
         if avoid_setns:
-            mp = dockerutils.get_docker_container_rootfs_path(container_id)
-            return crawl_connection(mp)
+            raise NotImplementedError('avoidsetns mode not implemented')
         else:  # in all other cases, including wrong mode set
             return run_as_another_namespace(pid,
                                             ALL_NAMESPACES,
-                                            crawl_connection)
+                                            crawl_connections)

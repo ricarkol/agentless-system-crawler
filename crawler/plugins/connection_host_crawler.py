@@ -1,7 +1,9 @@
 try:
     from crawler.icrawl_plugin import IHostCrawler
+    from crawler.plugins.connection_crawler import crawl_connections
 except ImportError:
     from icrawl_plugin import IHostCrawler
+    from plugins.connection_crawler import crawl_connections
 
 import logging
 
@@ -16,4 +18,4 @@ class ConnectionHostCrawler(IHostCrawler):
     def crawl(self, **kwargs):
         logger.debug('Crawling %s' % (self.get_feature()))
 
-        return crawl_connection(mp)
+        return crawl_connections()

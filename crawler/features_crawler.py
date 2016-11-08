@@ -120,7 +120,7 @@ class FeaturesCrawler:
             #'disk': self.crawl_disk_partitions,
             #'metric': self.crawl_metrics,
             # 'process': self.crawl_processes,
-            'connection': self.crawl_connections,
+            #'connection': self.crawl_connections,
             # 'package': self.crawl_packages,
             # 'file': self.crawl_files,
             # 'config': self.crawl_config_files,
