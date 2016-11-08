@@ -5,6 +5,7 @@ try:
 except ImportError:
     from features import DiskFeature
 
+
 def crawl_disk_partitions():
     partitions = []
     for partition in psutil.disk_partitions(all=True):

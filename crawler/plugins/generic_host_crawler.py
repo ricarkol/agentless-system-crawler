@@ -8,12 +8,12 @@ import logging
 logger = logging.getLogger('crawlutils')
 
 
-class <GENERIC_UPPERCASE>HostCrawler(IHostCrawler):
+class __GENERIC_UPPERCASE__HostCrawler(IHostCrawler):
 
     def get_feature(self):
-        return '<GENERIC>'
+        return '__GENERIC__'
 
     def crawl(self, **kwargs):
         logger.debug('Crawling %s' % (self.get_feature()))
 
-        return crawl_<GENERIC>(mp)
+        return crawl___GENERIC__(mp)

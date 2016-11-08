@@ -12,21 +12,22 @@ import logging
 logger = logging.getLogger('crawlutils')
 
 
-class <GENERIC_UPPERCASE>ContainerCrawler(IContainerCrawler):
+class __GENERIC_UPPERCASE__ContainerCrawler(IContainerCrawler):
 
     def get_feature(self):
-        return '<GENERIC>'
+        return '__GENERIC__'
 
     def crawl(self, container_id, avoid_setns=False, **kwargs):
         inspect = dockerutils.exec_dockerinspect(container_id)
         state = inspect['State']
         pid = str(state['Pid'])
-        logger.debug('Crawling %s for container %s' % (self.get_feature(), container_id))
+        logger.debug('Crawling %s for container %s' % (self.get_feature(),
+                                                       container_id))
 
         if avoid_setns:
             mp = dockerutils.get_docker_container_rootfs_path(container_id)
-            return crawl_<GENERIC>(mp)
+            return crawl___GENERIC__(mp)
         else:  # in all other cases, including wrong mode set
             return run_as_another_namespace(pid,
                                             ALL_NAMESPACES,
-                                            crawl_<GENERIC>)
+                                            crawl___GENERIC__)

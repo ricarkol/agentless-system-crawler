@@ -21,7 +21,9 @@ class MemoryContainerCrawler(IContainerCrawler):
         inspect = dockerutils.exec_dockerinspect(container_id)
         state = inspect['State']
         pid = str(state['Pid'])
-        logger.debug('Crawling %s for container %s' % (self.get_feature(), container_id))
+        logger.debug(
+            'Crawling %s for container %s' %
+            (self.get_feature(), container_id))
 
         if avoid_setns:
             mp = dockerutils.get_docker_container_rootfs_path(container_id)

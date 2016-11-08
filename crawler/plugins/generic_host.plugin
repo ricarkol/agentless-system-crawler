@@ -1,8 +1,8 @@
 [Core]
-Name = <GENERIC>_host
-Module = <GENERIC>_host_crawler
+Name = __GENERIC___host
+Module = __GENERIC___host_crawler
 
 [Documentation]
 Author = IBM
 Version = 0.1
-Description = "<GENERIC_UPPERCASE> crawling function for hosts"
+Description = "__GENERIC_UPPERCASE__ crawling function for hosts"

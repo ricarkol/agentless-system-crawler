@@ -25,7 +25,9 @@ class MetricContainerCrawler(IContainerCrawler):
         inspect = dockerutils.exec_dockerinspect(container_id)
         state = inspect['State']
         pid = str(state['Pid'])
-        logger.debug('Crawling %s for container %s' % (self.get_feature(), container_id))
+        logger.debug(
+            'Crawling %s for container %s' %
+            (self.get_feature(), container_id))
 
         if avoid_setns:
             raise NotImplementedError('avoidsetns mode not implemented')

@@ -1,8 +1,8 @@
 [Core]
-Name = <GENERIC>_container
-Module = <GENERIC>_container_crawler
+Name = __GENERIC___container
+Module = __GENERIC___container_crawler
 
 [Documentation]
 Author = IBM
 Version = 0.1
-Description = "<GENERIC_UPPERCASE> crawling function for containers"
+Description = "__GENERIC_UPPERCASE__ crawling function for containers"

@@ -5,6 +5,7 @@ try:
 except ImportError:
     from features import MetricFeature
 
+
 def _crawl_metrics_cpu_percent(process):
     cpu_percent = (
         process.get_cpu_percent(

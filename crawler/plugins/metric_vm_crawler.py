@@ -19,12 +19,14 @@ except ImportError:
 
 logger = logging.getLogger('crawlutils')
 
+
 class MetricVmCrawler(IVMCrawler):
 
     """
     To calculate rates like packets sent per second, we need to
     store the last measurement. We store it in this dictionary.
     """
+
     def __init__(self):
         _cached_values = {}
 
@@ -67,7 +69,6 @@ class MetricVmCrawler(IVMCrawler):
                                              prev_sys_cpu_time))
 
         return cpu_percent
-
 
     def crawl(self, vm_desc, **kwargs):
 
@@ -132,7 +133,6 @@ class MetricVmCrawler(IVMCrawler):
                 meminfo.vms,
                 ioinfo.write_bytes,
             ), 'metric')
-
 
     def get_feature(self):
         return 'metric'
