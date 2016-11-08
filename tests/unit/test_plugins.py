@@ -34,6 +34,7 @@ from crawler.plugins.metric_host_crawler import MetricHostCrawler
 
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
+from crawler.plugins.metric_vm_crawler import MetricVmCrawler
 
 
 # for OUTVM psvmi
@@ -1215,18 +1216,17 @@ class PluginTests(unittest.TestCase):
             assert f.write == 20
         assert args[0].call_count == 1
 
-    @mock.patch('crawler.features_crawler.psvmi.context_init',
+    @mock.patch('crawler.plugins.metric_vm_crawler.psvmi.context_init',
                 side_effect=lambda dn1, dn2, kv, d, a: 1000)
-    @mock.patch('crawler.features_crawler.psvmi.process_iter',
+    @mock.patch('crawler.plugins.metric_vm_crawler.psvmi.process_iter',
                 side_effect=lambda vmc: [Process('init')])
     @mock.patch(
-        ("crawler.features_crawler.FeaturesCrawler."
-         "_crawl_metrics_cpu_percent"),
+        ("crawler.plugins.metric_vm_crawler."
+         "MetricVmCrawler._crawl_metrics_cpu_percent"),
         side_effect=lambda proc: 30.0)
-    def _test_crawl_metrics_outvm_mode(self, *args):
-        fc = FeaturesCrawler(crawl_mode=Modes.OUTVM,
-                             vm=('dn', '2.6', 'ubuntu', 'x86'))
-        for (k, f) in fc.crawl_metrics():
+    def test_crawl_metrics_vm_mode(self, *args):
+        fc = MetricVmCrawler()
+        for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
             assert f.cpupct == 30.0
             assert f.mempct == 30.0
             assert f.pname == 'init'
