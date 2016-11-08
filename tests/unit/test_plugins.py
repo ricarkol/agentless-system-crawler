@@ -21,11 +21,13 @@ from crawler.plugins.file_container_crawler import FileContainerCrawler
 from crawler.plugins.config_container_crawler import ConfigContainerCrawler
 from crawler.plugins.package_container_crawler import PackageContainerCrawler
 from crawler.plugins.process_container_crawler import ProcessContainerCrawler
+from crawler.plugins.disk_container_crawler import DiskContainerCrawler
 from crawler.plugins.os_host_crawler import OSHostCrawler
 from crawler.plugins.file_host_crawler import FileHostCrawler
 from crawler.plugins.config_host_crawler import ConfigHostCrawler
 from crawler.plugins.package_host_crawler import PackageHostCrawler
 from crawler.plugins.process_host_crawler import ProcessHostCrawler
+from crawler.plugins.disk_host_crawler import DiskHostCrawler
 from crawler.plugins.os_vm_crawler import os_vm_crawler
 from crawler.plugins.process_vm_crawler import process_vm_crawler
 
@@ -1133,3 +1135,29 @@ class PluginTests(unittest.TestCase):
             assert f.cmd == 'cmd'
             assert f.pid == 123
         assert args[0].call_count == 1
+
+    @mock.patch('crawler.plugins.disk_crawler.psutil.disk_partitions',
+                side_effect=mocked_disk_partitions)
+    @mock.patch('crawler.plugins.disk_crawler.psutil.disk_usage',
+                side_effect=lambda x: pdiskusage(10, 100))
+    def test_crawl_disk_partitions_invm_mode(self, *args):
+        fc = DiskHostCrawler()
+        disks = fc.crawl()
+        assert set(disks) == set([('/a', DiskFeature(partitionname='/dev/a', freepct=90.0, fstype='type', mountpt='/a', mountopts='opts', partitionsize=100), 'disk'),
+                         ('/b', DiskFeature(partitionname='/dev/b', freepct=90.0, fstype='type', mountpt='/b', mountopts='opts', partitionsize=100), 'disk')])
+
+    @mock.patch('crawler.plugins.disk_container_crawler.run_as_another_namespace',
+                side_effect=mocked_run_as_another_namespace)
+    @mock.patch('crawler.plugins.disk_crawler.psutil.disk_partitions',
+                side_effect=mocked_disk_partitions)
+    @mock.patch('crawler.plugins.disk_crawler.psutil.disk_usage',
+                side_effect=lambda x: pdiskusage(10, 100))
+    @mock.patch(
+        ("crawler.plugins.disk_container_crawler.dockerutils."
+         "exec_dockerinspect"),
+        side_effect=lambda long_id: {'State': {'Pid': 123}})
+    def test_crawl_disk_partitions_outcontainer_mode(self, *args):
+        fc = DiskContainerCrawler()
+        disks = fc.crawl('123')
+        assert set(disks) == set([('/a', DiskFeature(partitionname='/dev/a', freepct=90.0, fstype='type', mountpt='/a', mountopts='opts', partitionsize=100), 'disk'),
+                         ('/b', DiskFeature(partitionname='/dev/b', freepct=90.0, fstype='type', mountpt='/b', mountopts='opts', partitionsize=100), 'disk')])
