@@ -180,6 +180,9 @@ class CrawlutilsVMTest(unittest.TestCase):
                     'avoid_setns': False},
                 'cpu': {}}}
 
+        features = ['memory', 'interface']
+        crawler.plugins_manager.reload_vm_crawl_plugins(
+            features=features)
         crawler.crawlutils.snapshot_vms(**fxn_args)
 
         subprocess.call(['/bin/chmod', '-R', '777', self.tempd])
