@@ -54,7 +54,6 @@ from crawler.plugins.interface_vm_crawler import InterfaceVmCrawler
 # for OUTVM psvmi
 from mock import Mock
 import sys
-sys.modules['psvmi'] = Mock()
 
 
 class DummyContainer(Container):
@@ -496,6 +495,7 @@ class PluginTests(unittest.TestCase):
                                                       100000,
                                                       100000,
                                                       100000))
+    @mock.patch('crawler.plugins.os_vm_crawler.psvmi')
     def test_os_vm_crawler_plugin_without_vm(self, *args):
         fc = os_vm_crawler()
         for os in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -511,7 +511,7 @@ class PluginTests(unittest.TestCase):
                     architecture='osplatform'),
                 'os')
             pass
-        assert args[0].call_count == 1
+        assert args[1].call_count == 1
 
     @mock.patch('crawler.plugins.file_crawler.os.path.isdir',
                 side_effect=lambda p: True)
@@ -1145,6 +1145,7 @@ class PluginTests(unittest.TestCase):
                 side_effect=lambda dn1, dn2, kv, d, a: 1000)
     @mock.patch('crawler.plugins.process_vm_crawler.psvmi.process_iter',
                 side_effect=lambda vmc: [Process('init')])
+    @mock.patch('crawler.plugins.process_vm_crawler.psvmi')
     def test_process_vm_crawler(self, *args):
         fc = process_vm_crawler()
         for (k, f, fname) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -1153,7 +1154,7 @@ class PluginTests(unittest.TestCase):
             assert f.pname == 'init'
             assert f.cmd == 'cmd'
             assert f.pid == 123
-        assert args[0].call_count == 1
+        assert args[1].call_count == 1 # process_iter
 
     @mock.patch('crawler.plugins.disk_crawler.psutil.disk_partitions',
                 side_effect=mocked_disk_partitions)
@@ -1268,6 +1269,7 @@ class PluginTests(unittest.TestCase):
         ("crawler.plugins.metric_vm_crawler."
          "MetricVmCrawler._crawl_metrics_cpu_percent"),
         side_effect=lambda proc: 30.0)
+    @mock.patch('crawler.plugins.metric_vm_crawler.psvmi')
     def test_crawl_metrics_vm_mode(self, *args):
         fc = MetricVmCrawler()
         for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -1280,7 +1282,7 @@ class PluginTests(unittest.TestCase):
             assert f.vms == 20
             assert f.read == 10
             assert f.write == 20
-        assert args[0].call_count == 1
+        assert args[1].call_count == 1 # process_iter
 
     @mock.patch('crawler.plugins.connection_crawler.psutil.process_iter',
                 side_effect=lambda: [Process('init')])
@@ -1315,6 +1317,7 @@ class PluginTests(unittest.TestCase):
                 side_effect=lambda dn1, dn2, kv, d, a: 1000)
     @mock.patch('crawler.plugins.connection_vm_crawler.psvmi.process_iter',
                 side_effect=lambda vmc: [Process('init')])
+    @mock.patch('crawler.plugins.connection_vm_crawler.psvmi')
     def test_crawl_connections_outvm_mode(self, *args):
         fc = ConnectionVmCrawler()
         for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -1322,7 +1325,7 @@ class PluginTests(unittest.TestCase):
             assert f.remoteipaddr == '2.2.2.2'
             assert f.localport == '22'
             assert f.remoteport == '22'
-        assert args[0].call_count == 1
+        assert args[1].call_count == 1
 
     @mock.patch('crawler.plugins.memory_host_crawler.psutil.virtual_memory',
                 side_effect=lambda: psutils_memory(2, 2, 3, 4))
@@ -1350,6 +1353,7 @@ class PluginTests(unittest.TestCase):
                 side_effect=lambda dn1, dn2, kv, d, a: 1000)
     @mock.patch('crawler.plugins.memory_vm_crawler.psvmi.system_memory_info',
                 side_effect=lambda vmc: psvmi_memory(10, 20, 30, 40))
+    @mock.patch('crawler.plugins.memory_vm_crawler.psvmi')
     def test_crawl_memory_outvm_mode(self, *args):
         fc = MemoryVmCrawler()
         for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -1359,7 +1363,7 @@ class PluginTests(unittest.TestCase):
                 memory_cached=30,
                 memory_free=40,
                 memory_util_percentage=20)
-        assert args[0].call_count == 1
+        assert args[1].call_count == 1
 
     @mock.patch(
         'crawler.plugins.memory_container_crawler.psutil.virtual_memory',
@@ -1578,6 +1582,7 @@ class PluginTests(unittest.TestCase):
     @mock.patch('crawler.plugins.interface_vm_crawler.psvmi.interface_iter',
                 side_effect=lambda vmc: [psvmi_interface(
                     'eth1', 10, 20, 30, 40, 50, 60)])
+    @mock.patch('crawler.plugins.interface_vm_crawler.psvmi')
     def test_crawl_interface_outvm_mode(self, *args):
         fc = InterfaceVmCrawler()
         for (k, f, t) in fc.crawl(vm_desc=('dn', '2.6', 'ubuntu', 'x86')):
@@ -1597,5 +1602,5 @@ class PluginTests(unittest.TestCase):
                 if_packets_rx=0,
                 if_errors_tx=0,
                 if_errors_rx=0)
-        assert args[0].call_count == 2
         assert args[1].call_count == 2
+        assert args[2].call_count == 2
