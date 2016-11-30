@@ -29,7 +29,7 @@ def kafka_send(kurl, temp_fpath, format, topic, queue=None):
         kafka_python_client = kafka_python.KafkaClient(kurl)
         kafka_python_client.ensure_topic_exists(topic)
         kafka = pykafka.KafkaClient(hosts=kurl)
-
+        print queue
         publish_topic_object = kafka.topics[topic]
         # the default partitioner is random_partitioner
         producer = publish_topic_object.get_producer()
@@ -46,9 +46,9 @@ def kafka_send(kurl, temp_fpath, format, topic, queue=None):
             raise EmitterUnsupportedFormat('Unsupported format: %s' % format)
 
         queue and queue.put((True, None))
-    except Exception as e:
+    except Exception as exc:
         if queue:
-            queue.put((False, e))
+            queue.put((False, exc))
         else:
             raise
     finally:
@@ -67,6 +67,8 @@ class KafkaEmitter(BaseEmitter):
         :param snapshot_num:
         :return:
         """
+        if compress:
+            raise NotImplementedError('kafka emitter does not support gzip.')
         self._publish_to_kafka(iostream, self.url)
 
     def _publish_to_kafka_no_retries(self, iostream, url):
@@ -85,27 +87,28 @@ class KafkaEmitter(BaseEmitter):
         # TODO: fix this mess. Why are we creating a file to pass its
         # path to a new process created just for sending messages to kafka?
         (temp_fd, temp_fpath) = tempfile.mkstemp(prefix='emit.')
-        iostream.seek(0)
-        shutil.copyfileobj(iostream, temp_fd)
         os.close(temp_fd)  # close temporary file descriptor
+        with open(temp_fpath, 'w') as fd:
+            iostream.seek(0)
+            shutil.copyfileobj(iostream, fd)
 
         queue = multiprocessing.Queue()
         try:
             try:
                 child_process = multiprocessing.Process(
                     name='kafka-emitter', target=kafka_send, args=(
-                        kurl, temp_fpath, self.format, topic, queue))
+                        kurl, temp_fpath, 'graphite', topic, queue))
                 child_process.start()
             except OSError:
                 raise
 
             try:
                 (result, child_exception) = queue.get(
-                    timeout=self.kafka_timeout_secs)
+                    timeout=self.timeout)
             except Queue.Empty:
                 child_exception = EmitterEmitTimeout()
 
-            child_process.join(self.kafka_timeout_secs)
+            child_process.join(self.timeout)
 
             if child_process.is_alive():
                 errmsg = ('Timed out waiting for process %d to exit.' %
@@ -119,14 +122,10 @@ class KafkaEmitter(BaseEmitter):
         finally:
             queue.close()
 
-    def _publish_to_kafka(self, iostream, url, max_emit_retries=8):
-        if self.compress:
-            raise NotImplementedError('Compressing kafka messages '
-                                      'not supported')
-
+    def _publish_to_kafka(self, iostream, url):
         broker_alive = False
         retries = 0
-        while not broker_alive and retries <= max_emit_retries:
+        while not broker_alive and retries <= self.max_retries:
             try:
                 retries += 1
                 self._publish_to_kafka_no_retries(iostream, url)
@@ -135,7 +134,7 @@ class KafkaEmitter(BaseEmitter):
                 logger.debug(
                     '_publish_to_kafka_no_retries {0}: {1}'.format(
                         url, exc))
-                if retries <= max_emit_retries:
+                if retries <= self.max_retries:
 
                     # Wait for (2^retries * 100) milliseconds
 

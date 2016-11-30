@@ -10,7 +10,8 @@ from emitters.file_emitter import FileEmitter
 from emitters.http_emitter import HttpEmitter
 from emitters.stdout_emitter import StdoutEmitter
 from emitters.kafka_emitter import KafkaEmitter
-from crawler_exceptions import (EmitterUnsupportedFormat)
+from crawler_exceptions import (EmitterUnsupportedFormat,
+                                EmitterUnsupportedProtocol)
 
 
 logger = logging.getLogger('crawlutils')
@@ -41,9 +42,9 @@ class EmittersManager:
         :param compress: gzip each emitter frame or not
         :param extra_metadata: dict added to the metadata of each frame
         """
-
         if format not in self.supported_formats:
-            raise TypeError('Emitter format not supported')
+            raise EmitterUnsupportedFormat(
+                'Unsupported format: %s' % format)
 
         self.extra_metadata = extra_metadata
         self.urls = urls
@@ -60,8 +61,10 @@ class EmittersManager:
                 self.emitters.append(HttpEmitter(url))
             elif url.startswith('kafka://'):
                 self.emitters.append(KafkaEmitter(url))
+            else:
+                raise EmitterUnsupportedProtocol(url)
 
-    def emit(self, frame, snapshot_num):
+    def emit(self, frame, snapshot_num=0):
         """
         Sends a frame to the URLs specified at __init__
 
@@ -131,9 +134,6 @@ class EmittersManager:
                 feature_key,
                 feature_val_as_dict,
                 iostream=iostream)
-        else:
-            raise EmitterUnsupportedFormat(
-                'Unsupported format: %s' % self.format)
 
     def write_in_graphite_format(
         self,

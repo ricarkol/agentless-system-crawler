@@ -20,8 +20,8 @@ class StdoutEmitter(BaseEmitter):
         if compress:
             tempio = cStringIO.StringIO()
             gzip_file = gzip.GzipFile(fileobj=tempio, mode='w')
-            gzip_file.write(iostream.getvalue())
+            gzip_file.write(iostream.getvalue().strip())
             gzip_file.close()
             print tempio.getvalue()
         else:
-            print iostream.getvalue()
+            print "%s" % iostream.getvalue().strip()

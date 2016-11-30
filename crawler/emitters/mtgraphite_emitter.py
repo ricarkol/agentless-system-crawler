@@ -13,8 +13,8 @@ logger = logging.getLogger('crawlutils')
 
 
 class MtGraphiteEmitter(BaseEmitter):
-    def __init__(self, url):
-        BaseFrame.__init__(self, url)
+    def __init__(self, url, timeout=1, max_retries=5):
+        BaseEmitter.__init__(self, timeout, max_retries)
         self.mtgraphite_client = MTGraphiteClient(self.url)
 
     def emit(self, iostream, compress=False,

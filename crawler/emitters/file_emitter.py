@@ -18,8 +18,11 @@ class FileEmitter(BaseEmitter):
         :return:
         """
         output_path = self.url[len('file://'):]
-        short_name = metadata.get('emit_shortname', '')
-        file_suffix = '{0}.{1}'.format(short_name, snapshot_num)
+        short_name = metadata.get('emit_shortname', None)
+        if not short_name:
+            file_suffix = str(snapshot_num)
+        else:
+            file_suffix = '{0}.{1}'.format(short_name, snapshot_num)
         output_path = '{0}.{1}'.format(output_path, file_suffix)
         output_path += '.gz' if compress else ''
 
