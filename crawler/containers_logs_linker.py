@@ -1,7 +1,6 @@
 from containers import get_containers
 from base_crawler import BaseCrawler
 from worker import Worker
-from emitters_manager import EmittersManager
 import argparse
 import os
 import misc
