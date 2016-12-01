@@ -16,13 +16,14 @@ from crawler_exceptions import (EmitterUnsupportedFormat,
 
 logger = logging.getLogger('crawlutils')
 
+
 class EmittersManager:
     """
     Class that stores a list of emitter objects, one for each url. This class
-    should be instantiated at the beginNing of the program, and emit() should be
-    called for each frame. emit() calls the emit() function of each emitter object.
-    This class can also emit() frames in different formats, for example in json
-    format, each feature in a frame is a json.
+    should be instantiated at the beginNing of the program, and emit() should
+    be called for each frame. emit() calls the emit() function of each emitter
+    object.  This class can also emit() frames in different formats, for
+    example in json format, each feature in a frame is a json.
     """
 
     supported_formats = ['csv', 'graphite', 'json']
@@ -69,8 +70,8 @@ class EmittersManager:
         Sends a frame to the URLs specified at __init__
 
         :param frame: frame of type BaseFrame
-        :param snapshot_num: iteration count (from worker.py). This is just used
-        to differentiate successive frame files (when url is file://).
+        :param snapshot_num: iteration count (from worker.py). This is just
+        used to differentiate successive frame files (when url is file://).
         :return: None
         """
         if not isinstance(frame, BaseFrame):
@@ -90,7 +91,7 @@ class EmittersManager:
         # respective url
         for emitter in self.emitters:
             emitter.emit(iostream, self.compress,
-                              metadata, snapshot_num)
+                         metadata, snapshot_num)
 
     def write_feature(
         self,
@@ -107,7 +108,7 @@ class EmittersManager:
         :param feature_key:
         :param feature_val:
         :param feature_type:
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :param metadata: metadata dictionary of the Frame that has this
         feature being emitted.
         :return: None
@@ -152,7 +153,7 @@ class EmittersManager:
         :param suffix:
         :param data:
         :param timestamp:
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :return:
         """
         timestamp = int(timestamp or time.time())
@@ -188,15 +189,22 @@ class EmittersManager:
         """
         Writes the metadata dictionary as a string into iostream.
 
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :param metadata:
         :return:
         """
         # Update timestamp to the actual emit time
         metadata['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S%z')
         if self.format == 'csv':
-            iostream.write('%s\t%s\t%s\n' % ('metadata', json.dumps('metadata'),
-                         json.dumps(metadata, separators=(',', ':'))))
+            iostream.write(
+                '%s\t%s\t%s\n' %
+                ('metadata',
+                 json.dumps('metadata'),
+                    json.dumps(
+                     metadata,
+                     separators=(
+                         ',',
+                         ':'))))
         if self.format == 'json':
             iostream.write('%s\n' % json.dumps(metadata))
         # graphite format does not have a metadata feature as the namespace

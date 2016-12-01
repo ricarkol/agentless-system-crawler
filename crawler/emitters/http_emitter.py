@@ -9,13 +9,14 @@ except ImportError:
 
 logger = logging.getLogger('crawlutils')
 
+
 class HttpEmitter(BaseEmitter):
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
         """
 
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :param compress:
         :param metadata:
         :param snapshot_num:
@@ -33,7 +34,7 @@ class HttpEmitter(BaseEmitter):
                 logger.exception(e)
                 logger.error(
                     "POST to %s resulted in exception (attempt %d of %d), "
-                    "will not re-try" % (self.url, attempt + 1, self.max_retries))
+                    "Exiting." % (self.url, attempt + 1, self.max_retries))
                 break
             except requests.exceptions.RequestException as e:
                 logger.exception(e)

@@ -6,12 +6,20 @@ try:
 except ImportError:
     from crawler.emitters.base_emitter import BaseEmitter
 
+
 class FileEmitter(BaseEmitter):
+    """
+    Emitter to file. This creates one file per frame. The file names
+    are the ones in the url. For example: for file:///tmp/a the file for
+    the first frame would be /tmp/a.0 for a host, and /tmp/a.xyz.0 for a
+    container with id xyz.
+    """
+
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
         """
 
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :param compress:
         :param metadata:
         :param snapshot_num:

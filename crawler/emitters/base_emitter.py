@@ -14,7 +14,7 @@ class BaseEmitter:
              metadata={}, snapshot_num=0):
         """
 
-        :param iostream: a CStringIO stream used to buffer the formatted features.
+        :param iostream: a CStringIO used to buffer the formatted features.
         :param compress:
         :param metadata:
         :param snapshot_num:

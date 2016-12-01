@@ -14,11 +14,12 @@ class Worker:
         """
         Store and check the types of the arguments.
 
-        :param emitters: EmittersManager that holds the list of Emitters. If it is
-        None, then no emit is done.
+        :param emitters: EmittersManager that holds the list of Emitters.
+        If it is None, then no emit is done.
         :param frequency: Sleep seconds between iterations
-        :param crawler: Crawler object with a crawl() method. This object maintains
-        a list of crawler plugins, each with their own crawl() method.
+        :param crawler: Crawler object with a crawl() method. This object
+        maintains a list of crawler plugins, each with their own crawl()
+        method.
         """
         if not isinstance(crawler, BaseCrawler):
             raise TypeError('crawler is not of type BaseCrawler')
