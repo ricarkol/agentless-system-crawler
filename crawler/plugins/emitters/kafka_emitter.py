@@ -23,7 +23,7 @@ logger = logging.getLogger('crawlutils')
 logging.getLogger('kafka').addHandler(NullHandler())
 
 
-def kafka_send(kurl, temp_fpath, one_emit_per_line, topic, queue=None):
+def kafka_send(kurl, temp_fpath, emit_per_line, topic, queue=None):
     try:
         kafka_python_client = kafka_python.KafkaClient(kurl)
         kafka_python_client.ensure_topic_exists(topic)
@@ -33,7 +33,7 @@ def kafka_send(kurl, temp_fpath, one_emit_per_line, topic, queue=None):
         producer = publish_topic_object.get_producer()
 
         with open(temp_fpath, 'r') as fp:
-            if one_emit_per_line:
+            if emit_per_line:
                 for line in fp.readlines():
                     producer.produce([line])
             else:
@@ -53,11 +53,11 @@ def kafka_send(kurl, temp_fpath, one_emit_per_line, topic, queue=None):
 class KafkaEmitter(BaseEmitter):
 
     def __init__(self, url, timeout=1, max_retries=5,
-                 one_emit_per_line=False):
+                 emit_per_line=False):
         BaseEmitter.__init__(self, url,
                              timeout=timeout,
                              max_retries=max_retries,
-                             one_emit_per_line=one_emit_per_line)
+                             emit_per_line=emit_per_line)
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
@@ -99,7 +99,7 @@ class KafkaEmitter(BaseEmitter):
             try:
                 child_process = multiprocessing.Process(
                     name='kafka-emitter', target=kafka_send,
-                    args=(kurl, temp_fpath, self.one_emit_per_line,
+                    args=(kurl, temp_fpath, self.emit_per_line,
                           topic, queue))
                 child_process.start()
             except OSError:

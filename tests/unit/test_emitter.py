@@ -530,19 +530,16 @@ class EmitterTests(unittest.TestCase):
         emitfile.close()
 
         try:
-            kafka_send('1.1.1.1', path, 'csv', 'topic1')
-            kafka_send('1.1.1.1', path, 'graphite', 'topic1')
+            kafka_send('1.1.1.1', path, False, 'topic1')
+            kafka_send('1.1.1.1', path, True, 'topic1')
             with self.assertRaises(RandomKafkaException):
-                kafka_send('1.1.1.1', path, 'csv', 'badtopic')
+                kafka_send('1.1.1.1', path, False, 'badtopic')
             with self.assertRaises(RandomKafkaException):
-                kafka_send('1.1.1.1', path, 'graphite', 'badtopic')
-            with self.assertRaises(
-                    crawler.crawler_exceptions.EmitterUnsupportedFormat):
-                kafka_send('1.1.1.1', path, 'xxx', 'badtopic')
+                kafka_send('1.1.1.1', path, True, 'badtopic')
         finally:
             os.remove(path)
-        self.assertEqual(MockC1.call_count, 5)
-        self.assertEqual(MockC1.call_count, 5)
+        self.assertEqual(MockC1.call_count, 4)
+        self.assertEqual(MockC1.call_count, 4)
 
     @mock.patch('crawler.plugins.emitters.mtgraphite_emitter.MTGraphiteClient',
                 side_effect=MockedMTGraphiteClient, autospec=True)

@@ -60,10 +60,10 @@ class EmittersManager:
             elif url.startswith('file://'):
                 self.emitters.append(FileEmitter(url))
             elif url.startswith('http://'):
-                self.emitters.append(HttpEmitter(url, one_emit_per_line=per_line))
+                self.emitters.append(HttpEmitter(url, emit_per_line=per_line))
             elif url.startswith('kafka://'):
                 per_line = format == 'graphite'
-                self.emitters.append(KafkaEmitter(url, one_emit_per_line=per_line))
+                self.emitters.append(KafkaEmitter(url, emit_per_line=per_line))
             else:
                 raise EmitterUnsupportedProtocol(url)
 

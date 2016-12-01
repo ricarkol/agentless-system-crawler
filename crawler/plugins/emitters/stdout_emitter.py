@@ -10,11 +10,11 @@ except ImportError:
 
 class StdoutEmitter(BaseEmitter):
     def __init__(self, url, timeout=1, max_retries=5,
-                 one_emit_per_line=False):
+                 emit_per_line=False):
         BaseEmitter.__init__(self, url,
                              timeout=timeout,
                              max_retries=max_retries,
-                             one_emit_per_line=one_emit_per_line)
+                             emit_per_line=emit_per_line)
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
@@ -26,7 +26,7 @@ class StdoutEmitter(BaseEmitter):
         :param snapshot_num:
         :return:
         """
-        if self.one_emit_per_line:
+        if self.emit_per_line:
             iostream.seek(0)
             for line in iostream.readlines():
                 self.emit_string(line, compress)

@@ -7,11 +7,11 @@ class BaseEmitter:
     to emit).
     """
     def __init__(self, url, timeout=1, max_retries=5,
-                 one_emit_per_line=False):
+                 emit_per_line=False):
         self.url = url
         self.timeout = timeout
         self.max_retries = max_retries
-        self.one_emit_per_line = one_emit_per_line
+        self.emit_per_line = emit_per_line
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
