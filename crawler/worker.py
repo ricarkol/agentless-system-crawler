@@ -14,14 +14,15 @@ class Worker:
         """
         Store and check the types of the arguments.
 
-        :param emitters: EmittersManager that holds the list of Emitters
+        :param emitters: EmittersManager that holds the list of Emitters. If it is
+        None, then no emit is done.
         :param frequency: Sleep seconds between iterations
         :param crawler: Crawler object with a crawl() method. This object maintains
         a list of crawler plugins, each with their own crawl() method.
         """
         if not isinstance(crawler, BaseCrawler):
             raise TypeError('crawler is not of type BaseCrawler')
-        if not isinstance(emitters, EmittersManager):
+        if emitters and not isinstance(emitters, EmittersManager):
             raise TypeError('emitter is not of type Emitter')
         self.iter_count = 0
         self.frequency = frequency
@@ -37,7 +38,8 @@ class Worker:
         :return: None
         """
         for frame in self.crawler.crawl():
-            self.emitters.emit(frame, snapshot_num=self.iter_count)
+            if self.emitters is not None:
+                self.emitters.emit(frame, snapshot_num=self.iter_count)
 
         # just used for output purposes
         self.iter_count += 1
