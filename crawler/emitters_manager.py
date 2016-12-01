@@ -51,6 +51,8 @@ class EmittersManager:
         self.compress = compress
         self.format = format
 
+        per_line = format in ['graphite', 'json']
+
         self.emitters = []
         for url in self.urls:
             if url.startswith('stdout://'):
@@ -58,9 +60,10 @@ class EmittersManager:
             elif url.startswith('file://'):
                 self.emitters.append(FileEmitter(url))
             elif url.startswith('http://'):
-                self.emitters.append(HttpEmitter(url))
+                self.emitters.append(HttpEmitter(url, one_emit_per_line=per_line))
             elif url.startswith('kafka://'):
-                self.emitters.append(KafkaEmitter(url))
+                per_line = format == 'graphite'
+                self.emitters.append(KafkaEmitter(url, one_emit_per_line=per_line))
             else:
                 raise EmitterUnsupportedProtocol(url)
 

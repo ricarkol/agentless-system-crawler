@@ -11,12 +11,10 @@ import pykafka
 
 try:
     from crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
-    from crawler_exceptions import (EmitterUnsupportedFormat)
     from plugins.emitters.base_emitter import BaseEmitter
     from misc import NullHandler
 except ImportError:
     from crawler.crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
-    from crawler.crawler_exceptions import (EmitterUnsupportedFormat)
     from crawler.plugins.emitters.base_emitter import BaseEmitter
     from crawler.misc import NullHandler
 
@@ -25,26 +23,22 @@ logger = logging.getLogger('crawlutils')
 logging.getLogger('kafka').addHandler(NullHandler())
 
 
-def kafka_send(kurl, temp_fpath, format, topic, queue=None):
+def kafka_send(kurl, temp_fpath, one_emit_per_line, topic, queue=None):
     try:
         kafka_python_client = kafka_python.KafkaClient(kurl)
         kafka_python_client.ensure_topic_exists(topic)
         kafka = pykafka.KafkaClient(hosts=kurl)
-        print queue
         publish_topic_object = kafka.topics[topic]
         # the default partitioner is random_partitioner
         producer = publish_topic_object.get_producer()
 
-        if format == 'csv':
-            with open(temp_fpath, 'r') as fp:
-                text = fp.read()
-                producer.produce([text])
-        elif format == 'graphite':
-            with open(temp_fpath, 'r') as fp:
+        with open(temp_fpath, 'r') as fp:
+            if one_emit_per_line:
                 for line in fp.readlines():
                     producer.produce([line])
-        else:
-            raise EmitterUnsupportedFormat('Unsupported format: %s' % format)
+            else:
+                text = fp.read()
+                producer.produce([text])
 
         queue and queue.put((True, None))
     except Exception as exc:
@@ -57,6 +51,13 @@ def kafka_send(kurl, temp_fpath, format, topic, queue=None):
 
 
 class KafkaEmitter(BaseEmitter):
+
+    def __init__(self, url, timeout=1, max_retries=5,
+                 one_emit_per_line=False):
+        BaseEmitter.__init__(self, url,
+                             timeout=timeout,
+                             max_retries=max_retries,
+                             one_emit_per_line=one_emit_per_line)
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
@@ -97,8 +98,9 @@ class KafkaEmitter(BaseEmitter):
         try:
             try:
                 child_process = multiprocessing.Process(
-                    name='kafka-emitter', target=kafka_send, args=(
-                        kurl, temp_fpath, 'graphite', topic, queue))
+                    name='kafka-emitter', target=kafka_send,
+                    args=(kurl, temp_fpath, self.one_emit_per_line,
+                          topic, queue))
                 child_process.start()
             except OSError:
                 raise

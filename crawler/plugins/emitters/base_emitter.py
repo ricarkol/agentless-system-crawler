@@ -6,10 +6,12 @@ class BaseEmitter:
     implement an emit() function given an iostream (a buffer with the features
     to emit).
     """
-    def __init__(self, url, timeout=1, max_retries=5):
+    def __init__(self, url, timeout=1, max_retries=5,
+                 one_emit_per_line=False):
         self.url = url
         self.timeout = timeout
         self.max_retries = max_retries
+        self.one_emit_per_line = one_emit_per_line
 
     def emit(self, iostream, compress=False,
              metadata={}, snapshot_num=0):
