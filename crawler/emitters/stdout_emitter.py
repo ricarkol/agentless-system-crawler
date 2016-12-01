@@ -1,5 +1,6 @@
 import cStringIO
 import gzip
+import sys
 
 try:
     from emitters.base_emitter import BaseEmitter
@@ -25,3 +26,4 @@ class StdoutEmitter(BaseEmitter):
             print tempio.getvalue()
         else:
             print "%s" % iostream.getvalue().strip()
+        sys.stdout.flush()
