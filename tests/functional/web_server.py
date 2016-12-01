@@ -13,7 +13,9 @@ Send a POST request::
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
 
+
 class S(BaseHTTPRequestHandler):
+
     def _set_headers(self):
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -25,15 +27,18 @@ class S(BaseHTTPRequestHandler):
 
     def do_HEAD(self):
         self._set_headers()
-        
+
     def do_POST(self):
         # Doesn't do anything with posted data
-        content_length = int(self.headers['Content-Length']) # <--- Gets the size of data
-        post_data = self.rfile.read(content_length) # <--- Gets the data itself
+        # <--- Gets the size of data
+        content_length = int(self.headers['Content-Length'])
+        # <--- Gets the data itself
+        post_data = self.rfile.read(content_length)
         self._set_headers()
         self.wfile.write("<html><body><h1>POST!</h1></body></html>")
-	print post_data
-        
+        print post_data
+
+
 def run(server_class=HTTPServer, handler_class=S, port=80):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)

@@ -52,7 +52,12 @@ class ContainersCrawlerTests(unittest.TestCase):
         shutil.rmtree(self.tempd)
 
     def testCrawlContainer1(self):
-        crawler = ContainersCrawler(features=['cpu', 'memory', 'interface', 'package'])
+        crawler = ContainersCrawler(
+            features=[
+                'cpu',
+                'memory',
+                'interface',
+                'package'])
         frames = list(crawler.crawl())
         output = str(frames[0])
         print output  # only printed if the test fails
@@ -137,7 +142,7 @@ class ContainersCrawlerTests(unittest.TestCase):
         f.close()
 
     def testCrawlContainerAvoidSetns(self):
-        options = {'avoid_setns':True}
+        options = {'avoid_setns': True}
         crawler = ContainersCrawler(
             features=['cpu', 'memory', 'interface', 'package'],
             options=options)

@@ -34,6 +34,7 @@ def mocked_requests_post(*args, **kwargs):
     elif args[0] == 'http://1.1.1.1/encoding_error':
         raise requests.exceptions.ChunkedEncodingError('bla')
 
+
 class MockedKafkaClient1:
 
     def __init__(self, kurl):
@@ -50,6 +51,7 @@ class RandomKafkaException(Exception):
 
 def raise_value_error(*args, **kwargs):
     raise ValueError()
+
 
 class MockProducer:
 
@@ -116,11 +118,11 @@ class EmitterTests(unittest.TestCase):
                                   compress=compress)
         frame = BaseFrame(feature_types=['os'])
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame, 0)
 
     def test_emitter_csv_simple_stdout(self):
@@ -144,11 +146,11 @@ class EmitterTests(unittest.TestCase):
                                   compress=False)
         frame = BaseFrame(feature_types=['os'])
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame, 0)
         with open('/tmp/test_emitter.0') as f:
             _output = f.readlines()
@@ -223,11 +225,11 @@ class EmitterTests(unittest.TestCase):
         frame = BaseFrame(feature_types=[])
         frame.metadata['namespace'] = 'namespace777'
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame, 0)
 
     def test_emitter_graphite_simple_stdout(self):
@@ -286,11 +288,11 @@ class EmitterTests(unittest.TestCase):
         frame = BaseFrame(feature_types=[])
         frame.metadata['namespace'] = 'namespace777'
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame)
         with open('/tmp/test_emitter.0') as f:
             _output = f.readlines()
@@ -322,11 +324,11 @@ class EmitterTests(unittest.TestCase):
         frame = BaseFrame(feature_types=[])
         frame.metadata['namespace'] = 'namespace777'
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame)
         with open('/tmp/test_emitter.0') as f:
             _output = f.readlines()
@@ -334,9 +336,10 @@ class EmitterTests(unittest.TestCase):
             print output
             assert len(_output) == 2
             assert "metadata" not in output
-            assert ('{"test3": 12345.0, "test2": 12345, "test4": 12345.0, '
-                    '"namespace": "namespace777", "test": "bla", "feature_type": '
-                    '"dummy_feature"}') in output
+            assert (
+                '{"test3": 12345.0, "test2": 12345, "test4": 12345.0, '
+                '"namespace": "namespace777", "test": "bla", "feature_type": '
+                '"dummy_feature"}') in output
 
     def test_emitter_graphite_simple_compressed_file(self):
         emitter = EmittersManager(urls=['file:///tmp/test_emitter'],
@@ -345,11 +348,11 @@ class EmitterTests(unittest.TestCase):
         frame = BaseFrame(feature_types=[])
         frame.metadata['namespace'] = 'namespace777'
         frame.add_features([("dummy_feature",
-                     {'test': 'bla',
-                      'test2': 12345,
-                      'test3': 12345.0,
-                      'test4': 12345.00000},
-                     'dummy_feature')])
+                             {'test': 'bla',
+                              'test2': 12345,
+                              'test3': 12345.0,
+                              'test4': 12345.00000},
+                             'dummy_feature')])
         emitter.emit(frame)
         with gzip.open('/tmp/test_emitter.0.gz') as f:
             _output = f.readlines()
@@ -419,11 +422,12 @@ class EmitterTests(unittest.TestCase):
         # there are no retries for encoding errors
         self.assertEqual(mock_post.call_count, 1)
 
-
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1, autospec=True)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1,
+        autospec=True)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
     def test_emitter_csv_kafka_invalid_url(
             self, mockedSleep, MockKafkaClient1, MockKafkaClient2):
@@ -436,8 +440,9 @@ class EmitterTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
     def test_emitter_kafka(
             self, mock_sleep, MockKafkaClient1, MockKafkaClient2, *args):
@@ -453,8 +458,9 @@ class EmitterTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
     def test_emitter_kafka_failed_emit(self, mock_sleep, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/badtopic')
@@ -466,10 +472,12 @@ class EmitterTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_csv_kafka_failed_emit_no_retries(self, MockSleep, MockC1, MockC2):
+    def test_emitter_csv_kafka_failed_emit_no_retries(
+            self, MockSleep, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/badtopic',
                                max_retries=0)
         iostream = cStringIO.StringIO()
@@ -481,8 +489,9 @@ class EmitterTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
     def test_emitter_csv_kafka_emit_timeout(self, mock_sleep, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/timeouttopic',
@@ -493,8 +502,9 @@ class EmitterTests(unittest.TestCase):
         with self.assertRaises(crawler.crawler_exceptions.EmitterEmitTimeout):
             emitter.emit(iostream)
 
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.multiprocessing.Process',
-                side_effect=raise_value_error)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.multiprocessing.Process',
+        side_effect=raise_value_error)
     def test_emitter_csv_kafka_failed_new_process(self, mock_process):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/topic',
                                max_retries=0)
@@ -506,8 +516,10 @@ class EmitterTests(unittest.TestCase):
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-                side_effect=MockedKafkaClient1, autospec=True)
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1,
+        autospec=True)
     def test_emitter_kafka_send(self, MockC1, MockC2):
         (temp_fd, path) = tempfile.mkstemp(prefix='emit.')
         os.close(temp_fd)  # close temporary file descriptor
