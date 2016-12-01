@@ -1,3 +1,4 @@
+
 class BaseEmitter:
     """
     Base emitter class from which emitters like FileEmitter, StdoutEmitter

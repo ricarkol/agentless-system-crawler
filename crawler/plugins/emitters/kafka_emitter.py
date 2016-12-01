@@ -1,22 +1,23 @@
 import Queue
+import logging
 import multiprocessing
 import os
 import shutil
 import tempfile
 import time
-import logging
+
 import kafka as kafka_python
 import pykafka
 
 try:
     from crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
     from crawler_exceptions import (EmitterUnsupportedFormat)
-    from emitters.base_emitter import BaseEmitter
+    from plugins.emitters.base_emitter import BaseEmitter
     from misc import NullHandler
 except ImportError:
     from crawler.crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
     from crawler.crawler_exceptions import (EmitterUnsupportedFormat)
-    from crawler.emitters.base_emitter import BaseEmitter
+    from crawler.plugins.emitters.base_emitter import BaseEmitter
     from crawler.misc import NullHandler
 
 logger = logging.getLogger('crawlutils')

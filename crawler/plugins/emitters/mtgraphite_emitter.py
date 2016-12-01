@@ -2,11 +2,11 @@ import logging
 
 try:
     from base_crawler import BaseFrame
-    from emitters.base_emitter import BaseEmitter
+    from plugins.emitters.base_emitter import BaseEmitter
     from mtgraphite import MTGraphiteClient
 except ImportError:
     from crawler.base_crawler import BaseFrame
-    from crawler.emitters.base_emitter import BaseEmitter
+    from crawler.plugins.emitters.base_emitter import BaseEmitter
     from crawler.mtgraphite import MTGraphiteClient
 
 logger = logging.getLogger('crawlutils')

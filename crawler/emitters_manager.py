@@ -6,13 +6,12 @@ import logging
 import time
 
 from base_crawler import BaseFrame
-from emitters.file_emitter import FileEmitter
-from emitters.http_emitter import HttpEmitter
-from emitters.stdout_emitter import StdoutEmitter
-from emitters.kafka_emitter import KafkaEmitter
+from plugins.emitters.file_emitter import FileEmitter
+from plugins.emitters.http_emitter import HttpEmitter
+from plugins.emitters.kafka_emitter import KafkaEmitter
+from plugins.emitters.stdout_emitter import StdoutEmitter
 from crawler_exceptions import (EmitterUnsupportedFormat,
                                 EmitterUnsupportedProtocol)
-
 
 logger = logging.getLogger('crawlutils')
 
