@@ -23,8 +23,6 @@ class Worker:
         """
         if not isinstance(crawler, BaseCrawler):
             raise TypeError('crawler is not of type BaseCrawler')
-        if emitters and not isinstance(emitters, EmittersManager):
-            raise TypeError('emitter is not of type Emitter')
         self.iter_count = 0
         self.frequency = frequency
         self.next_iteration_time = None
