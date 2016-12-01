@@ -1,5 +1,4 @@
 import time
-from emitters_manager import EmittersManager
 from base_crawler import BaseCrawler
 
 
