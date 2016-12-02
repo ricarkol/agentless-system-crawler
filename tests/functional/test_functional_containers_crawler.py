@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import pykafka
 
 # Tests for crawlers in kraken crawlers configuration.
 
@@ -28,8 +29,8 @@ class ContainersCrawlerTests(unittest.TestCase):
         ch.setFormatter(formatter)
         root.addHandler(ch)
 
-        self.docker = docker.Client(
-            base_url='unix://var/run/docker.sock', version='auto')
+        self.docker = docker.Client(base_url='unix://var/run/docker.sock',
+                                    version='auto')
         try:
             if len(self.docker.containers()) != 0:
                 raise Exception(
@@ -39,15 +40,35 @@ class ContainersCrawlerTests(unittest.TestCase):
             print ("Error connecting to docker daemon, are you in the docker"
                    "group? You need to be in the docker group.")
 
+        # start a container to be crawled
         self.docker.pull(repository='ubuntu', tag='latest')
         self.container = self.docker.create_container(
             image='ubuntu:latest', command='/bin/sleep 60')
         self.tempd = tempfile.mkdtemp(prefix='crawlertest.')
         self.docker.start(container=self.container['Id'])
 
+        # start a kakfa+zookeeper container to send data to (to test our
+        # kafka emitter)
+        # sudo docker run -p 2181:2181 -p 9092:9092
+        #   --env ADVERTISED_HOST=localhost --name kafka
+        #   --env ADVERTISED_PORT=9092 spotify/kafka
+        self.docker.pull(repository='spotify/kafka', tag='latest')
+        self.kafka_container = self.docker.create_container(
+            image='spotify/kafka', ports=[9092, 2181],
+            host_config=self.docker.create_host_config(port_bindings={
+                9092: 9092,
+                2181: 2181
+            }),
+            environment={'ADVERTISED_HOST': 'localhost',
+                         'ADVERTISED_PORT': '9092'})
+        self.docker.start(container=self.kafka_container['Id'])
+
     def tearDown(self):
         self.docker.stop(container=self.container['Id'])
         self.docker.remove_container(container=self.container['Id'])
+
+        self.docker.stop(container=self.kafka_container['Id'])
+        self.docker.remove_container(container=self.kafka_container['Id'])
 
         shutil.rmtree(self.tempd)
 
@@ -81,7 +102,7 @@ class ContainersCrawlerTests(unittest.TestCase):
                 '/usr/bin/python', mypath + '/../../crawler/crawler.py',
                 '--url', 'file://' + self.tempd + '/out/crawler',
                 '--features', 'cpu,memory,interface,package',
-                '--crawlContainers', 'ALL',
+                '--crawlContainers', self.container['Id'],
                 '--format', 'graphite',
                 '--crawlmode', 'OUTCONTAINER',
                 '--numprocesses', '1'
@@ -107,6 +128,34 @@ class ContainersCrawlerTests(unittest.TestCase):
         assert 'apt.pkgsize' in output
         f.close()
 
+    def testCrawlContainerKafka(self):
+        env = os.environ.copy()
+        mypath = os.path.dirname(os.path.realpath(__file__))
+        os.makedirs(self.tempd + '/out')
+
+        # crawler itself needs to be root
+        process = subprocess.Popen(
+            [
+                '/usr/bin/python', mypath + '/../../crawler/crawler.py',
+                '--url', 'kafka://localhost:9092/test',
+                '--features', 'os,process',
+                '--crawlContainers', self.container['Id'],
+                '--crawlmode', 'OUTCONTAINER',
+                '--numprocesses', '1'
+            ],
+            env=env)
+        stdout, stderr = process.communicate()
+        assert process.returncode == 0
+
+        print stderr
+        print stdout
+
+        kafka = pykafka.KafkaClient(hosts='localhost:9092')
+        topic = kafka.topics['test']
+        consumer = topic.get_simple_consumer()
+        message = consumer.consume()
+        assert '"cmd":"/bin/sleep 60"' in message.value
+
     def testCrawlContainer3(self):
         env = os.environ.copy()
         mypath = os.path.dirname(os.path.realpath(__file__))
@@ -118,7 +167,7 @@ class ContainersCrawlerTests(unittest.TestCase):
                 '/usr/bin/python', mypath + '/../../crawler/crawler.py',
                 '--url', 'file://' + self.tempd + '/out/crawler',
                 '--features', 'os,process',
-                '--crawlContainers', 'ALL',
+                '--crawlContainers', self.container['Id'],
                 '--crawlmode', 'OUTCONTAINER',
                 '--numprocesses', '1'
             ],
@@ -144,6 +193,7 @@ class ContainersCrawlerTests(unittest.TestCase):
     def testCrawlContainerAvoidSetns(self):
         options = {'avoid_setns': True}
         crawler = ContainersCrawler(
+            user_list=self.container['Id'],
             features=['cpu', 'memory', 'interface', 'package'],
             options=options)
         frames = list(crawler.crawl())
