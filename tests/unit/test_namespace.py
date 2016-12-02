@@ -244,9 +244,9 @@ class NamespaceTests(unittest.TestCase):
     @mock.patch('crawler.namespace.multiprocessing.Queue',
                 side_effect=MockedQueue)
     def test_run_as_another_namespace_fun_not_exiting_failure(self, *args):
-        _old_timeout = crawler.namespace.IN_CONTAINER_TIMEOUT
-        crawler.namespace.IN_CONTAINER_TIMEOUT = 0
+        _old_timeout = crawler.namespace.IN_PROCESS_TIMEOUT
+        crawler.namespace.IN_PROCESS_TIMEOUT = 0
         with self.assertRaises(crawler.crawler_exceptions.CrawlTimeoutError):
             crawler.namespace.run_as_another_namespace(
                 '1', crawler.namespace.ALL_NAMESPACES, fun_not_exiting, 1)
-        crawler.namespace.IN_CONTAINER_TIMEOUT = _old_timeout
+        crawler.namespace.IN_PROCESS_TIMEOUT = _old_timeout

@@ -22,7 +22,7 @@ except Exception as e:
 
 
 ALL_NAMESPACES = 'user pid uts ipc net mnt'.split()
-IN_CONTAINER_TIMEOUT = 30
+IN_PROCESS_TIMEOUT = 30
 
 
 def get_errno_msg():
@@ -108,12 +108,80 @@ class ProcessContext:
         close_process_namespaces(self.host_ns_fds, self.namespaces)
 
 
-def run_as_another_namespace(
+def run_as_another_namespace_bak(
     pid,
     namespaces,
     function,
     *args,
     **kwargs
+):
+    _args = (queue, _run_as_another_namespace)
+    _kwargs = {'_args': (pid, namespaces, function),
+              '_kwargs': {'_args': tuple(args),
+                          '_kwargs': dict(kwargs)}
+              }
+
+
+def run_as_another_namespace(
+        pid,
+        namespaces,
+        function,
+        *args,
+        **kwargs
+):
+    try:
+        queue = multiprocessing.Queue(2 ** 15)
+    except OSError:
+        # try again with a smaller queue
+        queue = multiprocessing.Queue(2 ** 14)
+
+    try:
+        child_process = multiprocessing.Process(
+                target=function_wrapper,
+                args=(queue, _run_as_another_namespace),
+                kwargs={'_args': (pid, namespaces, function),
+                        '_kwargs': {'_args': tuple(args),
+                                    '_kwargs': dict(kwargs)}
+                        })
+        child_process.start()
+    except Exception as exc:
+        raise
+    child_exception = None
+    try:
+        (result, child_exception) = queue.get(timeout=IN_PROCESS_TIMEOUT)
+    except Queue.Empty:
+        child_exception = CrawlTimeoutError()
+    except Exception:
+        result = None
+
+    if child_exception:
+        result = None
+
+    child_process.join(IN_PROCESS_TIMEOUT)
+
+    # The join failed and the process might still be alive
+
+    if child_process.is_alive():
+        errmsg = ('Timed out waiting for process %d to exit.' %
+                  child_process.pid)
+        queue.close()
+        os.kill(child_process.pid, 9)
+        logger.error(errmsg)
+        raise CrawlTimeoutError(errmsg)
+
+    if result is None:
+        if child_exception:
+            raise child_exception
+        raise CrawlError('Unknown crawl error.')
+    return result
+
+
+def _run_as_another_namespace(
+        pid,
+        namespaces,
+        function,
+        _args=(),
+        _kwargs={}
 ):
     hack_to_pre_load_modules()
 
@@ -126,14 +194,14 @@ def run_as_another_namespace(
         queue = multiprocessing.Queue(2 ** 14)
 
     child_process = multiprocessing.Process(
-        name='crawler-%s' %
-        pid, target=function_wrapper, args=(
-            queue, function, args), kwargs=kwargs)
+        name='crawler-%s' % pid,
+        target=function_wrapper, args=(queue, function),
+        kwargs={'_args': tuple(_args), '_kwargs': dict(_kwargs)})
     child_process.start()
 
     child_exception = None
     try:
-        (result, child_exception) = queue.get(timeout=IN_CONTAINER_TIMEOUT)
+        (result, child_exception) = queue.get(timeout=IN_PROCESS_TIMEOUT)
     except Queue.Empty:
         child_exception = CrawlTimeoutError()
     except Exception:
@@ -142,7 +210,7 @@ def run_as_another_namespace(
     if child_exception:
         result = None
 
-    child_process.join(IN_CONTAINER_TIMEOUT)
+    child_process.join(IN_PROCESS_TIMEOUT)
 
     # The join failed and the process might still be alive
 
@@ -167,8 +235,8 @@ def run_as_another_namespace(
 def function_wrapper(
     queue,
     function,
-    *args,
-    **kwargs
+    _args=(),
+    _kwargs={}
 ):
 
     # Die if the parent dies
@@ -184,8 +252,7 @@ def function_wrapper(
 
     result = None
     try:
-        args = args[0]
-        result = function(*args)
+        result = function(*_args, **_kwargs)
 
         # if res is a generator (i.e. function uses yield)
 

@@ -13,7 +13,7 @@ all_namespaces = ["user", "pid", "uts", "ipc", "net", "mnt"]
 
 
 # Functions used to test the library
-def func(arg1=None, arg2=None):
+def func(arg1, arg2=None):
     return "test %s %s" % (arg1, arg2)
 
 
@@ -25,7 +25,8 @@ class FooError(Exception):
     pass
 
 
-def func_crash(arg):
+def func_crash(arg, *args, **kwargs):
+    print locals()
     raise FooError("oops")
 
 
@@ -84,14 +85,15 @@ class NamespaceLibTests(unittest.TestCase):
         except FooError:
             # we shuld get a FooError exception
             pass  # all good
-        except Exception:
+        except Exception as exc:
+            print exc
             assert False
 
     # TODO: why it fails here and not at old/test_namespace.py?
     def _test_run_as_another_namespace_infinite_loop_function(self):
         try:
             run_as_another_namespace(
-                self.pid, all_namespaces, func_infinite_loop, "arg")
+                self.pid, all_namespaces, func_infinite_loop, _args=["arg"])
         except CrawlTimeoutError:
             # we should get a TimeoutError exception
             pass  # all good
