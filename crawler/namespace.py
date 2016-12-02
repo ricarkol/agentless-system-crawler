@@ -108,27 +108,19 @@ class ProcessContext:
         close_process_namespaces(self.host_ns_fds, self.namespaces)
 
 
-def run_as_another_namespace_bak(
+def run_as_another_namespace(
     pid,
     namespaces,
     function,
     *args,
     **kwargs
 ):
-    _args = (queue, _run_as_another_namespace)
-    _kwargs = {'_args': (pid, namespaces, function),
-              '_kwargs': {'_args': tuple(args),
-                          '_kwargs': dict(kwargs)}
-              }
+    _args = (pid, namespaces, function)
+    _kwargs = {'_args': tuple(args), '_kwargs': dict(kwargs)}
+    return run_as_another_process(_run_as_another_namespace, _args, _kwargs)
 
 
-def run_as_another_namespace(
-        pid,
-        namespaces,
-        function,
-        *args,
-        **kwargs
-):
+def run_as_another_process(function, _args=(), _kwargs={}):
     try:
         queue = multiprocessing.Queue(2 ** 15)
     except OSError:
@@ -138,11 +130,8 @@ def run_as_another_namespace(
     try:
         child_process = multiprocessing.Process(
                 target=function_wrapper,
-                args=(queue, _run_as_another_namespace),
-                kwargs={'_args': (pid, namespaces, function),
-                        '_kwargs': {'_args': tuple(args),
-                                    '_kwargs': dict(kwargs)}
-                        })
+                args=(queue, function),
+                kwargs={'_args': _args, '_kwargs': _kwargs})
         child_process.start()
     except Exception as exc:
         raise
