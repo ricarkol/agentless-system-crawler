@@ -13,9 +13,14 @@ all_namespaces = ["user", "pid", "uts", "ipc", "net", "mnt"]
 
 
 # Functions used to test the library
-def func(arg1, arg2=None):
+def func_args(arg1, arg2):
     return "test %s %s" % (arg1, arg2)
 
+def func_kwargs(arg1='a', arg2='b'):
+    return "test %s %s" % (arg1, arg2)
+
+def func_mixed_args(arg1, arg2='b'):
+    return "test %s %s" % (arg1, arg2)
 
 def func_no_args(arg="default"):
     return "test %s" % (arg)
@@ -67,9 +72,21 @@ class NamespaceLibTests(unittest.TestCase):
 
         shutil.rmtree(self.tempd)
 
-    def test_run_as_another_namespace_simple_function(self):
+    def test_run_as_another_namespace_function_args(self):
         res = run_as_another_namespace(
-            self.pid, all_namespaces, func, "arg1", "arg2")
+            self.pid, all_namespaces, func_args, "arg1", "arg2")
+        assert res == "test arg1 arg2"
+        print sys._getframe().f_code.co_name, 1
+
+    def test_run_as_another_namespace_function_kwargs(self):
+        res = run_as_another_namespace(
+            self.pid, all_namespaces, func_kwargs, arg1="arg1", arg2="arg2")
+        assert res == "test arg1 arg2"
+        print sys._getframe().f_code.co_name, 1
+
+    def test_run_as_another_namespace_function_mixed_args(self):
+        res = run_as_another_namespace(
+            self.pid, all_namespaces, func_mixed_args, "arg1", arg2="arg2")
         assert res == "test arg1 arg2"
         print sys._getframe().f_code.co_name, 1
 
@@ -79,26 +96,14 @@ class NamespaceLibTests(unittest.TestCase):
         print sys._getframe().f_code.co_name, 1
 
     def test_run_as_another_namespace_crashing_function(self):
-        try:
+        with self.assertRaises(FooError):
             run_as_another_namespace(
                 self.pid, all_namespaces, func_crash, "arg")
-        except FooError:
-            # we shuld get a FooError exception
-            pass  # all good
-        except Exception as exc:
-            print exc
-            assert False
 
-    # TODO: why it fails here and not at old/test_namespace.py?
-    def _test_run_as_another_namespace_infinite_loop_function(self):
-        try:
+    def test_run_as_another_namespace_infinite_loop_function(self):
+        with self.assertRaises(CrawlTimeoutError):
             run_as_another_namespace(
-                self.pid, all_namespaces, func_infinite_loop, _args=["arg"])
-        except CrawlTimeoutError:
-            # we should get a TimeoutError exception
-            pass  # all good
-        except Exception:
-            assert False
+                self.pid, all_namespaces, func_infinite_loop, "arg")
 
     if __name__ == '__main__':
         logging.basicConfig(

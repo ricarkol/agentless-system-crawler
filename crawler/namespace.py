@@ -115,6 +115,8 @@ def run_as_another_namespace(
     *args,
     **kwargs
 ):
+    hack_to_pre_load_modules()
+
     _args = (pid, namespaces, function)
     _kwargs = {'_args': tuple(args), '_kwargs': dict(kwargs)}
     return run_as_another_process(_run_as_another_namespace, _args, _kwargs)
@@ -129,7 +131,7 @@ def run_as_another_process(function, _args=(), _kwargs={}):
 
     try:
         child_process = multiprocessing.Process(
-                target=function_wrapper,
+                target=_function_wrapper,
                 args=(queue, function),
                 kwargs={'_args': _args, '_kwargs': _kwargs})
         child_process.start()
@@ -165,68 +167,22 @@ def run_as_another_process(function, _args=(), _kwargs={}):
     return result
 
 
-def _run_as_another_namespace(
-        pid,
-        namespaces,
-        function,
-        _args=(),
-        _kwargs={}
-):
-    hack_to_pre_load_modules()
-
-    context = ProcessContext(pid, namespaces)
-    context.attach()
-    try:
-        queue = multiprocessing.Queue(2 ** 15)
-    except OSError:
-        # try again with a smaller queue
-        queue = multiprocessing.Queue(2 ** 14)
-
-    child_process = multiprocessing.Process(
-        name='crawler-%s' % pid,
-        target=function_wrapper, args=(queue, function),
-        kwargs={'_args': tuple(_args), '_kwargs': dict(_kwargs)})
-    child_process.start()
-
-    child_exception = None
-    try:
-        (result, child_exception) = queue.get(timeout=IN_PROCESS_TIMEOUT)
-    except Queue.Empty:
-        child_exception = CrawlTimeoutError()
-    except Exception:
-        result = None
-
-    if child_exception:
-        result = None
-
-    child_process.join(IN_PROCESS_TIMEOUT)
-
-    # The join failed and the process might still be alive
-
-    if child_process.is_alive():
-        errmsg = ('Timed out waiting for process %d to exit.' %
-                  child_process.pid)
-        queue.close()
-        os.kill(child_process.pid, 9)
-        context.detach()
-        logger.error(errmsg)
-        raise CrawlTimeoutError(errmsg)
-
-    context.detach()
-
-    if result is None:
-        if child_exception:
-            raise child_exception
-        raise CrawlError('Unknown crawl error.')
-    return result
-
-
-def function_wrapper(
+def _function_wrapper(
     queue,
     function,
     _args=(),
     _kwargs={}
 ):
+    """
+    Function to be used by run_as_another_process to wrap `function`
+    and call it with _args and _kwargs. `queue` is used to get the result
+    and any exception raised.
+    :param queue:
+    :param function:
+    :param _args:
+    :param _kwargs:
+    :return:
+    """
 
     # Die if the parent dies
     PR_SET_PDEATHSIG = 1
@@ -239,7 +195,6 @@ def function_wrapper(
 
     signal.signal(signal.SIGHUP, signal_handler_sighup)
 
-    result = None
     try:
         result = function(*_args, **_kwargs)
 
@@ -254,6 +209,22 @@ def function_wrapper(
         queue.put((None, e))
         queue.close()
         sys.exit(1)
+
+
+def _run_as_another_namespace(
+        pid,
+        namespaces,
+        function,
+        _args=(),
+        _kwargs={}
+):
+
+    context = ProcessContext(pid, namespaces)
+    context.attach()
+    try:
+        return run_as_another_process(function, _args, _kwargs)
+    finally:
+        context.detach()
 
 
 def hack_to_pre_load_modules():
