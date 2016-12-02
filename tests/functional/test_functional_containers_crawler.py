@@ -11,6 +11,8 @@ import pykafka
 # Tests for crawlers in kraken crawlers configuration.
 
 from crawler.containers_crawler import ContainersCrawler
+from crawler.worker import Worker
+from crawler.emitters_manager import EmittersManager
 
 import logging
 
@@ -21,9 +23,9 @@ class ContainersCrawlerTests(unittest.TestCase):
 
     def setUp(self):
         root = logging.getLogger()
-        root.setLevel(logging.DEBUG)
+        root.setLevel(logging.INFO)
         ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
+        ch.setLevel(logging.INFO)
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         ch.setFormatter(formatter)
@@ -40,18 +42,13 @@ class ContainersCrawlerTests(unittest.TestCase):
             print ("Error connecting to docker daemon, are you in the docker"
                    "group? You need to be in the docker group.")
 
-        # start a container to be crawled
-        self.docker.pull(repository='ubuntu', tag='latest')
-        self.container = self.docker.create_container(
-            image='ubuntu:latest', command='/bin/sleep 60')
-        self.tempd = tempfile.mkdtemp(prefix='crawlertest.')
-        self.docker.start(container=self.container['Id'])
+        self.start_crawled_container()
 
         # start a kakfa+zookeeper container to send data to (to test our
         # kafka emitter)
-        # sudo docker run -p 2181:2181 -p 9092:9092
-        #   --env ADVERTISED_HOST=localhost --name kafka
-        #   --env ADVERTISED_PORT=9092 spotify/kafka
+        #self.extract_kafka_container()
+
+    def extract_kafka_container(self):
         self.docker.pull(repository='spotify/kafka', tag='latest')
         self.kafka_container = self.docker.create_container(
             image='spotify/kafka', ports=[9092, 2181],
@@ -63,14 +60,27 @@ class ContainersCrawlerTests(unittest.TestCase):
                          'ADVERTISED_PORT': '9092'})
         self.docker.start(container=self.kafka_container['Id'])
 
-    def tearDown(self):
-        self.docker.stop(container=self.container['Id'])
-        self.docker.remove_container(container=self.container['Id'])
+    def start_crawled_container(self):
+        # start a container to be crawled
+        self.docker.pull(repository='ubuntu', tag='latest')
+        self.container = self.docker.create_container(
+            image='ubuntu:latest', command='/bin/sleep 60')
+        self.tempd = tempfile.mkdtemp(prefix='crawlertest.')
+        self.docker.start(container=self.container['Id'])
 
+    def tearDown(self):
+        self.remove_crawled_container()
+        #self.remove_kafka_container()
+
+        shutil.rmtree(self.tempd)
+
+    def remove_kafka_container(self):
         self.docker.stop(container=self.kafka_container['Id'])
         self.docker.remove_container(container=self.kafka_container['Id'])
 
-        shutil.rmtree(self.tempd)
+    def remove_crawled_container(self):
+        self.docker.stop(container=self.container['Id'])
+        self.docker.remove_container(container=self.container['Id'])
 
     def testCrawlContainer1(self):
         crawler = ContainersCrawler(
@@ -128,7 +138,7 @@ class ContainersCrawlerTests(unittest.TestCase):
         assert 'apt.pkgsize' in output
         f.close()
 
-    def testCrawlContainerKafka(self):
+    def _testCrawlContainerKafka(self):
         env = os.environ.copy()
         mypath = os.path.dirname(os.path.realpath(__file__))
         os.makedirs(self.tempd + '/out')
@@ -155,6 +165,26 @@ class ContainersCrawlerTests(unittest.TestCase):
         consumer = topic.get_simple_consumer()
         message = consumer.consume()
         assert '"cmd":"/bin/sleep 60"' in message.value
+
+    def _testCrawlContainerKafka2(self):
+
+        emitters = EmittersManager(urls=['kafka://localhost:9092/test'])
+        crawler = ContainersCrawler(
+            features=['os', 'process'],
+            user_list=self.container['Id'])
+        worker = Worker(emitters, -1, crawler)
+
+        worker.iterate()
+        kafka = pykafka.KafkaClient(hosts='localhost:9092')
+        topic = kafka.topics['test']
+        consumer = topic.get_simple_consumer()
+        message = consumer.consume()
+        assert '"cmd":"/bin/sleep 60"' in message.value
+
+        for i in range(1, 5):
+            worker.iterate()
+            message = consumer.consume()
+            assert '"cmd":"/bin/sleep 60"' in message.value
 
     def testCrawlContainer3(self):
         env = os.environ.copy()
