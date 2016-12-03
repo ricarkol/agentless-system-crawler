@@ -10,7 +10,7 @@ import signal
 import ctypes
 from crawler_exceptions import (CrawlTimeoutError,
                                 CrawlError,
-                                NamespaceFailedMntSetns)
+                                NamespaceFailedSetns)
 
 logger = logging.getLogger('crawlutils')
 
@@ -223,8 +223,7 @@ def open_process_namespaces(pid, namespace_fd, namespaces):
             error_msg = 'Opening the %s namespace file failed: %s' \
                 % (ct_ns, errno_msg)
             logger.warning(error_msg)
-            if ct_ns == 'mnt':
-                raise NamespaceFailedMntSetns(error_msg)
+            raise NamespaceFailedSetns(error_msg)
 
 
 def close_process_namespaces(namespace_fd, namespaces):
@@ -254,4 +253,4 @@ def attach_to_process_namespaces(namespace_fd, ct_namespaces):
             logger.warning(error_msg)
             if ct_ns == 'user':
                 continue
-            raise NamespaceFailedMntSetns(error_msg)
+            raise NamespaceFailedSetns(error_msg)

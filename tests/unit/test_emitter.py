@@ -443,9 +443,6 @@ class EmitterTests(unittest.TestCase):
             iostream.write('namespace777.dummy-feature.test2 12345 14805\r\n')
             emitter.emit(iostream)
 
-    @mock.patch(
-        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-        side_effect=MockedKafkaClient1)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.call_with_retries',
                 side_effect=mock_call_with_retries)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
