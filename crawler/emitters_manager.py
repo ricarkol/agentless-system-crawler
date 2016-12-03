@@ -1,106 +1,39 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import cStringIO
-import json
 import logging
-import time
 import urlparse
 
 from base_crawler import BaseFrame
+from formatters import (write_in_csv_format,
+                        write_in_json_format,
+                        write_in_graphite_format)
+from crawler_exceptions import (EmitterUnsupportedFormat,
+                                EmitterUnsupportedProtocol)
 from plugins.emitters.file_emitter import FileEmitter
 from plugins.emitters.http_emitter import HttpEmitter
 from plugins.emitters.kafka_emitter import KafkaEmitter
-from plugins.emitters.stdout_emitter import StdoutEmitter
 from plugins.emitters.mtgraphite_emitter import MtGraphiteEmitter
-from crawler_exceptions import (EmitterUnsupportedFormat,
-                                EmitterUnsupportedProtocol)
+from plugins.emitters.stdout_emitter import StdoutEmitter
 
 logger = logging.getLogger('crawlutils')
 
 
-def write_in_csv_format(iostream, frame):
-    iostream.write('%s\t%s\t%s\n' %
-                   ('metadata', json.dumps('metadata'),
-                    json.dumps(frame.metadata, separators=(',', ':'))))
-    for (key, val, feature_type) in frame.data:
-        if not isinstance(val, dict):
-            val = val._asdict()
-        iostream.write('%s\t%s\t%s\n' % (
-            feature_type, json.dumps(key),
-            json.dumps(val, separators=(',', ':'))))
-
-
-def write_in_json_format(iostream, frame):
-    iostream.write('%s\n' % json.dumps(frame.metadata))
-    for (key, val, feature_type) in frame.data:
-        if not isinstance(val, dict):
-            val = val._asdict()
-        val['feature_type'] = feature_type
-        val['namespace'] = frame.metadata.get('namespace', '')
-        iostream.write('%s\n' % json.dumps(val))
-
-
-def write_in_graphite_format(iostream, frame):
-    namespace = frame.metadata.get('namespace', '')
-    for (key, val, feature_type) in frame.data:
-        if not isinstance(val, dict):
-            val = val._asdict()
-        write_feature_in_graphite_format(iostream, namespace,
-                                         key, val, feature_type)
-
-
-def write_feature_in_graphite_format(iostream, namespace,
-                                     feature_key, feature_val,
-                                     feature_type):
-    """
-    Write a feature in graphite format into iostream.
-
-    :param namespace:
-    :param feature_type:
-    :param feature_key:
-    :param feature_val:
-    :param iostream: a CStringIO used to buffer the formatted features.
-    :return:
-    """
-    timestamp = time.time()
-    items = feature_val.items()
-    namespace = namespace.replace('/', '.')
-
-    for (metric, value) in items:
-        try:
-            # Only emit values that we can cast as floats
-            value = float(value)
-        except (TypeError, ValueError):
-            continue
-
-        metric = metric.replace('(', '_').replace(')', '')
-        metric = metric.replace(' ', '_').replace('-', '_')
-        metric = metric.replace('/', '_').replace('\\', '_')
-
-        feature_key = feature_key.replace('_', '-')
-        if 'cpu' in feature_key or 'memory' in feature_key:
-            metric = metric.replace('_', '-')
-        if 'if' in metric:
-            metric = metric.replace('_tx', '.tx')
-            metric = metric.replace('_rx', '.rx')
-        if feature_key == 'load':
-            feature_key = 'load.load'
-        feature_key = feature_key.replace('/', '$')
-
-        tmp_message = '%s.%s.%s %f %d\r\n' % (namespace, feature_key,
-                                              metric, value, timestamp)
-        iostream.write(tmp_message)
-
-
 class EmittersManager:
     """
-    Class that stores a list of emitter objects, one for each url. This class
-    should be instantiated at the beginNing of the program, and emit() should
-    be called for each frame. emit() calls the emit() function of each emitter
-    object.  This class can also emit() frames in different formats, for
-    example in json format, each feature in a frame is a json.
+    Class that manages a list of formatter and emitter objects, one per url.
+    The formatter takes a frame and writes it into an iostream, and the
+    emitter takes the iostream and emits it.
+
+    This class should be instantiated at the beginning of the program,
+    and emit() should be called for each frame.
     """
 
+    """
+    This maps url-protocols to emitters and formatters. For example,
+    when writing to stdout in csv format, this should use the
+    write_in_csv_format formatter and the StdoutEmitter.
+    """
     proto_to_class = {
         'stdout': {'csv': {'class': StdoutEmitter, 'per_line': False,
                            'formatter': write_in_csv_format},
@@ -137,11 +70,11 @@ class EmittersManager:
     }
 
     def __init__(
-        self,
-        urls,
-        format='csv',
-        compress=False,
-        extra_metadata={}
+            self,
+            urls,
+            format='csv',
+            compress=False,
+            extra_metadata={}
     ):
         """
         Initializes a list of emitter objects; also stores all the args.
@@ -162,6 +95,14 @@ class EmittersManager:
             self.allocate_emitter(url)
 
     def allocate_emitter(self, url):
+        """
+        Allocate a formatter and an emitter object based on the
+        self.proto_to_class mapping. The formatter takes a frame and writes
+        it into an iostream. The emitter takes the iostream and emits.
+
+        :param url:
+        :return:
+        """
         parsed = urlparse.urlparse(url)
         proto = parsed.scheme
         if proto not in self.proto_to_class:
@@ -171,7 +112,8 @@ class EmittersManager:
         emitter_class = self.proto_to_class[proto][self.format]['class']
         emit_per_line = self.proto_to_class[proto][self.format]['per_line']
         emitter = emitter_class(url, emit_per_line=emit_per_line)
-        self.emitters.append(emitter)
+        formatter = self.proto_to_class[proto][self.format]['formatter']
+        self.emitters.append((formatter, emitter))
 
     def emit(self, frame, snapshot_num=0):
         """
@@ -190,15 +132,11 @@ class EmittersManager:
 
         iostream = cStringIO.StringIO()
 
-        if self.format == 'csv':
-            write_in_csv_format(iostream, frame)
-        elif self.format == 'json':
-            write_in_json_format(iostream, frame)
-        elif self.format == 'graphite':
-            write_in_graphite_format(iostream, frame)
-
         # Pass iostream to the emitters so they can sent its content to their
         # respective url
-        for emitter in self.emitters:
+        for formatter, emitter in self.emitters:
+            # this writes the frame metadata and data into iostream
+            formatter(iostream, frame)
+            # this emits the iostream data
             emitter.emit(iostream, self.compress,
                          metadata, snapshot_num)
