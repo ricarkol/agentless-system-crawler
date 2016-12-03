@@ -103,10 +103,12 @@ class EmittersManager:
 
         iostream = cStringIO.StringIO()
 
-        # write all features to iostream
-        self.write_metadata(iostream, metadata)
-        for (key, val, feature_type) in frame.data:
-            self.write_feature(key, val, feature_type, iostream, metadata)
+        if self.format == 'csv':
+            self.write_in_csv_format(iostream, frame)
+        elif self.format == 'json':
+            self.write_in_json_format(iostream, frame)
+        elif self.format == 'graphite':
+            self.write_in_graphite_format(iostream, frame)
 
         # Pass iostream to the emitters so they can sent its content to their
         # respective url
@@ -114,59 +116,37 @@ class EmittersManager:
             emitter.emit(iostream, self.compress,
                          metadata, snapshot_num)
 
-    def write_feature(
-        self,
-        feature_key,
-        feature_val,
-        feature_type=None,
-        iostream=None,
-        metadata={},
-    ):
-        """
-        Write feature_key, feature_val, feature_type into iostream using the
-        format in self.format.
+    def write_in_csv_format(self, iostream, frame):
+        iostream.write('%s\t%s\t%s\n' %
+                       ('metadata', json.dumps('metadata'),
+                        json.dumps(frame.metadata, separators=(',', ':'))))
+        for (key, val, feature_type) in frame.data:
+            if not isinstance(val, dict):
+                val = val._asdict()
+            iostream.write('%s\t%s\t%s\n' % (
+                feature_type, json.dumps(key),
+                json.dumps(val, separators=(',', ':'))))
 
-        :param feature_key:
-        :param feature_val:
-        :param feature_type:
-        :param iostream: a CStringIO used to buffer the formatted features.
-        :param metadata: metadata dictionary of the Frame that has this
-        feature being emitted.
-        :return: None
-        """
-        if not isinstance(feature_val, dict):
-            feature_val = feature_val._asdict()
+    def write_in_json_format(self, iostream, frame):
+        iostream.write('%s\n' % json.dumps(frame.metadata))
+        for (key, val, feature_type) in frame.data:
+            if not isinstance(val, dict):
+                val = val._asdict()
+            val['feature_type'] = feature_type
+            val['namespace'] = frame.metadata.get('namespace', '')
+            iostream.write('%s\n' % json.dumps(val))
 
-        namespace = metadata.get('namespace', '')
+    def write_in_graphite_format(self, iostream, frame):
+        namespace = frame.metadata.get('namespace', '')
+        for (key, val, feature_type) in frame.data:
+            if not isinstance(val, dict):
+                val = val._asdict()
+            self.write_feature_in_graphite_format(iostream, namespace,
+                                                  key, val, feature_type)
 
-        if self.format == 'csv':
-            self.write_in_csv_format(iostream, namespace, feature_key,
-                                     feature_val, feature_type)
-        elif self.format == 'json':
-            self.write_in_json_format(iostream, namespace, feature_key,
-                                      feature_val, feature_type)
-        elif self.format == 'graphite':
-            self.write_in_graphite_format(iostream, namespace, feature_key,
-                                          feature_val, feature_type)
-        else:
-            raise EmitterUnsupportedFormat('Not supported: %s' % self.format)
-
-    def write_in_csv_format(self, iostream, namespace, feature_key,
-                            feature_val, feature_type):
-        iostream.write('%s\t%s\t%s\n' % (
-            feature_type,
-            json.dumps(feature_key),
-            json.dumps(feature_val, separators=(',', ':'))))
-
-    def write_in_json_format(self, iostream, namespace, feature_key,
-                             feature_val, feature_type):
-        feature_val['feature_type'] = feature_type
-        feature_val['feature_key'] = feature_key
-        feature_val['namespace'] = namespace
-        iostream.write('%s\n' % json.dumps(feature_val))
-
-    def write_in_graphite_format(self, iostream, namespace, feature_key,
-                                 feature_val, feature_type):
+    def write_feature_in_graphite_format(self, iostream, namespace,
+                                         feature_key, feature_val,
+                                         feature_type):
         """
         Write a feature in graphite format into iostream.
 
@@ -205,28 +185,3 @@ class EmittersManager:
             tmp_message = '%s.%s.%s %f %d\r\n' % (namespace, feature_key,
                                                   metric, value, timestamp)
             iostream.write(tmp_message)
-
-    def write_metadata(self, iostream, metadata):
-        """
-        Writes the metadata dictionary as a string into iostream.
-
-        :param iostream: a CStringIO used to buffer the formatted features.
-        :param metadata:
-        :return:
-        """
-        # Update timestamp to the actual emit time
-        metadata['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S%z')
-        if self.format == 'csv':
-            iostream.write(
-                '%s\t%s\t%s\n' %
-                ('metadata',
-                 json.dumps('metadata'),
-                    json.dumps(
-                     metadata,
-                     separators=(
-                         ',',
-                         ':'))))
-        if self.format == 'json':
-            iostream.write('%s\n' % json.dumps(metadata))
-        # graphite format does not have a metadata feature as the namespace
-        # is added at the beginning of every feature string.

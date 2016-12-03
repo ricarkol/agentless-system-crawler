@@ -15,7 +15,7 @@ class BaseFrame:
         self.data = []
         self.metadata = {}
         self.metadata['features'] = ','.join(map(str, feature_types))
-        self.metadata['timestamp'] = int(time.time())
+        self.metadata['timestamp'] = time.strftime('%Y-%m-%dT%H:%M:%S%z')
         self.metadata['uuid'] = str(uuid.uuid4())
         self.num_features = 0
 
