@@ -444,12 +444,12 @@ class EmitterTests(unittest.TestCase):
             emitter.emit(iostream)
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.call_with_retries',
-                side_effect=mock_call_with_retries)
+                side_effect=mock_call_with_retries, autospec=True)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
-        side_effect=MockedKafkaClient1)
+        side_effect=MockedKafkaClient1, autospec=True)
     def _test_emitter_kafka(
             self, MockKafkaClient1, MockKafkaClient2, *args):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/topic1')
