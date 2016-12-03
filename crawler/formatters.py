@@ -7,7 +7,7 @@ def write_in_csv_format(iostream, frame):
     Writes frame data and metadata into iostream in csv format.
 
     :param iostream: a CStringIO used to buffer the formatted features.
-    :param frame: the feature to write into the iostream
+    :param frame: a BaseFrame object to be written into iostream
     :return: None
     """
     iostream.write('%s\t%s\t%s\n' %
@@ -26,7 +26,7 @@ def write_in_json_format(iostream, frame):
     Writes frame data and metadata into iostream in json format.
 
     :param iostream: a CStringIO used to buffer the formatted features.
-    :param frame: the feature to write into the iostream
+    :param frame: a BaseFrame object to be written into iostream
     :return: None
     """
     iostream.write('%s\n' % json.dumps(frame.metadata))
@@ -43,7 +43,7 @@ def write_in_graphite_format(iostream, frame):
     Writes frame data and metadata into iostream in graphite format.
 
     :param iostream: a CStringIO used to buffer the formatted features.
-    :param frame: the feature to write into the iostream
+    :param frame: a BaseFrame object to be written into iostream
     :return: None
     """
     namespace = frame.metadata.get('namespace', '')
@@ -65,7 +65,7 @@ def write_feature_in_graphite_format(iostream, namespace,
     :param feature_key:
     :param feature_val:
     :param iostream: a CStringIO used to buffer the formatted features.
-    :return:
+    :return: None
     """
     timestamp = time.time()
     items = feature_val.items()
