@@ -240,7 +240,6 @@ def close_process_namespaces(namespace_fd, namespaces):
 
 def attach_to_process_namespaces(namespace_fd, ct_namespaces):
     for ct_ns in ct_namespaces:
-        print 'trying %s' % ct_ns
         if hasattr(get_libc(), 'setns'):
             r = get_libc().setns(namespace_fd[ct_ns], 0)
         else:

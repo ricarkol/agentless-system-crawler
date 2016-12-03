@@ -8,6 +8,8 @@ import subprocess
 import psutil
 import logging
 import logging.handlers
+import time
+import random
 
 # Additional modules
 
@@ -201,3 +203,19 @@ def btrfs_list_subvolumes(path):
             raise RuntimeError('Expecting the output of `btrfs subvolume` to'
                                ' have 9 columns. Received this: %s' % line)
         yield submodule
+
+
+def call_with_retries(function, max_retries=10,
+                      exception_type=Exception,
+                      _args=(), _kwargs={}):
+    retries = 0
+    last_exc = None
+    while retries <= max_retries:
+        try:
+            return function(*_args, **_kwargs)
+        except exception_type as exc:
+            retries += 1
+            wait = 2.0 ** retries * 0.1 + (random.randint(0, 1000) / 1000)
+            time.sleep(wait)
+            last_exc = exc
+    raise RuntimeError('Timed out calling %s: %s' % str(function, last_exc))

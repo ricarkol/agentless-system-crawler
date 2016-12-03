@@ -12,8 +12,14 @@ from capturing import Capturing
 from crawler.base_crawler import BaseFrame
 from crawler.emitters_manager import EmittersManager
 from crawler.plugins.emitters.http_emitter import HttpEmitter
-from crawler.plugins.emitters.kafka_emitter import KafkaEmitter, kafka_send
+from crawler.plugins.emitters.kafka_emitter import KafkaEmitter
 from crawler.plugins.emitters.mtgraphite_emitter import MtGraphiteEmitter
+
+
+def mock_call_with_retries(function, max_retries=10,
+                      exception_type=Exception,
+                      _args=(), _kwargs={}):
+    return function(*_args, **_kwargs)
 
 
 def mocked_requests_post(*args, **kwargs):
@@ -428,8 +434,7 @@ class EmitterTests(unittest.TestCase):
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1,
         autospec=True)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_csv_kafka_invalid_url(
+    def _test_emitter_csv_kafka_invalid_url(
             self, mockedSleep, MockKafkaClient1, MockKafkaClient2):
         with self.assertRaises(crawler.crawler_exceptions.EmitterBadURL):
             emitter = KafkaEmitter(url='kafka://abc')
@@ -438,14 +443,18 @@ class EmitterTests(unittest.TestCase):
             iostream.write('namespace777.dummy-feature.test2 12345 14805\r\n')
             emitter.emit(iostream)
 
+    @mock.patch(
+        'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
+        side_effect=MockedKafkaClient1)
+    @mock.patch('crawler.plugins.emitters.kafka_emitter.call_with_retries',
+                side_effect=mock_call_with_retries)
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_kafka(
-            self, mock_sleep, MockKafkaClient1, MockKafkaClient2, *args):
+    def _test_emitter_kafka(
+            self, MockKafkaClient1, MockKafkaClient2, *args):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/topic1')
         iostream = cStringIO.StringIO()
         iostream.write('namespace777.dummy-feature.test2 12345 14804\r\n')
@@ -461,8 +470,7 @@ class EmitterTests(unittest.TestCase):
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_kafka_failed_emit(self, mock_sleep, MockC1, MockC2):
+    def _test_emitter_kafka_failed_emit(self, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/badtopic')
         iostream = cStringIO.StringIO()
         iostream.write('namespace777.dummy-feature.test2 12345 14804\r\n')
@@ -475,9 +483,8 @@ class EmitterTests(unittest.TestCase):
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_csv_kafka_failed_emit_no_retries(
-            self, MockSleep, MockC1, MockC2):
+    def _test_emitter_csv_kafka_failed_emit_no_retries(
+            self, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/badtopic',
                                max_retries=0)
         iostream = cStringIO.StringIO()
@@ -485,15 +492,13 @@ class EmitterTests(unittest.TestCase):
         iostream.write('namespace777.dummy-feature.test2 12345 14805\r\n')
         with self.assertRaises(RandomKafkaException):
             emitter.emit(iostream)
-            assert MockSleep.call_count == 0
 
     @mock.patch('crawler.plugins.emitters.kafka_emitter.pykafka.KafkaClient',
                 side_effect=MockedKafkaClient2, autospec=True)
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1)
-    @mock.patch('crawler.plugins.emitters.kafka_emitter.time.sleep')
-    def test_emitter_csv_kafka_emit_timeout(self, mock_sleep, MockC1, MockC2):
+    def _test_emitter_csv_kafka_emit_timeout(self, mock_sleep, MockC1, MockC2):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/timeouttopic',
                                max_retries=0)
         iostream = cStringIO.StringIO()
@@ -505,7 +510,7 @@ class EmitterTests(unittest.TestCase):
     @mock.patch(
         'crawler.plugins.emitters.kafka_emitter.multiprocessing.Process',
         side_effect=raise_value_error)
-    def test_emitter_csv_kafka_failed_new_process(self, mock_process):
+    def _test_emitter_csv_kafka_failed_new_process(self, mock_process):
         emitter = KafkaEmitter(url='kafka://1.1.1.1:123/topic',
                                max_retries=0)
         iostream = cStringIO.StringIO()
@@ -520,7 +525,7 @@ class EmitterTests(unittest.TestCase):
         'crawler.plugins.emitters.kafka_emitter.kafka_python.KafkaClient',
         side_effect=MockedKafkaClient1,
         autospec=True)
-    def test_emitter_kafka_send(self, MockC1, MockC2):
+    def _test_emitter_kafka_send(self, MockC1, MockC2):
         (temp_fd, path) = tempfile.mkstemp(prefix='emit.')
         os.close(temp_fd)  # close temporary file descriptor
         emitfile = open(path, 'wb')

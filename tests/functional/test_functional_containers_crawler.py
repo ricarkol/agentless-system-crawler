@@ -46,9 +46,9 @@ class ContainersCrawlerTests(unittest.TestCase):
 
         # start a kakfa+zookeeper container to send data to (to test our
         # kafka emitter)
-        #self.extract_kafka_container()
+        self.start_kafka_container()
 
-    def extract_kafka_container(self):
+    def start_kafka_container(self):
         self.docker.pull(repository='spotify/kafka', tag='latest')
         self.kafka_container = self.docker.create_container(
             image='spotify/kafka', ports=[9092, 2181],
@@ -70,7 +70,7 @@ class ContainersCrawlerTests(unittest.TestCase):
 
     def tearDown(self):
         self.remove_crawled_container()
-        #self.remove_kafka_container()
+        self.remove_kafka_container()
 
         shutil.rmtree(self.tempd)
 
@@ -138,7 +138,7 @@ class ContainersCrawlerTests(unittest.TestCase):
         assert 'apt.pkgsize' in output
         f.close()
 
-    def _testCrawlContainerKafka(self):
+    def testCrawlContainerKafka(self):
         env = os.environ.copy()
         mypath = os.path.dirname(os.path.realpath(__file__))
         os.makedirs(self.tempd + '/out')
@@ -166,8 +166,7 @@ class ContainersCrawlerTests(unittest.TestCase):
         message = consumer.consume()
         assert '"cmd":"/bin/sleep 60"' in message.value
 
-    def _testCrawlContainerKafka2(self):
-
+    def testCrawlContainerKafka2(self):
         emitters = EmittersManager(urls=['kafka://localhost:9092/test'])
         crawler = ContainersCrawler(
             features=['os', 'process'],
