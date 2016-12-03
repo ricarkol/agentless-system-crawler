@@ -17,8 +17,8 @@ from crawler.plugins.emitters.mtgraphite_emitter import MtGraphiteEmitter
 
 
 def mock_call_with_retries(function, max_retries=10,
-                      exception_type=Exception,
-                      _args=(), _kwargs={}):
+                           exception_type=Exception,
+                           _args=(), _kwargs={}):
     return function(*_args, **_kwargs)
 
 

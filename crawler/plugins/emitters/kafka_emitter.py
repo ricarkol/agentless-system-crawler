@@ -3,11 +3,9 @@ import kafka as kafka_python
 import pykafka
 
 try:
-    from crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
     from plugins.emitters.base_emitter import BaseEmitter
     from misc import (NullHandler, call_with_retries)
 except ImportError:
-    from crawler.crawler_exceptions import EmitterBadURL, EmitterEmitTimeout
     from crawler.plugins.emitters.base_emitter import BaseEmitter
     from crawler.misc import (NullHandler, call_with_retries)
 

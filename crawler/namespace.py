@@ -107,9 +107,9 @@ def run_as_another_process(function, _args=(), _kwargs={}):
         queue = multiprocessing.Queue(2 ** 14)
 
     child_process = multiprocessing.Process(
-            target=_function_wrapper,
-            args=(queue, function),
-            kwargs={'_args': _args, '_kwargs': _kwargs})
+        target=_function_wrapper,
+        args=(queue, function),
+        kwargs={'_args': _args, '_kwargs': _kwargs})
     child_process.start()
 
     child_exception, result = None, None
@@ -191,7 +191,7 @@ def _run_as_another_namespace(
         _kwargs={}
 ):
 
-    #os.closerange(1, 1000)
+    # os.closerange(1, 1000)
     context = ProcessContext(pid, namespaces)
     context.attach()
     try:
