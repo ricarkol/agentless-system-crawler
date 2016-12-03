@@ -18,6 +18,80 @@ from crawler_exceptions import (EmitterUnsupportedFormat,
 logger = logging.getLogger('crawlutils')
 
 
+def write_in_csv_format(iostream, frame):
+    iostream.write('%s\t%s\t%s\n' %
+                   ('metadata', json.dumps('metadata'),
+                    json.dumps(frame.metadata, separators=(',', ':'))))
+    for (key, val, feature_type) in frame.data:
+        if not isinstance(val, dict):
+            val = val._asdict()
+        iostream.write('%s\t%s\t%s\n' % (
+            feature_type, json.dumps(key),
+            json.dumps(val, separators=(',', ':'))))
+
+
+def write_in_json_format(iostream, frame):
+    iostream.write('%s\n' % json.dumps(frame.metadata))
+    for (key, val, feature_type) in frame.data:
+        if not isinstance(val, dict):
+            val = val._asdict()
+        val['feature_type'] = feature_type
+        val['namespace'] = frame.metadata.get('namespace', '')
+        iostream.write('%s\n' % json.dumps(val))
+
+
+def write_in_graphite_format(iostream, frame):
+    namespace = frame.metadata.get('namespace', '')
+    for (key, val, feature_type) in frame.data:
+        if not isinstance(val, dict):
+            val = val._asdict()
+        write_feature_in_graphite_format(iostream, namespace,
+                                         key, val, feature_type)
+
+
+def write_feature_in_graphite_format(iostream, namespace,
+                                     feature_key, feature_val,
+                                     feature_type):
+    """
+    Write a feature in graphite format into iostream.
+
+    :param namespace:
+    :param feature_type:
+    :param feature_key:
+    :param feature_val:
+    :param iostream: a CStringIO used to buffer the formatted features.
+    :return:
+    """
+    timestamp = time.time()
+    items = feature_val.items()
+    namespace = namespace.replace('/', '.')
+
+    for (metric, value) in items:
+        try:
+            # Only emit values that we can cast as floats
+            value = float(value)
+        except (TypeError, ValueError):
+            continue
+
+        metric = metric.replace('(', '_').replace(')', '')
+        metric = metric.replace(' ', '_').replace('-', '_')
+        metric = metric.replace('/', '_').replace('\\', '_')
+
+        feature_key = feature_key.replace('_', '-')
+        if 'cpu' in feature_key or 'memory' in feature_key:
+            metric = metric.replace('_', '-')
+        if 'if' in metric:
+            metric = metric.replace('_tx', '.tx')
+            metric = metric.replace('_rx', '.rx')
+        if feature_key == 'load':
+            feature_key = 'load.load'
+        feature_key = feature_key.replace('/', '$')
+
+        tmp_message = '%s.%s.%s %f %d\r\n' % (namespace, feature_key,
+                                              metric, value, timestamp)
+        iostream.write(tmp_message)
+
+
 class EmittersManager:
     """
     Class that stores a list of emitter objects, one for each url. This class
@@ -28,24 +102,37 @@ class EmittersManager:
     """
 
     proto_to_class = {
-        'stdout': {'csv': {'class': StdoutEmitter, 'per_line': False},
-                   'graphite': {'class': StdoutEmitter, 'per_line': False},
-                   'json': {'class': StdoutEmitter, 'per_line': False},
+        'stdout': {'csv': {'class': StdoutEmitter, 'per_line': False,
+                           'formatter': write_in_csv_format},
+                   'graphite': {'class': StdoutEmitter, 'per_line': False,
+                                'formatter': write_in_graphite_format},
+                   'json': {'class': StdoutEmitter, 'per_line': False,
+                            'formatter': write_in_json_format},
                    },
-        'file': {'csv': {'class': FileEmitter, 'per_line': False},
-                 'graphite': {'class': FileEmitter, 'per_line': False},
-                 'json': {'class': FileEmitter, 'per_line': False},
+        'file': {'csv': {'class': FileEmitter, 'per_line': False,
+                         'formatter': write_in_csv_format},
+                 'graphite': {'class': FileEmitter, 'per_line': False,
+                              'formatter': write_in_graphite_format},
+                 'json': {'class': FileEmitter, 'per_line': False,
+                          'formatter': write_in_json_format},
                  },
-        'http': {'csv': {'class': HttpEmitter, 'per_line': False},
-                 'graphite': {'class': HttpEmitter, 'per_line': False},
-                 'json': {'class': HttpEmitter, 'per_line': True},
+        'http': {'csv': {'class': HttpEmitter, 'per_line': False,
+                         'formatter': write_in_csv_format},
+                 'graphite': {'class': HttpEmitter, 'per_line': False,
+                              'formatter': write_in_graphite_format},
+                 'json': {'class': HttpEmitter, 'per_line': True,
+                          'formatter': write_in_json_format},
                  },
-        'kafka': {'csv': {'class': KafkaEmitter, 'per_line': False},
-                  'graphite': {'class': KafkaEmitter, 'per_line': False},
-                  'json': {'class': KafkaEmitter, 'per_line': True},
+        'kafka': {'csv': {'class': KafkaEmitter, 'per_line': False,
+                          'formatter': write_in_csv_format},
+                  'graphite': {'class': KafkaEmitter, 'per_line': False,
+                               'formatter': write_in_graphite_format},
+                  'json': {'class': KafkaEmitter, 'per_line': True,
+                           'formatter': write_in_json_format},
                   },
         'mtgraphite': {'graphite': {'class': MtGraphiteEmitter,
-                                    'per_line': True},
+                                    'per_line': True,
+                                    'formatter': write_in_graphite_format},
                        },
     }
 
@@ -104,84 +191,14 @@ class EmittersManager:
         iostream = cStringIO.StringIO()
 
         if self.format == 'csv':
-            self.write_in_csv_format(iostream, frame)
+            write_in_csv_format(iostream, frame)
         elif self.format == 'json':
-            self.write_in_json_format(iostream, frame)
+            write_in_json_format(iostream, frame)
         elif self.format == 'graphite':
-            self.write_in_graphite_format(iostream, frame)
+            write_in_graphite_format(iostream, frame)
 
         # Pass iostream to the emitters so they can sent its content to their
         # respective url
         for emitter in self.emitters:
             emitter.emit(iostream, self.compress,
                          metadata, snapshot_num)
-
-    def write_in_csv_format(self, iostream, frame):
-        iostream.write('%s\t%s\t%s\n' %
-                       ('metadata', json.dumps('metadata'),
-                        json.dumps(frame.metadata, separators=(',', ':'))))
-        for (key, val, feature_type) in frame.data:
-            if not isinstance(val, dict):
-                val = val._asdict()
-            iostream.write('%s\t%s\t%s\n' % (
-                feature_type, json.dumps(key),
-                json.dumps(val, separators=(',', ':'))))
-
-    def write_in_json_format(self, iostream, frame):
-        iostream.write('%s\n' % json.dumps(frame.metadata))
-        for (key, val, feature_type) in frame.data:
-            if not isinstance(val, dict):
-                val = val._asdict()
-            val['feature_type'] = feature_type
-            val['namespace'] = frame.metadata.get('namespace', '')
-            iostream.write('%s\n' % json.dumps(val))
-
-    def write_in_graphite_format(self, iostream, frame):
-        namespace = frame.metadata.get('namespace', '')
-        for (key, val, feature_type) in frame.data:
-            if not isinstance(val, dict):
-                val = val._asdict()
-            self.write_feature_in_graphite_format(iostream, namespace,
-                                                  key, val, feature_type)
-
-    def write_feature_in_graphite_format(self, iostream, namespace,
-                                         feature_key, feature_val,
-                                         feature_type):
-        """
-        Write a feature in graphite format into iostream.
-
-        :param namespace:
-        :param feature_type:
-        :param feature_key:
-        :param feature_val:
-        :param iostream: a CStringIO used to buffer the formatted features.
-        :return:
-        """
-        timestamp = time.time()
-        items = feature_val.items()
-        namespace = namespace.replace('/', '.')
-
-        for (metric, value) in items:
-            try:
-                # Only emit values that we can cast as floats
-                value = float(value)
-            except (TypeError, ValueError):
-                continue
-
-            metric = metric.replace('(', '_').replace(')', '')
-            metric = metric.replace(' ', '_').replace('-', '_')
-            metric = metric.replace('/', '_').replace('\\', '_')
-
-            feature_key = feature_key.replace('_', '-')
-            if 'cpu' in feature_key or 'memory' in feature_key:
-                metric = metric.replace('_', '-')
-            if 'if' in metric:
-                metric = metric.replace('_tx', '.tx')
-                metric = metric.replace('_rx', '.rx')
-            if feature_key == 'load':
-                feature_key = 'load.load'
-            feature_key = feature_key.replace('/', '$')
-
-            tmp_message = '%s.%s.%s %f %d\r\n' % (namespace, feature_key,
-                                                  metric, value, timestamp)
-            iostream.write(tmp_message)
