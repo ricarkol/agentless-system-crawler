@@ -5,6 +5,7 @@ import requests.exceptions
 import tempfile
 import shutil
 import sys
+import time
 
 from crawler.namespace import run_as_another_namespace
 from crawler.crawler_exceptions import CrawlTimeoutError
@@ -37,7 +38,7 @@ def func_crash(arg, *args, **kwargs):
 
 def func_infinite_loop(arg):
     while True:
-        pass
+        time.sleep(1)
 
 # Tests conducted with a single container running.
 
